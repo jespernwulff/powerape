@@ -30,7 +30,8 @@ Suggests:
     knitr,
     marginaleffects,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    TOSTER
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://jespernwulff.github.io/powerape/, https://github.com/jespernwulff/powerape
