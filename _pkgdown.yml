@@ -1,0 +1,38 @@
+url: https://jespernwulff.github.io/powerape/
+template:
+  bootstrap: 5
+
+reference:
+- title: Specify the world
+  desc: Describe the data-generating process the study will sample from.
+  contents:
+  - pa_var
+  - ape_dgp
+  - ape_dgp_empirical
+  - ape_dgp_from_fit
+- title: Pin the effect
+  desc: Solve coefficients from targets in APE/AIE units.
+  contents:
+  - set_ape
+  - set_aie
+  - true_ape
+  - true_aie
+- title: Power
+  desc: Simulated power, curves, and required sample sizes.
+  contents:
+  - ape_power
+  - ape_curve
+  - ape_n
+- title: Robustness and reporting
+  contents:
+  - ape_robust
+  - power_statement
+
+articles:
+- title: Workflows
+  navbar: ~
+  contents:
+  - minimum-effect
+  - classic-sesoi-detection
+  - equivalence
+  - interaction-effects

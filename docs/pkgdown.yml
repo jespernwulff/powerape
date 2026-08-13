@@ -1,0 +1,12 @@
+pandoc: '3.10'
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  classic-sesoi-detection: classic-sesoi-detection.html
+  equivalence: equivalence.html
+  interaction-effects: interaction-effects.html
+  minimum-effect: minimum-effect.html
+last_built: 2026-08-13T10:51Z
+urls:
+  reference: https://jespernwulff.github.io/powerape/reference
+  article: https://jespernwulff.github.io/powerape/articles

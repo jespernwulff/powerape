@@ -1,0 +1,80 @@
+---
+title: "Powering for equivalence: showing an effect is too small to matter"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Powering for equivalence: showing an effect is too small to matter}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
+                      fig.width = 6, fig.height = 4)
+```
+
+## The claim
+
+Sometimes the research goal is to show an effect is *negligible*: a cheaper
+treatment is not meaningfully worse, a feared side effect is not
+meaningfully present. The equivalence claim succeeds when the whole
+confidence interval lies inside (-SESOI, +SESOI). A non-significant test
+is **not** evidence of absence; a CI inside the equivalence bounds is.
+
+```{r}
+library(powerape)
+
+d <- ape_dgp(model = "probit",
+             focal = pa_var("treat", "binary", p = 0.5),
+             covariates = list(pa_var("age", "normal", mean = 45, sd = 12)),
+             baseline = 0.30, signal = 0.10)
+d <- set_ape(d, target = 0)    # planning value: no effect at all
+```
+
+The coherence guard requires |target| < SESOI: you cannot power for
+equivalence while assuming a true effect on or beyond the bounds.
+
+## Power and required n
+
+```{r}
+ape_power(d, n = 2000, claim = "equivalence", sesoi = 0.05,
+          nsim = 600, seed = 1)
+```
+
+```{r}
+ape_n(d, power = 0.80, claim = "equivalence", sesoi = 0.05,
+      nsim = 500, seed = 2)
+```
+
+Equivalence needs the CI to be *narrow*, not just centered near zero, so
+sample sizes are driven entirely by the SESOI: halving the SESOI roughly
+quadruples the required n.
+
+```{r}
+cv <- ape_curve(d, n = seq(500, 3500, by = 750), claim = "equivalence",
+                sesoi = 0.05, nsim = 300, seed = 3)
+plot(cv, target_power = 0.80)
+```
+
+## A robustness note
+
+The width of the CI for an APE depends on the baseline rate (binomial
+variance peaks at 0.5), so equivalence power inherits that dependence.
+`ape_robust()` makes it visible:
+
+```{r}
+ape_robust(d, n = 2600, claim = "equivalence", sesoi = 0.05,
+           vary = list(baseline = c(0.20, 0.50)), grid_points = 3,
+           nsim = 300, seed = 4, nmax = FALSE)
+```
+
+## Reporting
+
+`power_statement()` works for equivalence designs too, and states the CI
+convention explicitly -- with a 95% interval the implied two one-sided
+tests run at the conservative 2.5% level (Riesthuis, 2024).
+
+```{r}
+pw <- ape_power(d, n = 2600, claim = "equivalence", sesoi = 0.05,
+                nsim = 500, seed = 5)
+power_statement(pw)
+```
