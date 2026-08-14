@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -133,6 +133,8 @@
 <span></span>
 <span><span class="co">## 4. Required n, power curves, robustness, reporting</span></span>
 <span><span class="fu"><a href="reference/ape_n.html">ape_n</a></span><span class="op">(</span><span class="va">d</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="co">## ...or, when n is fixed by the archive, the smallest effect it can find:</span></span>
+<span><span class="fu"><a href="reference/ape_mde.html">ape_mde</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">1500</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/ape_curve.html">ape_curve</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">3000</span>, <span class="fl">500</span><span class="op">)</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>,</span>
 <span>     target_power <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/ape_robust.html">ape_robust</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">2200</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
@@ -156,7 +158,9 @@
 <li>
 <strong>Three covariate routes</strong>: parametric marginals with a Gaussian copula, pilot-data resampling (<code><a href="reference/ape_dgp_empirical.html">ape_dgp_empirical()</a></code>), or a fitted pilot model (<code><a href="reference/ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code>).</li>
 <li>
-<strong>Robustness sweeps</strong> (<code><a href="reference/ape_robust.html">ape_robust()</a></code>): worst-case power and the insurance-premium sample size n_max over contextual assumptions, in the spirit of Hancock &amp; Feng (2025).</li>
+<strong>Minimum detectable effects</strong> (<code><a href="reference/ape_mde.html">ape_mde()</a></code>): when n is fixed — an archive of so many firms, a panel of so many units and waves — find the smallest APE or AIE the design reliably concludes, with the same conservative confirmation stage as <code><a href="reference/ape_n.html">ape_n()</a></code>; the equivalence variant returns the tightest establishable margin.</li>
+<li>
+<strong>Robustness sweeps</strong> (<code><a href="reference/ape_robust.html">ape_robust()</a></code>): worst-case power and the insurance-premium sample size n_max over contextual assumptions, in the spirit of Hancock &amp; Feng (2025) — and <code>mode = "mde"</code> for the minimum detectable effect under the least favorable assumptions.</li>
 <li>
 <strong>Citable output</strong>: <code><a href="reference/power_statement.html">power_statement()</a></code> renders any result as a self-contained methods paragraph for grants and preregistrations.</li>
 <li>

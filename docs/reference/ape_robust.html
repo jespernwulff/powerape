@@ -17,7 +17,7 @@ the worst scenario – the insurance-premium n."><meta property="og:image" conte
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,6 +72,8 @@ the worst scenario – the insurance-premium n.</p>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">vary</span>,</span>
 <span>  pin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ape"</span>, <span class="st">"coefficients"</span><span class="op">)</span>,</span>
+<span>  mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"power"</span>, <span class="st">"mde"</span><span class="op">)</span>,</span>
+<span>  power <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  grid_points <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  nmax <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nmax_power <span class="op">=</span> <span class="fl">0.9</span></span>
@@ -122,7 +124,21 @@ Scenarios are the full factorial grid.</p></dd>
 
 <dt id="arg-pin">pin<a class="anchor" aria-label="anchor" href="#arg-pin"></a></dt>
 <dd><p><code>"ape"</code> (re-invert per scenario) or <code>"coefficients"</code> (hold
-coefficients, let the implied effect drift).</p></dd>
+coefficients, let the implied effect drift). Ignored in MDE mode,
+which always re-solves.</p></dd>
+
+
+<dt id="arg-mode">mode<a class="anchor" aria-label="anchor" href="#arg-mode"></a></dt>
+<dd><p><code>"power"</code> (default) reports power at the pinned effect per
+scenario; <code>"mde"</code> reports the <strong>minimum detectable effect</strong> per
+scenario via <code><a href="ape_mde.html">ape_mde()</a></code> – the worst case is then the <em>largest</em>
+MDE, answering "what is the smallest effect this design finds even
+under the least favorable contextual assumptions?".</p></dd>
+
+
+<dt id="arg-power">power<a class="anchor" aria-label="anchor" href="#arg-power"></a></dt>
+<dd><p>Target power for MDE mode (default 0.80; unused in power
+mode).</p></dd>
 
 
 <dt id="arg-grid-points">grid_points<a class="anchor" aria-label="anchor" href="#arg-grid-points"></a></dt>
@@ -130,7 +146,8 @@ coefficients, let the implied effect drift).</p></dd>
 
 
 <dt id="arg-nmax">nmax<a class="anchor" aria-label="anchor" href="#arg-nmax"></a></dt>
-<dd><p>Run the n_max search in the worst scenario (default TRUE).</p></dd>
+<dd><p>Run the n_max search in the worst scenario (default TRUE;
+power mode only).</p></dd>
 
 
 <dt id="arg-nmax-power">nmax_power<a class="anchor" aria-label="anchor" href="#arg-nmax-power"></a></dt>

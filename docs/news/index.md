@@ -1,5 +1,38 @@
 # Changelog
 
+## powerape 1.5.0
+
+- Minimum detectable effect:
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  inverts the design question – the sample size is fixed (an archive of
+  so many firms, a panel of so many units and waves) and the function
+  finds the smallest APE or AIE the design reliably concludes at a
+  target power. Detect and minimum-effect claims search over the assumed
+  effect, re-running the APE/AIE inversion at every candidate; the
+  equivalence claim holds the pinned truth and returns the tightest
+  establishable margin instead. Every route works unchanged (parametric,
+  empirical, pilot-model, panel with n in units, IV), and the answer is
+  verified with the same conservative confirmation stage as
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+  (pushed upward, never down, when the high-precision run falls short).
+  Feasibility ceilings produce a teaching error reporting the largest
+  attainable effect and the power available there.
+- Robustness for the MDE: `ape_robust(mode = "mde")` sweeps the
+  contextual assumptions and reports the minimum detectable effect per
+  scenario; the worst case is the *largest* MDE – the smallest effect
+  the design finds even under the least favorable assumptions.
+- [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+  renders
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  results (“the minimum detectable APE at n = … was …”), units-aware for
+  panel designs.
+- Validation: battery gains V11 – the MDE at the four-tool anchor (n
+  = 712) returns the anchor’s target (~0.10), the exact-enumeration
+  power of the decision rule at the returned MDE sits at the goal, and
+  the analytic inverse from
+  [`power.prop.test()`](https://rdrr.io/r/stats/power.prop.test.html)
+  agrees.
+
 ## powerape 1.4.0
 
 - IV designs via control-function probit:

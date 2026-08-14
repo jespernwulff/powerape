@@ -39,9 +39,18 @@ rebuild_dgp <- function(dgp, spec) {
 #'   to `grid_points` equally spaced values; longer vectors are used as-is.
 #'   Scenarios are the full factorial grid.
 #' @param pin `"ape"` (re-invert per scenario) or `"coefficients"` (hold
-#'   coefficients, let the implied effect drift).
+#'   coefficients, let the implied effect drift). Ignored in MDE mode,
+#'   which always re-solves.
+#' @param mode `"power"` (default) reports power at the pinned effect per
+#'   scenario; `"mde"` reports the **minimum detectable effect** per
+#'   scenario via [ape_mde()] -- the worst case is then the *largest*
+#'   MDE, answering "what is the smallest effect this design finds even
+#'   under the least favorable contextual assumptions?".
+#' @param power Target power for MDE mode (default 0.80; unused in power
+#'   mode).
 #' @param grid_points Grid size used to expand length-2 `vary` elements.
-#' @param nmax Run the n_max search in the worst scenario (default TRUE).
+#' @param nmax Run the n_max search in the worst scenario (default TRUE;
+#'   power mode only).
 #' @param nmax_power Target power for the n_max search (default 0.90).
 #'
 #' @return A `powerape_robust` object: `scenarios` (inputs, implied effect,
@@ -59,10 +68,20 @@ rebuild_dgp <- function(dgp, spec) {
 ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                        sesoi = NULL, conf = 0.95, nsim = 800, seed = NULL,
                        vary, pin = c("ape", "coefficients"),
+                       mode = c("power", "mde"), power = 0.80,
                        grid_points = 3, nmax = TRUE, nmax_power = 0.90) {
   claim <- match.arg(claim)
   pin <- match.arg(pin)
-  check_coherence(dgp, claim, sesoi, conf)
+  mode <- match.arg(mode)
+  if (mode == "mde" && claim == "equivalence")
+    stop(paste("MDE mode searches the effect for detect/minimum claims; for",
+               "the equivalence analog run ape_mde(claim = \"equivalence\")",
+               "per scenario directly."), call. = FALSE)
+  if (mode == "power") check_coherence(dgp, claim, sesoi, conf)
+  if (mode == "mde" && !is.null(dgp$moderator) &&
+      (is.null(dgp$main_focal) || is.null(dgp$main_moderator)))
+    stop("MDE mode for an AIE design needs the DGP pinned with set_aie() first.",
+         call. = FALSE)
   stopifnot(is.list(vary), length(vary) >= 1L)
   if (is.null(names(vary)) || !all(nzchar(names(vary))))
     stop("`vary` must be a fully named list.", call. = FALSE)
@@ -97,6 +116,33 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
     spec <- dgp$spec
     for (nm in names(grid)) spec[[nm]] <- grid[i, nm]
     d_i <- tryCatch(rebuild_dgp(dgp, spec), error = function(e) e)
+    if (mode == "mde") {
+      if (inherits(d_i, "error")) {
+        rows[[i]] <- data.frame(grid[i, , drop = FALSE], mde = NA_real_,
+                                power = NA_real_, mcse = NA_real_,
+                                note = conditionMessage(d_i),
+                                stringsAsFactors = FALSE)
+        next
+      }
+      si <- if (is.null(seed)) NULL else seed + i
+      m_i <- tryCatch(
+        ape_mde(d_i, n, power = power, claim = claim, sesoi = sesoi,
+                conf = conf, nsim = nsim, seed = si,
+                main_focal = dgp$main_focal,
+                main_moderator = dgp$main_moderator, confirm = FALSE),
+        error = function(e) e)
+      if (inherits(m_i, "error")) {
+        rows[[i]] <- data.frame(grid[i, , drop = FALSE], mde = NA_real_,
+                                power = NA_real_, mcse = NA_real_,
+                                note = conditionMessage(m_i),
+                                stringsAsFactors = FALSE)
+      } else {
+        rows[[i]] <- data.frame(grid[i, , drop = FALSE], mde = m_i$mde,
+                                power = m_i$power, mcse = m_i$mcse, note = "",
+                                stringsAsFactors = FALSE)
+      }
+      next
+    }
     if (!inherits(d_i, "error")) {
       if (pin == "ape") {
         d_i <- tryCatch(
@@ -138,21 +184,26 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   scenarios <- do.call(rbind, rows)
   rownames(scenarios) <- NULL
 
-  ok_idx <- which(!is.na(scenarios$power))
+  key <- if (mode == "mde") scenarios$mde else scenarios$power
+  ok_idx <- which(!is.na(key))
   if (!length(ok_idx))
     stop("No scenario was feasible; widen or shift the `vary` ranges.", call. = FALSE)
-  worst_i <- ok_idx[which.min(scenarios$power[ok_idx])]
+  worst_i <- if (mode == "mde") {
+    ok_idx[which.max(scenarios$mde[ok_idx])]
+  } else {
+    ok_idx[which.min(scenarios$power[ok_idx])]
+  }
 
   marginals <- lapply(names(vary), function(nm) {
-    ag <- aggregate(scenarios$power[ok_idx],
+    ag <- aggregate(key[ok_idx],
                     by = list(value = scenarios[[nm]][ok_idx]), FUN = mean)
-    names(ag) <- c("value", "mean_power")
+    names(ag) <- c("value", if (mode == "mde") "mean_mde" else "mean_power")
     ag
   })
   names(marginals) <- names(vary)
 
   nmax_res <- NULL
-  if (nmax) {
+  if (nmax && mode == "power") {
     nmax_res <- tryCatch(
       ape_n(dgps[[worst_i]], power = nmax_power, claim = claim, sesoi = sesoi,
             conf = conf, nsim = nsim,
@@ -169,7 +220,9 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                  worst = scenarios[worst_i, , drop = FALSE],
                  marginals = marginals, n = as.integer(n), claim = claim,
                  sesoi = sesoi, conf = conf, nsim = as.integer(nsim),
-                 pin = pin, estimand = dgp$estimand %||% "ape",
+                 pin = pin, mode = mode, goal = power,
+                 estimand = if (!is.null(dgp$moderator)) "aie"
+                            else dgp$estimand %||% "ape",
                  target = dgp$target_est,
                  nmax = nmax_res, nmax_power = nmax_power),
             class = "powerape_robust")
@@ -177,6 +230,24 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
 
 #' @export
 print.powerape_robust <- function(x, ...) {
+  if (identical(x$mode, "mde")) {
+    cat(sprintf("powerape robustness sweep -- minimum detectable %s, %s claim\n",
+                toupper(x$estimand), x$claim))
+    cat(sprintf("  n = %d, %.0f%% target power, nsim = %d per scenario, %d scenario(s) over: %s\n",
+                x$n, 100 * x$goal, x$nsim, nrow(x$scenarios),
+                paste(names(x$marginals), collapse = ", ")))
+    ok <- !is.na(x$scenarios$mde)
+    cat(sprintf("  MDE range [%.4f, %.4f]; worst (largest-MDE) scenario:\n",
+                min(x$scenarios$mde[ok]), max(x$scenarios$mde[ok])))
+    print(x$worst[, setdiff(names(x$worst), "note"), drop = FALSE],
+          row.names = FALSE)
+    if (any(!ok))
+      cat(sprintf("  %d infeasible scenario(s); see `$scenarios$note`.\n", sum(!ok)))
+    cat("  scenarios:\n")
+    print(x$scenarios[, setdiff(names(x$scenarios), "note"), drop = FALSE],
+          row.names = FALSE)
+    return(invisible(x))
+  }
   cat(sprintf("powerape robustness sweep -- %s claim, %s, pin = %s\n",
               x$claim, toupper(x$estimand), x$pin))
   cat(sprintf("  n = %d, nsim = %d per scenario, %d scenario(s) over: %s\n",

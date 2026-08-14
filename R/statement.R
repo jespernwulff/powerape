@@ -86,7 +86,8 @@ claim_text <- function(claim, sesoi, conf) {
 #' }
 #' @export
 power_statement <- function(x) {
-  stopifnot(inherits(x, "powerape_power") || inherits(x, "powerape_n"))
+  stopifnot(inherits(x, "powerape_power") || inherits(x, "powerape_n") ||
+              inherits(x, "powerape_mde"))
   d <- x$dgp
   is_aie <- identical(x$estimand, "aie")
   est_long <- if (is_aie) "average interaction effect (AIE)" else "average partial effect (APE)"
@@ -99,14 +100,18 @@ power_statement <- function(x) {
                        "Riesthuis (2024)."),
                 est_long, subject, as.character(packageVersion("powerape")))
   s2 <- sprintf("The assumed data-generating process was %s.", describe_dgp(d))
-  s3 <- sprintf("The assumed true %s was %.3f (%.1f percentage points)%s.",
-                est_short, x$target, 100 * x$target,
-                if (is_aie) sprintf(paste0(", with conditional-at-reference ",
-                                           "main-effect APEs of %.3f (%s) and ",
-                                           "%.3f (%s)"),
-                                    d$main_focal, d$focal$name,
-                                    d$main_moderator, d$moderator$name)
-                else "")
+  s3 <- if (inherits(x, "powerape_mde")) {
+    NULL
+  } else {
+    sprintf("The assumed true %s was %.3f (%.1f percentage points)%s.",
+            est_short, x$target, 100 * x$target,
+            if (is_aie) sprintf(paste0(", with conditional-at-reference ",
+                                       "main-effect APEs of %.3f (%s) and ",
+                                       "%.3f (%s)"),
+                                d$main_focal, d$focal$name,
+                                d$main_moderator, d$moderator$name)
+            else "")
+  }
   is_panel <- identical(d$route, "panel")
   n_text <- if (is_panel) {
     sprintf("n = %d units observed over %d periods (%d unit-period observations)",
@@ -114,7 +119,29 @@ power_statement <- function(x) {
   } else {
     sprintf("n = %d", x$n)
   }
-  s4 <- if (inherits(x, "powerape_n")) {
+  s4 <- if (inherits(x, "powerape_mde")) {
+    conf_frag <- if (isTRUE(x$confirmed)) {
+      sprintf(paste0(", confirmed by a high-precision verification run ",
+                     "(simulated power %.3f, Monte Carlo SE %.3f, %d ",
+                     "replications)"),
+              x$power, x$mcse, x$nsim_confirm)
+    } else {
+      sprintf(" (simulated power %.3f, Monte Carlo SE %.3f)", x$power, x$mcse)
+    }
+    if (isTRUE(x$is_margin)) {
+      sprintf(paste0("At a sample size of %s, the tightest equivalence ",
+                     "bounds establishable with %.0f%% power were +/-%.3f ",
+                     "(%.1f percentage points)%s."),
+              n_text, 100 * x$goal, x$mde, 100 * x$mde, conf_frag)
+    } else {
+      sprintf(paste0("At a sample size of %s, the minimum detectable %s at ",
+                     "%.0f%% power for %s was %.3f (%.1f percentage ",
+                     "points)%s."),
+              n_text, est_short, 100 * x$goal,
+              claim_text(x$claim, x$sesoi, x$conf), x$mde, 100 * x$mde,
+              conf_frag)
+    }
+  } else if (inherits(x, "powerape_n")) {
     size_noun <- if (is_panel) "number of units" else "total sample size"
     if (isTRUE(x$confirmed)) {
       sprintf(paste0("The required %s for %.0f%% power for %s ",

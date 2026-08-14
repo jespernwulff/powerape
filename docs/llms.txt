@@ -53,6 +53,8 @@ ape_power(d, n = 1500, claim = "minimum", sesoi = 0.05, nsim = 1000)
 
 ## 4. Required n, power curves, robustness, reporting
 ape_n(d, power = 0.80, claim = "minimum", sesoi = 0.05)
+## ...or, when n is fixed by the archive, the smallest effect it can find:
+ape_mde(d, n = 1500, claim = "minimum", sesoi = 0.05)
 plot(ape_curve(d, n = seq(500, 3000, 500), claim = "minimum", sesoi = 0.05),
      target_power = 0.80)
 ape_robust(d, n = 2200, claim = "minimum", sesoi = 0.05,
@@ -93,10 +95,19 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   ([`ape_dgp_empirical()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_empirical.md)),
   or a fitted pilot model
   ([`ape_dgp_from_fit()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_from_fit.md)).
+- **Minimum detectable effects**
+  ([`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)):
+  when n is fixed — an archive of so many firms, a panel of so many
+  units and waves — find the smallest APE or AIE the design reliably
+  concludes, with the same conservative confirmation stage as
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md);
+  the equivalence variant returns the tightest establishable margin.
 - **Robustness sweeps**
   ([`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)):
   worst-case power and the insurance-premium sample size n_max over
-  contextual assumptions, in the spirit of Hancock & Feng (2025).
+  contextual assumptions, in the spirit of Hancock & Feng (2025) — and
+  `mode = "mde"` for the minimum detectable effect under the least
+  favorable assumptions.
 - **Citable output**:
   [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
   renders any result as a self-contained methods paragraph for grants
@@ -169,7 +180,7 @@ Solve coefficients from targets in APE/AIE units.
 
 ## Power
 
-Simulated power, curves, and required sample sizes.
+Simulated power, curves, required sample sizes, detectable effects.
 
 - [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md)
   : Simulated power for an APE/AIE claim at a given sample size
@@ -178,6 +189,8 @@ Simulated power, curves, and required sample sizes.
   : Power curve over a grid of sample sizes
 - [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
   : Required sample size for a target power
+- [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  : Minimum detectable APE/AIE at a given sample size
 
 ## Robustness and reporting
 

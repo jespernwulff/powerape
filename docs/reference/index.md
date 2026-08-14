@@ -32,7 +32,7 @@ Solve coefficients from targets in APE/AIE units.
 
 ## Power
 
-Simulated power, curves, and required sample sizes.
+Simulated power, curves, required sample sizes, detectable effects.
 
 - [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md)
   : Simulated power for an APE/AIE claim at a given sample size
@@ -41,6 +41,8 @@ Simulated power, curves, and required sample sizes.
   : Power curve over a grid of sample sizes
 - [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
   : Required sample size for a target power
+- [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  : Minimum detectable APE/AIE at a given sample size
 
 ## Robustness and reporting
 

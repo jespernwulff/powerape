@@ -20,11 +20,12 @@ reference:
   - true_ape
   - true_aie
 - title: Power
-  desc: Simulated power, curves, and required sample sizes.
+  desc: Simulated power, curves, required sample sizes, detectable effects.
   contents:
   - ape_power
   - ape_curve
   - ape_n
+  - ape_mde
 - title: Robustness and reporting
   contents:
   - ape_robust

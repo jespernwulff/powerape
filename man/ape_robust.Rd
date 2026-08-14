@@ -14,6 +14,8 @@ ape_robust(
   seed = NULL,
   vary,
   pin = c("ape", "coefficients"),
+  mode = c("power", "mde"),
+  power = 0.8,
   grid_points = 3,
   nmax = TRUE,
   nmax_power = 0.9
@@ -43,11 +45,22 @@ to \code{grid_points} equally spaced values; longer vectors are used as-is.
 Scenarios are the full factorial grid.}
 
 \item{pin}{\code{"ape"} (re-invert per scenario) or \code{"coefficients"} (hold
-coefficients, let the implied effect drift).}
+coefficients, let the implied effect drift). Ignored in MDE mode,
+which always re-solves.}
+
+\item{mode}{\code{"power"} (default) reports power at the pinned effect per
+scenario; \code{"mde"} reports the \strong{minimum detectable effect} per
+scenario via \code{\link[=ape_mde]{ape_mde()}} -- the worst case is then the \emph{largest}
+MDE, answering "what is the smallest effect this design finds even
+under the least favorable contextual assumptions?".}
+
+\item{power}{Target power for MDE mode (default 0.80; unused in power
+mode).}
 
 \item{grid_points}{Grid size used to expand length-2 \code{vary} elements.}
 
-\item{nmax}{Run the n_max search in the worst scenario (default TRUE).}
+\item{nmax}{Run the n_max search in the worst scenario (default TRUE;
+power mode only).}
 
 \item{nmax_power}{Target power for the n_max search (default 0.90).}
 }

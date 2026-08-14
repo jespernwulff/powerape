@@ -50,6 +50,8 @@ ape_power(d, n = 1500, claim = "minimum", sesoi = 0.05, nsim = 1000)
 
 ## 4. Required n, power curves, robustness, reporting
 ape_n(d, power = 0.80, claim = "minimum", sesoi = 0.05)
+## ...or, when n is fixed by the archive, the smallest effect it can find:
+ape_mde(d, n = 1500, claim = "minimum", sesoi = 0.05)
 plot(ape_curve(d, n = seq(500, 3000, 500), claim = "minimum", sesoi = 0.05),
      target_power = 0.80)
 ape_robust(d, n = 2200, claim = "minimum", sesoi = 0.05,
@@ -85,9 +87,15 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
 - **Three covariate routes**: parametric marginals with a Gaussian copula,
   pilot-data resampling (`ape_dgp_empirical()`), or a fitted pilot model
   (`ape_dgp_from_fit()`).
+- **Minimum detectable effects** (`ape_mde()`): when n is fixed — an
+  archive of so many firms, a panel of so many units and waves — find
+  the smallest APE or AIE the design reliably concludes, with the same
+  conservative confirmation stage as `ape_n()`; the equivalence variant
+  returns the tightest establishable margin.
 - **Robustness sweeps** (`ape_robust()`): worst-case power and the
   insurance-premium sample size n_max over contextual assumptions, in the
-  spirit of Hancock & Feng (2025).
+  spirit of Hancock & Feng (2025) — and `mode = "mde"` for the minimum
+  detectable effect under the least favorable assumptions.
 - **Citable output**: `power_statement()` renders any result as a
   self-contained methods paragraph for grants and preregistrations.
 - **Monte Carlo honesty**: every power estimate carries its MCSE; failed

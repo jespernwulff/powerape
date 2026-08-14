@@ -20,6 +20,8 @@ ape_robust(
   seed = NULL,
   vary,
   pin = c("ape", "coefficients"),
+  mode = c("power", "mde"),
+  power = 0.8,
   grid_points = 3,
   nmax = TRUE,
   nmax_power = 0.9
@@ -72,7 +74,21 @@ ape_robust(
 - pin:
 
   `"ape"` (re-invert per scenario) or `"coefficients"` (hold
-  coefficients, let the implied effect drift).
+  coefficients, let the implied effect drift). Ignored in MDE mode,
+  which always re-solves.
+
+- mode:
+
+  `"power"` (default) reports power at the pinned effect per scenario;
+  `"mde"` reports the **minimum detectable effect** per scenario via
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  – the worst case is then the *largest* MDE, answering "what is the
+  smallest effect this design finds even under the least favorable
+  contextual assumptions?".
+
+- power:
+
+  Target power for MDE mode (default 0.80; unused in power mode).
 
 - grid_points:
 
@@ -80,7 +96,8 @@ ape_robust(
 
 - nmax:
 
-  Run the n_max search in the worst scenario (default TRUE).
+  Run the n_max search in the worst scenario (default TRUE; power mode
+  only).
 
 - nmax_power:
 
