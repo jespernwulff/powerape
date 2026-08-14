@@ -3,7 +3,9 @@
 # c_i = xi'(centered observed unit means of time-varying regressors) + a_i,
 # a_i ~ N(0, var_a). Estimation: pooled probit/logit with Mundlak means and
 # unit-clustered SEs. Estimand: ASF-based APE (means held at observed values).
-# True values integrate a_i in closed form via scale_a = sqrt(1 + var_a).
+# True values integrate a_i exactly: probit in closed form via
+# scale_a = sqrt(1 + var_a); logit by Gauss-Hermite quadrature (the probit
+# scale division over-attenuates a logistic kernel).
 
 # One draw of all regressor paths for n_units x T rows (unit-major order).
 # Cross-regressor dependence R is applied at both the unit and within level.
@@ -45,6 +47,39 @@ panel_integration <- function(dgp) {
     rep(0, dgp$n_int)
   }
   list(xd_c = rd$x[[1L]] - dgp$focal_ref, q = idxz + m_i[rd$unit])
+}
+
+# Gauss-Hermite nodes/weights (physicists' convention) via Golub-Welsch:
+# integral f(t) exp(-t^2) dt = sum w_j f(t_j).
+gauss_hermite <- function(n) {
+  J <- matrix(0, n, n)
+  b <- sqrt(seq_len(n - 1L) / 2)
+  J[cbind(seq_len(n - 1L), seq_len(n - 1L) + 1L)] <- b
+  J[cbind(seq_len(n - 1L) + 1L, seq_len(n - 1L))] <- b
+  e <- eigen(J, symmetric = TRUE)
+  list(nodes = e$values, weights = sqrt(pi) * e$vectors[1L, ]^2)
+}
+
+# E_a[G(x + a)] with a ~ N(0, var_a), and its derivative in x. Probit:
+# exact closed form (normal convolution). Logit: 20-node Gauss-Hermite --
+# the probit-style index/scale division has no logistic analog.
+panel_mix_funs <- function(model, var_a) {
+  lf <- link_funs(model)
+  if (var_a == 0) return(list(P = lf$G, p = lf$g))
+  if (model == "probit") {
+    s <- sqrt(1 + var_a)
+    return(list(P = function(x) pnorm(x / s),
+                p = function(x) dnorm(x / s) / s))
+  }
+  gh <- gauss_hermite(20L)
+  aj <- sqrt(2 * var_a) * gh$nodes
+  wj <- gh$weights / sqrt(pi)
+  mix <- function(f) function(x) {
+    out <- 0
+    for (j in seq_along(aj)) out <- out + wj[j] * f(x + aj[j])
+    out
+  }
+  list(P = mix(lf$G), p = mix(lf$g))
 }
 
 #' Specify a panel DGP: correlated random effects probit/logit
@@ -165,11 +200,12 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
   }
   var_a <- (1 - cre_share) * var_c
   scale_a <- sqrt(1 + var_a)
+  mx <- panel_mix_funs(model, var_a)
 
   ## intercept from the counterfactual baseline (focal at reference),
-  ## integrating a_i in closed form
+  ## integrating a_i exactly (closed form / quadrature)
   q <- idxz + m_i[rd$unit]
-  f0 <- function(b0) mean(lf$G((b0 + q) / scale_a)) - baseline
+  f0 <- function(b0) mean(mx$P(b0 + q)) - baseline
   beta0 <- uniroot(f0, c(-15, 15) * scale_a, extendInt = "upX", tol = 1e-10)$root
 
   structure(list(
@@ -184,7 +220,7 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
     main_focal = NULL, main_moderator = NULL,
     route = "panel", builder = "panel",
     n_periods = T_p, rho = rho, cre_share = cre_share,
-    var_a = var_a, scale_a = scale_a,
+    var_a = var_a, scale_a = scale_a, mix_P = mx$P, mix_p = mx$p,
     iccs = iccs, tv_idx = tv_idx, xi = xi, xbar_center = xbar_center,
     focal_ref = if (focal$type == "binary") 0 else focal$mean,
     mod_ref = NULL,
@@ -198,26 +234,24 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
 
 ## ---- inversion and truth (panel) --------------------------------------------
 
-# Binary focal: solve mean(G((b0 + b + q)/s)) - p0 = target.
+# Binary focal: solve E_a mean(G(b0 + b + q + a)) - p0 = target.
 solve_binary_panel <- function(dgp, target, q) {
-  s <- dgp$scale_a
-  G <- dgp$G
-  p0 <- mean(G((dgp$beta0 + q) / s))
+  P <- dgp$mix_P
+  p0 <- mean(P(dgp$beta0 + q))
   eps <- 1e-4
   if (target <= -p0 + eps || target >= (1 - p0) - eps)
     stop(sprintf(paste(
       "Target APE %.4f is infeasible for this panel DGP: with baseline",
       "P(Y=1 | reference) = %.3f the attainable APE range is (%.3f, %.3f)."),
       target, p0, -p0, 1 - p0), call. = FALSE)
-  uniroot(function(b) mean(G((dgp$beta0 + b + q) / s)) - p0 - target,
-          c(-8, 8) * s, extendInt = "upX", tol = 1e-9)$root
+  uniroot(function(b) mean(P(dgp$beta0 + b + q)) - p0 - target,
+          c(-8, 8) * dgp$scale_a, extendInt = "upX", tol = 1e-9)$root
 }
 
-# Continuous focal: APE(b) = (b/s) mean(g((b0 + b*xd_c + q)/s)); plateaus.
+# Continuous focal: APE(b) = b E_a mean(g(b0 + b*xd_c + q + a)); plateaus.
 solve_cont_panel <- function(dgp, target, xd_c, q) {
   s <- dgp$scale_a
-  g <- dgp$g
-  f <- function(b) (b / s) * mean(g((dgp$beta0 + b * xd_c + q) / s))
+  f <- function(b) b * mean(dgp$mix_p(dgp$beta0 + b * xd_c + q))
   sgn <- if (target < 0) -1 else 1
   sd_d <- pa_var_sd(dgp$focal)
   bgrid <- sgn * exp(seq(log(1e-3 / sd_d), log(200 * s / sd_d), length.out = 100))
@@ -235,13 +269,12 @@ solve_cont_panel <- function(dgp, target, xd_c, q) {
 
 true_ape_panel <- function(dgp) {
   id <- panel_integration(dgp)
-  s <- dgp$scale_a
   if (dgp$focal$type == "binary") {
-    mean(dgp$G((dgp$beta0 + dgp$beta_focal + id$q) / s) -
-           dgp$G((dgp$beta0 + id$q) / s))
+    mean(dgp$mix_P(dgp$beta0 + dgp$beta_focal + id$q) -
+           dgp$mix_P(dgp$beta0 + id$q))
   } else {
-    (dgp$beta_focal / s) *
-      mean(dgp$g((dgp$beta0 + dgp$beta_focal * id$xd_c + id$q) / s))
+    dgp$beta_focal *
+      mean(dgp$mix_p(dgp$beta0 + dgp$beta_focal * id$xd_c + id$q))
   }
 }
 

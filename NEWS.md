@@ -1,3 +1,16 @@
+# powerape 1.2.1
+
+* Fixed: for **logit** panel DGPs with a pure random-effects component
+  (`rho > 0` and `cre_share < 1`), calibration and true values integrated
+  the unit effect with the probit closed form (index divided by
+  `sqrt(1 + var_a)`), which over-attenuates a logistic kernel. A requested
+  baseline .30 / APE .10 logit world at `rho = .5, cre_share = 0` actually
+  had baseline .269 and true APE .116, so simulated power for such designs
+  was optimistic. The unit effect is now integrated by 20-node
+  Gauss-Hermite quadrature for logit; probit keeps the exact closed form
+  and is numerically unchanged. Realized-vs-requested calibration is
+  regression-tested for both links.
+
 # powerape 1.2.0
 
 * Panel designs: `ape_dgp_panel()` specifies a correlated random effects

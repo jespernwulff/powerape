@@ -146,3 +146,32 @@ test_that("panel APE and clustered SE match marginaleffects + sandwich on fixed 
   expect_equal(est$ape, mfx$estimate, tolerance = 1e-6)
   expect_equal(se, mfx$std.error, tolerance = 1e-3)
 })
+
+test_that("logit panel calibration integrates the unit effect correctly", {
+  ## Regression test for the 1.2.1 fix: with a pure RE component the probit
+  ## scale device over-attenuates a logistic kernel (realized baseline .269
+  ## and APE .116 for a requested .30/.10 world at rho = .5, cre_share = 0).
+  ## Gauss-Hermite integration must reproduce the requested world.
+  d <- ape_dgp_panel("logit",
+                     focal = pa_var("treat", "binary", p = 0.5, icc = 1),
+                     covariates = list(pa_var("size", "normal", icc = 0.6)),
+                     n_periods = 4, rho = 0.5, cre_share = 0,
+                     baseline = 0.30, signal = 0.10, n_int = 4e4, seed_int = 11L)
+  d <- set_ape(d, 0.10)
+  expect_equal(true_ape(d), 0.10, tolerance = 1e-7)
+  ## realized (brute-force) moments match the requested world: the focal is
+  ## independent of the covariates, so conditioning on the realized arm is fair
+  set.seed(99)
+  xx <- powerape:::draw_x_panel(d, 60000)
+  arm <- xx$X[, 2L]
+  p0 <- mean(xx$pr[arm == 0]); p1 <- mean(xx$pr[arm == 1])
+  expect_lt(abs(p0 - 0.30), 0.01)
+  expect_lt(abs((p1 - p0) - 0.10), 0.01)
+})
+
+test_that("gauss_hermite integrates normal moments exactly", {
+  gh <- powerape:::gauss_hermite(20L)
+  ## E[t^2] under exp(-t^2)/sqrt(pi) is 1/2; E[t^4] is 3/4
+  expect_equal(sum(gh$weights * gh$nodes^2) / sqrt(pi), 0.5, tolerance = 1e-12)
+  expect_equal(sum(gh$weights * gh$nodes^4) / sqrt(pi), 0.75, tolerance = 1e-12)
+})
