@@ -86,6 +86,21 @@ set_ape <- function(dgp, target) {
             is.numeric(target), length(target) == 1L, is.finite(target))
   if (!is.null(dgp$moderator))
     stop("This DGP has a moderator: pin the estimand with set_aie().", call. = FALSE)
+  if (identical(dgp$route, "panel")) {
+    id <- panel_integration(dgp)
+    root <- if (dgp$focal$type == "binary") {
+      solve_binary_panel(dgp, target, id$q)
+    } else {
+      solve_cont_panel(dgp, target, id$xd_c, id$q)
+    }
+    dgp$p1 <- if (dgp$focal$type == "binary") {
+      mean(dgp$G((dgp$beta0 + root + id$q) / dgp$scale_a))
+    } else NULL
+    dgp$beta_focal <- root
+    dgp$estimand <- "ape"
+    dgp$target_est <- target
+    return(dgp)
+  }
   G <- dgp$G
   if (dgp$focal$type == "binary") {
     if (dgp$route == "parametric" && dgp$k == 0L) {
@@ -119,6 +134,7 @@ set_ape <- function(dgp, target) {
 true_ape <- function(dgp) {
   if (!identical(dgp$estimand, "ape"))
     stop("This DGP has no pinned APE - call set_ape() first.", call. = FALSE)
+  if (identical(dgp$route, "panel")) return(true_ape_panel(dgp))
   G <- dgp$G
   if (dgp$focal$type == "binary") {
     if (dgp$route == "parametric" && dgp$k == 0L)

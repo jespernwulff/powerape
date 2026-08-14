@@ -8,13 +8,22 @@
 #' @param type `"binary"` (Bernoulli) or `"normal"`.
 #' @param p Success probability, strictly between 0 and 1 (binary only).
 #' @param mean,sd Mean and standard deviation (normal only; `sd > 0`).
+#' @param icc Panel designs only ([ape_dgp_panel()]): within-unit correlation
+#'   of the variable over time, via a shared-component device on the latent
+#'   normal scale (`u_it = sqrt(icc) v_i + sqrt(1-icc) e_it`) before the
+#'   marginal transform. `icc = 0` redraws each period; `icc = 1` makes the
+#'   variable time-constant (e.g., a unit-level treatment). For binary
+#'   variables the realized outcome-scale correlation is attenuated relative
+#'   to `icc`, as with the Gaussian-copula `correlation`. Ignored by the
+#'   cross-sectional constructors.
 #'
 #' @return An object of class `pa_var`.
 #' @examples
 #' pa_var("treat", "binary", p = 0.5)
 #' pa_var("age", "normal", mean = 45, sd = 12)
 #' @export
-pa_var <- function(name, type = c("binary", "normal"), p = NULL, mean = 0, sd = 1) {
+pa_var <- function(name, type = c("binary", "normal"), p = NULL, mean = 0, sd = 1,
+                   icc = NULL) {
   type <- match.arg(type)
   stopifnot(is.character(name), length(name) == 1L, nzchar(name))
   if (type == "binary") {
@@ -24,7 +33,10 @@ pa_var <- function(name, type = c("binary", "normal"), p = NULL, mean = 0, sd = 
     stopifnot(is.numeric(mean), length(mean) == 1L,
               is.numeric(sd), length(sd) == 1L, sd > 0)
   }
-  structure(list(name = name, type = type, p = p, mean = mean, sd = sd),
+  if (!is.null(icc))
+    stopifnot(is.numeric(icc), length(icc) == 1L, icc >= 0, icc <= 1)
+  structure(list(name = name, type = type, p = p, mean = mean, sd = sd,
+                 icc = icc),
             class = "pa_var")
 }
 

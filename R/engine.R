@@ -6,17 +6,19 @@
 # ok = FALSE and count against every claim downstream (conservative).
 sim_ci <- function(dgp, n, nsim, conf, seed = NULL) {
   z <- zcrit(conf)
-  bt <- beta_true(dgp)
   is_aie <- identical(dgp$estimand, "aie")
+  is_panel <- identical(dgp$route, "panel")
+  bt <- if (is_panel) NULL else beta_true(dgp)
   with_seed(seed, {
     l <- u <- se <- rep(NA_real_, nsim)
     ok <- logical(nsim)
     for (r in seq_len(nsim)) {
       xx <- draw_x(dgp, n)
-      pr <- dgp$G(drop(xx$X %*% bt))
-      y <- rbinom(n, 1L, pr)
+      pr <- if (is_panel) xx$pr else dgp$G(drop(xx$X %*% bt))
+      y <- rbinom(length(pr), 1L, pr)
       if (all(y == y[1L])) next
-      ft <- fit_index_model(xx$X, y, dgp$link, start = bt)
+      ft <- fit_index_model(xx$X, y, dgp$link,
+                            start = if (is_panel) xx$start else bt)
       if (!ft$ok) next
       est <- if (is_aie) {
         aie_est(ft$fit$coefficients, xx$X, dgp$link,
@@ -25,7 +27,11 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL) {
         ape_est(ft$fit$coefficients, xx$X, xx$focal_col, dgp$link,
                 dgp$focal$type)
       }
-      V <- vcov_from_glmfit(ft$fit)
+      V <- if (is_panel) {
+        vcov_cluster(ft$fit, xx$X, xx$id, dgp$link)
+      } else {
+        vcov_from_glmfit(ft$fit)
+      }
       s_ <- sqrt(max(0, drop(t(est$jac) %*% V %*% est$jac)))
       if (!is.finite(s_) || s_ <= 0) next
       ok[r] <- TRUE
@@ -107,6 +113,8 @@ summarize_sim <- function(sim, target, claim, sesoi, nsim) {
 # implied effect across a claim boundary and the point is to SHOW that.
 power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE) {
   stopifnot(is.numeric(n), length(n) == 1L, n >= 20)
+  if (identical(dgp$route, "panel") && n < 30)
+    warning("Fewer than 30 units (clusters): cluster-robust inference is unreliable at this size.")
   stopifnot(is.numeric(conf), length(conf) == 1L, conf > 0.5, conf < 1)
   stopifnot(is.numeric(nsim), length(nsim) == 1L, nsim >= 20)
   if (enforce) check_coherence(dgp, claim, sesoi, conf)

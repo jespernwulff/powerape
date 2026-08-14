@@ -17,6 +17,7 @@ criteria for detection, minimum-effect, and equivalence claims
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://jespernwulff.github.io/powerape/}
   \item \url{https://github.com/jespernwulff/powerape}
   \item Report bugs at \url{https://github.com/jespernwulff/powerape/issues}
 }

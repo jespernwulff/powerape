@@ -26,6 +26,22 @@ vcov_from_glmfit <- function(fit) {
   chol2inv(fit$qr$qr[p1, p1, drop = FALSE])
 }
 
+# Cluster-robust (CR) sandwich for the pooled probit/logit MLE: score-based
+# meat aggregated by cluster, bread from the IRLS QR, with the G/(G-1)
+# multiplier that matches Stata's vce(cluster) convention for ML estimators
+# (verified against Stata margins in the validation battery).
+vcov_cluster <- function(fit, X, id, link) {
+  G <- if (link == "probit") pnorm else plogis
+  gd <- if (link == "probit") dnorm else dlogis
+  eta <- drop(X %*% fit$coefficients)
+  mu <- G(eta)
+  w <- gd(eta) * (fit$y - mu) / pmax(mu * (1 - mu), 1e-12)
+  U <- rowsum(X * w, id)
+  B <- vcov_from_glmfit(fit)
+  Gn <- nrow(U)
+  (Gn / (Gn - 1)) * (B %*% crossprod(U) %*% B)
+}
+
 # First and second derivatives of the density for the two links:
 #   probit: g'(z) = -z phi(z),          g''(z) = (z^2 - 1) phi(z)
 #   logit:  g'(z) = g(1 - 2G),          g''(z) = g(1 - 2G)^2 - 2 g^2

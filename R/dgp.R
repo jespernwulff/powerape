@@ -215,6 +215,7 @@ ape_dgp <- function(model = c("probit", "logit"), focal, moderator = NULL,
 #   no moderator:  [1, focal, Z]           focal_col = 2
 #   moderator:     [1, focal, mod, focal*mod, Z]   cols 2, 3, 4
 draw_x <- function(dgp, n) {
+  if (identical(dgp$route, "panel")) return(draw_x_panel(dgp, n))
   if (dgp$route == "empirical") return(draw_x_empirical(dgp, n))
   U <- draw_std_mvn(n, dgp$R_chol)
   d <- transform_u(U[, 1], dgp$focal)

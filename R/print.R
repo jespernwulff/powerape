@@ -1,8 +1,10 @@
 # Print methods ----------------------------------------------------------------
 
 pa_var_label <- function(v) {
-  if (v$type == "binary") sprintf("%s (binary, p = %.2f)", v$name, v$p)
-  else sprintf("%s (normal, mean %.2f, sd %.2f)", v$name, v$mean, v$sd)
+  base <- if (v$type == "binary") sprintf("%s (binary, p = %.2f", v$name, v$p)
+          else sprintf("%s (normal, mean %.2f, sd %.2f", v$name, v$mean, v$sd)
+  if (!is.null(v$icc)) base <- sprintf("%s, icc = %.2f", base, v$icc)
+  paste0(base, ")")
 }
 
 #' @export
@@ -27,6 +29,9 @@ print.powerape_dgp <- function(x, ...) {
   } else {
     cat("  covariates: none\n")
   }
+  if (identical(x$route, "panel"))
+    cat(sprintf("  panel: %d periods per unit; rho = %.2f (latent unit share), cre_share = %.2f; CRE probit w/ Mundlak means, unit-clustered SEs\n",
+                x$n_periods, x$rho, x$cre_share))
   if (x$route == "empirical")
     cat(sprintf("  pilot rows: %d (resampled with replacement)\n", x$n_emp))
   if (identical(x$builder, "from_fit"))
@@ -61,8 +66,14 @@ print.powerape_power <- function(x, ...) {
     detect = "detection claim (CI excludes 0, directional)",
     equivalence = sprintf("equivalence claim (CI within +/-%.3f)", x$sesoi))
   cat(sprintf("powerape -- %s\n", claim_lab))
-  cat(sprintf("  %s, n = %d, assumed true %s %+.4f, %.0f%% CI, nsim = %d\n",
-              x$model, x$n, toupper(x$estimand), x$target, 100 * x$conf, x$nsim))
+  n_lab <- if (identical(x$dgp$route, "panel")) {
+    sprintf("n = %d units x %d periods (%d obs)", x$n, x$dgp$n_periods,
+            x$n * x$dgp$n_periods)
+  } else {
+    sprintf("n = %d", x$n)
+  }
+  cat(sprintf("  %s, %s, assumed true %s %+.4f, %.0f%% CI, nsim = %d\n",
+              x$model, n_lab, toupper(x$estimand), x$target, 100 * x$conf, x$nsim))
   cat(sprintf("  power = %.3f (MCSE %.3f)\n", x$power, x$mcse))
   o <- x$outcomes
   cat("  outcomes:", paste(sprintf("%s %.3f", gsub("_", "-", names(o)), o),
@@ -85,8 +96,13 @@ print.powerape_curve <- function(x, ...) {
 print.powerape_n <- function(x, ...) {
   cat(sprintf("powerape required sample size -- %s claim\n", x$claim))
   lab <- if (isTRUE(x$confirmed)) "confirmed" else "achieved"
-  cat(sprintf("  n = %d for %.0f%% target power (%s %.3f, MCSE %.3f)\n",
-              x$n, 100 * x$goal, lab, x$power, x$mcse))
+  unit_lab <- if (identical(x$dgp$route, "panel")) {
+    sprintf("n = %d units (x %d periods)", x$n, x$dgp$n_periods)
+  } else {
+    sprintf("n = %d", x$n)
+  }
+  cat(sprintf("  %s for %.0f%% target power (%s %.3f, MCSE %.3f)\n",
+              unit_lab, 100 * x$goal, lab, x$power, x$mcse))
   cat(sprintf("  assumed true %s %+.4f, sesoi %s, %.0f%% CI, %s\n",
               toupper(x$estimand), x$target,
               if (is.null(x$sesoi)) "-" else sprintf("%.3f", x$sesoi),

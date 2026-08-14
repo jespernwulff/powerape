@@ -4,7 +4,14 @@
 \alias{pa_var}
 \title{Declare a variable of the data-generating process}
 \usage{
-pa_var(name, type = c("binary", "normal"), p = NULL, mean = 0, sd = 1)
+pa_var(
+  name,
+  type = c("binary", "normal"),
+  p = NULL,
+  mean = 0,
+  sd = 1,
+  icc = NULL
+)
 }
 \arguments{
 \item{name}{Variable name (a string; used in printing and error messages).}
@@ -14,6 +21,15 @@ pa_var(name, type = c("binary", "normal"), p = NULL, mean = 0, sd = 1)
 \item{p}{Success probability, strictly between 0 and 1 (binary only).}
 
 \item{mean, sd}{Mean and standard deviation (normal only; \code{sd > 0}).}
+
+\item{icc}{Panel designs only (\code{\link[=ape_dgp_panel]{ape_dgp_panel()}}): within-unit correlation
+of the variable over time, via a shared-component device on the latent
+normal scale (\verb{u_it = sqrt(icc) v_i + sqrt(1-icc) e_it}) before the
+marginal transform. \code{icc = 0} redraws each period; \code{icc = 1} makes the
+variable time-constant (e.g., a unit-level treatment). For binary
+variables the realized outcome-scale correlation is attenuated relative
+to \code{icc}, as with the Gaussian-copula \code{correlation}. Ignored by the
+cross-sectional constructors.}
 }
 \value{
 An object of class \code{pa_var}.

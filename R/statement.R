@@ -5,7 +5,17 @@ describe_dgp <- function(d) {
     if (v$type == "binary") sprintf("%s (binary, prevalence %.2f)", v$name, v$p)
     else sprintf("%s (continuous, mean %.1f, SD %.1f)", v$name, v$mean, v$sd)
   }
-  parts <- sprintf("a %s model with focal variable %s", d$model, var_desc(d$focal))
+  parts <- if (identical(d$route, "panel")) {
+    sprintf(paste0("a correlated random effects %s model over %d periods per ",
+                   "unit (latent unit-effect share rho = %.2f, %.0f%% of it ",
+                   "loaded on regressor means), estimated by pooled %s with ",
+                   "Mundlak means and unit-clustered standard errors, with ",
+                   "focal variable %s"),
+            d$model, d$n_periods, d$rho, 100 * d$cre_share, d$model,
+            var_desc(d$focal))
+  } else {
+    sprintf("a %s model with focal variable %s", d$model, var_desc(d$focal))
+  }
   if (!is.null(d$moderator))
     parts <- paste0(parts,
                     sprintf(", moderator %s, and their interaction",
