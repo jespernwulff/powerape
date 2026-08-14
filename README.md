@@ -66,6 +66,12 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   [`ginteff`](https://github.com/jespernwulff/ginteff) estimand — with
   `set_aie()`; the internal AIE is unit-tested to reproduce `ginteff`
   exactly for all four variable-type pairs.
+- **Panel designs** (`ape_dgp_panel()`): correlated random effects
+  probit/logit — Mundlak means, unit-clustered SEs, per-variable
+  within-unit persistence via `pa_var(icc = )`, and sample sizes counted
+  in **units (clusters)**. The target stays the ASF-based APE, which the
+  pooled CRE estimator recovers; binary-by-binary panel AIE designs
+  included.
 - **Three covariate routes**: parametric marginals with a Gaussian copula,
   pilot-data resampling (`ape_dgp_empirical()`), or a fitted pilot model
   (`ape_dgp_from_fit()`).
@@ -83,11 +89,17 @@ The engine is anchored against independent implementations: the
 two-proportion case reproduces `power.prop.test()` and Stata
 `power twoproportions`; APE estimates and delta-method SEs match
 `marginaleffects` and Stata `margins, dydx()` to ~1e-6 on fixed datasets;
-the AIE matches `ginteff` exactly. See the package tests and the design
-document for details.
+the AIE matches `ginteff` exactly; simulated power matches exact
+finite-sample enumeration in the saturated case and TOSTER under matched
+conventions. Panel designs match Stata's clustered `margins` (APE and AIE
+double difference) to all printed digits on fixed panels, the clustered
+sandwich matches `sandwich::vcovCL` exactly, and the engine reproduces
+the Donner-Klar cluster design effect. See the package tests and the
+design document for details.
 
 ## Learn more
 
-Four vignettes cover the workflows:
+Five vignettes cover the workflows:
 `vignette("minimum-effect")`, `vignette("classic-sesoi-detection")`,
-`vignette("equivalence")`, and `vignette("interaction-effects")`.
+`vignette("equivalence")`, `vignette("interaction-effects")`, and
+`vignette("panel-designs")`.

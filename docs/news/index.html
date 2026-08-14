@@ -22,6 +22,7 @@
     <li><a class="dropdown-item" href="../articles/classic-sesoi-detection.html">The classic SESOI power analysis, and what it cannot tell you</a></li>
     <li><a class="dropdown-item" href="../articles/equivalence.html">Powering for equivalence: showing an effect is too small to matter</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
+    <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -43,6 +44,7 @@
 <ul><li>Panel AIE designs (binary x binary): <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> gains a <code>moderator</code> argument, and <code><a href="../reference/set_aie.html">set_aie()</a></code> pins the average interaction effect of a CRE panel world. All anchors – baseline, the two conditional-at-reference main-effect APEs, and the target AIE – are defined on the average structural function (unit effects integrated exactly, Mundlak means held fixed), so the panel AIE is the same population quantity a cross-sectional AIE design targets. The estimating model includes the interaction’s own Mundlak mean whenever the product term is time-varying (the mean of a product is not the product of means); inference is unit-clustered throughout, and <code><a href="../reference/ape_robust.html">ape_robust()</a></code>, <code><a href="../reference/ape_curve.html">ape_curve()</a></code>, <code><a href="../reference/ape_n.html">ape_n()</a></code>, and <code><a href="../reference/power_statement.html">power_statement()</a></code> all work unchanged.</li>
 <li>Validation: the ASF double difference matches Stata (<code>probit i.d##i.m ... , vce(cluster id)</code> + <code>margins</code> + <code>lincom</code>) to all printed digits on a fixed panel, with the clustered-SE gap again fully attributed to Stata’s observed-Hessian bread (reproduced to 7 decimals); ginteff reproduces the double difference and model-based SE on the identical fit to 1e-6; exact reduction of the inversion to the cross-sectional case at rho = 0; estimator consistency and nominal clustered-CI coverage of the true AIE. Battery gains V9.</li>
 <li>Continuous focal or moderator pairs in panel AIE designs are not yet supported (clean error); cross-sectional AIE keeps all four type pairs.</li>
+<li>New vignette <code>panel-designs</code>: the CRE workflow end to end – the panel knobs, units-not-observations accounting, the panel-vs-cross-section comparison, rho robustness, and the panel AIE. The README now covers the panel route.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.2.1" id="powerape-121">powerape 1.2.1<a class="anchor" aria-label="anchor" href="#powerape-121"></a></h2>

@@ -10,3 +10,5 @@
   matter](https://jespernwulff.github.io/powerape/articles/equivalence.md):
 - [Power for average interaction effects
   (AIEs)](https://jespernwulff.github.io/powerape/articles/interaction-effects.md):
+- [Panel designs: correlated random
+  effects](https://jespernwulff.github.io/powerape/articles/panel-designs.md):

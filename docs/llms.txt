@@ -70,6 +70,13 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md);
   the internal AIE is unit-tested to reproduce `ginteff` exactly for all
   four variable-type pairs.
+- **Panel designs**
+  ([`ape_dgp_panel()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_panel.md)):
+  correlated random effects probit/logit — Mundlak means, unit-clustered
+  SEs, per-variable within-unit persistence via `pa_var(icc = )`, and
+  sample sizes counted in **units (clusters)**. The target stays the
+  ASF-based APE, which the pooled CRE estimator recovers;
+  binary-by-binary panel AIE designs included.
 - **Three covariate routes**: parametric marginals with a Gaussian
   copula, pilot-data resampling
   ([`ape_dgp_empirical()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_empirical.md)),
@@ -93,17 +100,24 @@ two-proportion case reproduces
 [`power.prop.test()`](https://rdrr.io/r/stats/power.prop.test.html) and
 Stata `power twoproportions`; APE estimates and delta-method SEs match
 `marginaleffects` and Stata `margins, dydx()` to ~1e-6 on fixed
-datasets; the AIE matches `ginteff` exactly. See the package tests and
-the design document for details.
+datasets; the AIE matches `ginteff` exactly; simulated power matches
+exact finite-sample enumeration in the saturated case and TOSTER under
+matched conventions. Panel designs match Stata’s clustered `margins`
+(APE and AIE double difference) to all printed digits on fixed panels,
+the clustered sandwich matches
+[`sandwich::vcovCL`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html)
+exactly, and the engine reproduces the Donner-Klar cluster design
+effect. See the package tests and the design document for details.
 
 ## Learn more
 
-Four vignettes cover the workflows:
+Five vignettes cover the workflows:
 [`vignette("minimum-effect")`](https://jespernwulff.github.io/powerape/articles/minimum-effect.md),
 [`vignette("classic-sesoi-detection")`](https://jespernwulff.github.io/powerape/articles/classic-sesoi-detection.md),
 [`vignette("equivalence")`](https://jespernwulff.github.io/powerape/articles/equivalence.md),
+[`vignette("interaction-effects")`](https://jespernwulff.github.io/powerape/articles/interaction-effects.md),
 and
-[`vignette("interaction-effects")`](https://jespernwulff.github.io/powerape/articles/interaction-effects.md).
+[`vignette("panel-designs")`](https://jespernwulff.github.io/powerape/articles/panel-designs.md).
 
 # Package index
 
@@ -167,3 +181,5 @@ Simulated power, curves, and required sample sizes.
   matter](https://jespernwulff.github.io/powerape/articles/equivalence.md):
 - [Power for average interaction effects
   (AIEs)](https://jespernwulff.github.io/powerape/articles/interaction-effects.md):
+- [Panel designs: correlated random
+  effects](https://jespernwulff.github.io/powerape/articles/panel-designs.md):

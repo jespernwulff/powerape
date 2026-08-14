@@ -32,6 +32,10 @@
 - Continuous focal or moderator pairs in panel AIE designs are not yet
   supported (clean error); cross-sectional AIE keeps all four type
   pairs.
+- New vignette `panel-designs`: the CRE workflow end to end – the panel
+  knobs, units-not-observations accounting, the panel-vs-cross-section
+  comparison, rho robustness, and the panel AIE. The README now covers
+  the panel route.
 
 ## powerape 1.2.1
 
