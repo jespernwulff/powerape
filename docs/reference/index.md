@@ -12,6 +12,8 @@ Describe the data-generating process the study will sample from.
   : Specify a DGP with covariates resampled from pilot data
 - [`ape_dgp_from_fit()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_from_fit.md)
   : Specify a DGP from a fitted pilot model
+- [`ape_dgp_panel()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_panel.md)
+  : Specify a panel DGP: correlated random effects probit/logit
 
 ## Pin the effect
 

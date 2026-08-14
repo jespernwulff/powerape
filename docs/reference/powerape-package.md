@@ -12,6 +12,8 @@ contextual assumptions (Hancock and Feng, 2025).
 
 Useful links:
 
+- <https://jespernwulff.github.io/powerape/>
+
 - <https://github.com/jespernwulff/powerape>
 
 - Report bugs at <https://github.com/jespernwulff/powerape/issues>

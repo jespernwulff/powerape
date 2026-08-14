@@ -11,7 +11,7 @@ the correlation argument of ape_dgp() (a Gaussian copula)."><meta property="og:i
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,14 @@ the <code>correlation</code> argument of <code><a href="ape_dgp.html">ape_dgp()<
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pa_var</span><span class="op">(</span><span class="va">name</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"binary"</span>, <span class="st">"normal"</span><span class="op">)</span>, p <span class="op">=</span> <span class="cn">NULL</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pa_var</span><span class="op">(</span></span>
+<span>  <span class="va">name</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"binary"</span>, <span class="st">"normal"</span><span class="op">)</span>,</span>
+<span>  p <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mean <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  sd <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  icc <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,6 +79,17 @@ the <code>correlation</code> argument of <code><a href="ape_dgp.html">ape_dgp()<
 
 <dt id="arg-mean-sd">mean, sd<a class="anchor" aria-label="anchor" href="#arg-mean-sd"></a></dt>
 <dd><p>Mean and standard deviation (normal only; <code>sd &gt; 0</code>).</p></dd>
+
+
+<dt id="arg-icc">icc<a class="anchor" aria-label="anchor" href="#arg-icc"></a></dt>
+<dd><p>Panel designs only (<code><a href="ape_dgp_panel.html">ape_dgp_panel()</a></code>): within-unit correlation
+of the variable over time, via a shared-component device on the latent
+normal scale (<code>u_it = sqrt(icc) v_i + sqrt(1-icc) e_it</code>) before the
+marginal transform. <code>icc = 0</code> redraws each period; <code>icc = 1</code> makes the
+variable time-constant (e.g., a unit-level treatment). For binary
+variables the realized outcome-scale correlation is attenuated relative
+to <code>icc</code>, as with the Gaussian-copula <code>correlation</code>. Ignored by the
+cross-sectional constructors.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -97,6 +115,9 @@ the <code>correlation</code> argument of <code><a href="ape_dgp.html">ape_dgp()<
 <span class="r-out co"><span class="r-pr">#&gt;</span> $sd</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $icc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pa_var"</span>
 <span class="r-in"><span><span class="fu">pa_var</span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"normal"</span>, mean <span class="op">=</span> <span class="fl">45</span>, sd <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></span>
@@ -114,6 +135,9 @@ the <code>correlation</code> argument of <code><a href="ape_dgp.html">ape_dgp()<
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $sd</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $icc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pa_var"</span>

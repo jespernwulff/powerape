@@ -1,5 +1,36 @@
 # Changelog
 
+## powerape 1.2.0
+
+- Panel designs:
+  [`ape_dgp_panel()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_panel.md)
+  specifies a correlated random effects (CRE) probit/logit world –
+  Mundlak heterogeneity on observed unit means, latent unit-effect share
+  `rho` (xtprobit convention), `cre_share` for the
+  heterogeneity-regressor correlation, and per-variable within-unit
+  persistence via `pa_var(..., icc =)` (icc = 1 gives unit-level,
+  time-constant variables). Estimation in the engine is pooled
+  probit/logit with Mundlak means and unit-clustered standard errors;
+  the target remains the ASF-based APE, which the pooled CRE estimator
+  recovers even though coefficients are attenuated. Sample-size
+  arguments count **units (clusters)**; each contributes `n_periods`
+  observations.
+- Clustered delta-method inference: score-based cluster-robust sandwich
+  matching R’s
+  [`sandwich::vcovCL`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html)
+  convention exactly (verified against marginaleffects with
+  `vcov = ~id`); Stata’s `vce(cluster)` differs only by its
+  observed-Hessian bread (~0.3% in the validation example, with the
+  attribution reproduced to 7 decimals). A warning is issued below 30
+  clusters.
+- Validation: exact-enumeration reduction (no-Mundlak case), the
+  Donner-Klar cluster design-effect anchor, clustered-CI coverage, and
+  the documented “Mundlak insurance premium” (at rho = 0 the CRE
+  estimator is correctly less powerful than a cross-sectional analysis
+  of the same information). Battery gains V8.
+- Panel scope in this release: parametric route, balanced panels, no
+  moderator (AIE) combination yet.
+
 ## powerape 1.1.0
 
 - [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)

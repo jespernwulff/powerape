@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,13 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.2.0" id="powerape-120">powerape 1.2.0<a class="anchor" aria-label="anchor" href="#powerape-120"></a></h2>
+<ul><li>Panel designs: <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> specifies a correlated random effects (CRE) probit/logit world – Mundlak heterogeneity on observed unit means, latent unit-effect share <code>rho</code> (xtprobit convention), <code>cre_share</code> for the heterogeneity-regressor correlation, and per-variable within-unit persistence via <code>pa_var(..., icc =)</code> (icc = 1 gives unit-level, time-constant variables). Estimation in the engine is pooled probit/logit with Mundlak means and unit-clustered standard errors; the target remains the ASF-based APE, which the pooled CRE estimator recovers even though coefficients are attenuated. Sample-size arguments count <strong>units (clusters)</strong>; each contributes <code>n_periods</code> observations.</li>
+<li>Clustered delta-method inference: score-based cluster-robust sandwich matching R’s <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> convention exactly (verified against marginaleffects with <code>vcov = ~id</code>); Stata’s <code>vce(cluster)</code> differs only by its observed-Hessian bread (~0.3% in the validation example, with the attribution reproduced to 7 decimals). A warning is issued below 30 clusters.</li>
+<li>Validation: exact-enumeration reduction (no-Mundlak case), the Donner-Klar cluster design-effect anchor, clustered-CI coverage, and the documented “Mundlak insurance premium” (at rho = 0 the CRE estimator is correctly less powerful than a cross-sectional analysis of the same information). Battery gains V8.</li>
+<li>Panel scope in this release: parametric route, balanced panels, no moderator (AIE) combination yet.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.0" id="powerape-110">powerape 1.1.0<a class="anchor" aria-label="anchor" href="#powerape-110"></a></h2>
 <ul><li>

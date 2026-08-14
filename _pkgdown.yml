@@ -10,6 +10,7 @@ reference:
   - ape_dgp
   - ape_dgp_empirical
   - ape_dgp_from_fit
+  - ape_dgp_panel
 - title: Pin the effect
   desc: Solve coefficients from targets in APE/AIE units.
   contents:

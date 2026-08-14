@@ -10,7 +10,14 @@ Dependence between variables is set via the `correlation` argument of
 ## Usage
 
 ``` r
-pa_var(name, type = c("binary", "normal"), p = NULL, mean = 0, sd = 1)
+pa_var(
+  name,
+  type = c("binary", "normal"),
+  p = NULL,
+  mean = 0,
+  sd = 1,
+  icc = NULL
+)
 ```
 
 ## Arguments
@@ -30,6 +37,19 @@ pa_var(name, type = c("binary", "normal"), p = NULL, mean = 0, sd = 1)
 - mean, sd:
 
   Mean and standard deviation (normal only; `sd > 0`).
+
+- icc:
+
+  Panel designs only
+  ([`ape_dgp_panel()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_panel.md)):
+  within-unit correlation of the variable over time, via a
+  shared-component device on the latent normal scale
+  (`u_it = sqrt(icc) v_i + sqrt(1-icc) e_it`) before the marginal
+  transform. `icc = 0` redraws each period; `icc = 1` makes the variable
+  time-constant (e.g., a unit-level treatment). For binary variables the
+  realized outcome-scale correlation is attenuated relative to `icc`, as
+  with the Gaussian-copula `correlation`. Ignored by the cross-sectional
+  constructors.
 
 ## Value
 
@@ -54,6 +74,9 @@ pa_var("treat", "binary", p = 0.5)
 #> $sd
 #> [1] 1
 #> 
+#> $icc
+#> NULL
+#> 
 #> attr(,"class")
 #> [1] "pa_var"
 pa_var("age", "normal", mean = 45, sd = 12)
@@ -71,6 +94,9 @@ pa_var("age", "normal", mean = 45, sd = 12)
 #> 
 #> $sd
 #> [1] 12
+#> 
+#> $icc
+#> NULL
 #> 
 #> attr(,"class")
 #> [1] "pa_var"
