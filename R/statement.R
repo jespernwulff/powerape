@@ -94,25 +94,33 @@ power_statement <- function(x) {
                                     d$main_focal, d$focal$name,
                                     d$main_moderator, d$moderator$name)
                 else "")
+  is_panel <- identical(d$route, "panel")
+  n_text <- if (is_panel) {
+    sprintf("n = %d units observed over %d periods (%d unit-period observations)",
+            x$n, d$n_periods, x$n * d$n_periods)
+  } else {
+    sprintf("n = %d", x$n)
+  }
   s4 <- if (inherits(x, "powerape_n")) {
+    size_noun <- if (is_panel) "number of units" else "total sample size"
     if (isTRUE(x$confirmed)) {
-      sprintf(paste0("The required total sample size for %.0f%% power for %s ",
-                     "was n = %d, confirmed by a high-precision verification ",
+      sprintf(paste0("The required %s for %.0f%% power for %s ",
+                     "was %s, confirmed by a high-precision verification ",
                      "run (simulated power %.3f, Monte Carlo SE %.3f, %d ",
                      "replications)."),
-              100 * x$goal, claim_text(x$claim, x$sesoi, x$conf), x$n,
-              x$power, x$mcse, x$nsim_confirm)
+              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf),
+              n_text, x$power, x$mcse, x$nsim_confirm)
     } else {
-      sprintf(paste0("The required total sample size for %.0f%% power for %s ",
-                     "was n = %d (simulated power %.3f, Monte Carlo SE %.3f, ",
+      sprintf(paste0("The required %s for %.0f%% power for %s ",
+                     "was %s (simulated power %.3f, Monte Carlo SE %.3f, ",
                      "%d replications per search step)."),
-              100 * x$goal, claim_text(x$claim, x$sesoi, x$conf), x$n,
-              x$power, x$mcse, x$nsim)
+              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf),
+              n_text, x$power, x$mcse, x$nsim)
     }
   } else {
-    sprintf(paste0("At a total sample size of n = %d, simulated power for %s ",
+    sprintf(paste0("At a sample size of %s, simulated power for %s ",
                    "was %.3f (Monte Carlo SE %.3f; %d replications)."),
-            x$n, claim_text(x$claim, x$sesoi, x$conf), x$power, x$mcse, x$nsim)
+            n_text, claim_text(x$claim, x$sesoi, x$conf), x$power, x$mcse, x$nsim)
   }
   s5 <- if (inherits(x, "powerape_power") && !is.null(x$sesoi)) {
     o <- x$outcomes

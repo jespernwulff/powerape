@@ -31,6 +31,19 @@ test_that("power_statement renders APE power, ape_n, and AIE objects", {
   expect_match(txt2, "main-effect APEs")
 })
 
+test_that("power_statement counts panel n in units, not observations", {
+  dp <- ape_dgp_panel("probit",
+                      focal = pa_var("treat", "binary", p = 0.5, icc = 1),
+                      n_periods = 3, rho = 0.2, baseline = 0.30,
+                      n_int = 2e4, seed_int = 7L)
+  dp <- set_ape(dp, 0.10)
+  pw <- ape_power(dp, n = 80, claim = "detect", nsim = 60, seed = 5)
+  txt <- unclass(power_statement(pw))
+  expect_match(txt, "n = 80 units observed over 3 periods")
+  expect_match(txt, "240 unit-period observations")
+  expect_no_match(txt, "total sample size")
+})
+
 test_that("power_statement rejects other objects", {
   expect_error(power_statement(42))
 })
