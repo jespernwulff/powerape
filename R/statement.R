@@ -13,6 +13,19 @@ describe_dgp <- function(d) {
                    "focal variable %s"),
             d$model, d$n_periods, d$rho, 100 * d$cre_share, d$model,
             var_desc(d$focal))
+  } else if (identical(d$route, "iv")) {
+    sprintf(paste0("a probit model with an endogenous focal variable %s ",
+                   "(error correlation %.2f with the first stage), ",
+                   "instrumented by %s (%s first stage, instrument strength ",
+                   "%.2f as a share of the focal's %svariance) and estimated ",
+                   "by control-function probit with stacked ",
+                   "method-of-moments robust standard errors (the estimator ",
+                   "of Stata's cfprobit)"),
+            var_desc(d$focal), d$endogeneity,
+            paste(vapply(d$instruments, var_desc, character(1)),
+                  collapse = ", "),
+            d$first_stage, d$iv_strength,
+            if (d$focal$type == "binary") "latent " else "")
   } else {
     sprintf("a %s model with focal variable %s", d$model, var_desc(d$focal))
   }
@@ -133,13 +146,22 @@ power_statement <- function(x) {
   } else {
     NULL
   }
-  s6 <- if (inherits(x, "powerape_power")) {
-    sprintf(paste0("Estimation used maximum likelihood with delta-method ",
-                   "Wald confidence intervals; replications that failed to ",
-                   "converge (%.1f%%) counted against the claim."),
-            100 * x$outcomes[["failed"]])
+  est_desc <- if (identical(d$route, "iv")) {
+    paste0("two-step control-function estimation with stacked ",
+           "method-of-moments robust standard errors and delta-method ",
+           "Wald confidence intervals")
+  } else if (identical(x$se %||% "model", "robust")) {
+    paste0("maximum likelihood with heteroskedasticity-robust (sandwich) ",
+           "standard errors and delta-method Wald confidence intervals")
   } else {
-    "Estimation used maximum likelihood with delta-method Wald confidence intervals."
+    "maximum likelihood with delta-method Wald confidence intervals"
+  }
+  s6 <- if (inherits(x, "powerape_power")) {
+    sprintf(paste0("Estimation used %s; replications that failed to ",
+                   "converge (%.1f%%) counted against the claim."),
+            est_desc, 100 * x$outcomes[["failed"]])
+  } else {
+    sprintf("Estimation used %s.", est_desc)
   }
 
   structure(paste(c(s1, s2, s3, s4, s5, s6), collapse = " "),

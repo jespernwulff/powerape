@@ -12,3 +12,5 @@
   (AIEs)](https://jespernwulff.github.io/powerape/articles/interaction-effects.md):
 - [Panel designs: correlated random
   effects](https://jespernwulff.github.io/powerape/articles/panel-designs.md):
+- [IV designs: endogenous focal variables via control
+  functions](https://jespernwulff.github.io/powerape/articles/iv-designs.md):

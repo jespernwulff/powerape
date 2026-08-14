@@ -77,6 +77,17 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   sample sizes counted in **units (clusters)**. The target stays the
   ASF-based APE, which the pooled CRE estimator recovers;
   binary-by-binary panel AIE designs included.
+- **IV designs**
+  ([`ape_dgp_iv()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_iv.md)):
+  endogenous focal variables via control-function probit — the estimator
+  of Stata’s `cfprobit`, replicated exactly with its stacked
+  no-bootstrap standard errors (robust and clustered). Friendly knobs:
+  `endogeneity` (error correlation) and `iv_strength` (first-stage share
+  of the focal’s variance); endogenous-interaction AIE designs include
+  the instrument-by-moderator first-stage terms.
+- **Robust standard errors** for the standard routes via `se = "robust"`
+  (HC0 sandwich); panel and IV routes carry their own clustered /
+  stacked inference.
 - **Three covariate routes**: parametric marginals with a Gaussian
   copula, pilot-data resampling
   ([`ape_dgp_empirical()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_empirical.md)),
@@ -107,14 +118,19 @@ matched conventions. Panel designs match Stata’s clustered `margins`
 the clustered sandwich matches
 [`sandwich::vcovCL`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html)
 exactly, and the engine reproduces the Donner-Klar cluster design
-effect. See the package tests and the design document for details.
+effect. The control-function route reproduces Stata’s `cfprobit` across
+all four first-stage models — coefficients, stacked robust/clustered
+SEs, and `margins` ASF effects to ~1e-6 — including the
+endogenous-interaction design run with Stata’s own syntax. See the
+package tests and the validation battery for details.
 
 ## Learn more
 
-Five vignettes cover the workflows:
+Six vignettes cover the workflows:
 [`vignette("minimum-effect")`](https://jespernwulff.github.io/powerape/articles/minimum-effect.md),
 [`vignette("classic-sesoi-detection")`](https://jespernwulff.github.io/powerape/articles/classic-sesoi-detection.md),
 [`vignette("equivalence")`](https://jespernwulff.github.io/powerape/articles/equivalence.md),
 [`vignette("interaction-effects")`](https://jespernwulff.github.io/powerape/articles/interaction-effects.md),
+[`vignette("panel-designs")`](https://jespernwulff.github.io/powerape/articles/panel-designs.md),
 and
-[`vignette("panel-designs")`](https://jespernwulff.github.io/powerape/articles/panel-designs.md).
+[`vignette("iv-designs")`](https://jespernwulff.github.io/powerape/articles/iv-designs.md).

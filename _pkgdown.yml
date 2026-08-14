@@ -11,6 +11,7 @@ reference:
   - ape_dgp_empirical
   - ape_dgp_from_fit
   - ape_dgp_panel
+  - ape_dgp_iv
 - title: Pin the effect
   desc: Solve coefficients from targets in APE/AIE units.
   contents:
@@ -38,3 +39,4 @@ articles:
   - equivalence
   - interaction-effects
   - panel-designs
+  - iv-designs

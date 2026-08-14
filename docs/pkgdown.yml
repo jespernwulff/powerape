@@ -5,9 +5,10 @@ articles:
   classic-sesoi-detection: classic-sesoi-detection.html
   equivalence: equivalence.html
   interaction-effects: interaction-effects.html
+  iv-designs: iv-designs.html
   minimum-effect: minimum-effect.html
   panel-designs: panel-designs.html
-last_built: 2026-08-14T15:47Z
+last_built: 2026-08-14T17:42Z
 urls:
   reference: https://jespernwulff.github.io/powerape/reference
   article: https://jespernwulff.github.io/powerape/articles

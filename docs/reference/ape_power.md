@@ -18,7 +18,8 @@ ape_power(
   sesoi = NULL,
   conf = 0.95,
   nsim = 1000,
-  seed = NULL
+  seed = NULL,
+  se = c("model", "robust")
 )
 ```
 
@@ -56,6 +57,14 @@ ape_power(
 - seed:
 
   Optional seed (the caller's RNG state is preserved).
+
+- se:
+
+  Standard errors for the exogenous cross-sectional routes: `"model"`
+  (default, expected-information ML) or `"robust"`
+  (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+  Panel designs always use unit-clustered SEs and IV designs the stacked
+  method-of-moments robust sandwich; `se` is ignored there.
 
 ## Value
 

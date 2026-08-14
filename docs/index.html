@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@
     <li><a class="dropdown-item" href="articles/equivalence.html">Powering for equivalence: showing an effect is too small to matter</a></li>
     <li><a class="dropdown-item" href="articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
     <li><a class="dropdown-item" href="articles/panel-designs.html">Panel designs: correlated random effects</a></li>
+    <li><a class="dropdown-item" href="articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -149,6 +150,10 @@
 <li>
 <strong>Panel designs</strong> (<code><a href="reference/ape_dgp_panel.html">ape_dgp_panel()</a></code>): correlated random effects probit/logit — Mundlak means, unit-clustered SEs, per-variable within-unit persistence via <code>pa_var(icc = )</code>, and sample sizes counted in <strong>units (clusters)</strong>. The target stays the ASF-based APE, which the pooled CRE estimator recovers; binary-by-binary panel AIE designs included.</li>
 <li>
+<strong>IV designs</strong> (<code><a href="reference/ape_dgp_iv.html">ape_dgp_iv()</a></code>): endogenous focal variables via control-function probit — the estimator of Stata’s <code>cfprobit</code>, replicated exactly with its stacked no-bootstrap standard errors (robust and clustered). Friendly knobs: <code>endogeneity</code> (error correlation) and <code>iv_strength</code> (first-stage share of the focal’s variance); endogenous-interaction AIE designs include the instrument-by-moderator first-stage terms.</li>
+<li>
+<strong>Robust standard errors</strong> for the standard routes via <code>se = "robust"</code> (HC0 sandwich); panel and IV routes carry their own clustered / stacked inference.</li>
+<li>
 <strong>Three covariate routes</strong>: parametric marginals with a Gaussian copula, pilot-data resampling (<code><a href="reference/ape_dgp_empirical.html">ape_dgp_empirical()</a></code>), or a fitted pilot model (<code><a href="reference/ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code>).</li>
 <li>
 <strong>Robustness sweeps</strong> (<code><a href="reference/ape_robust.html">ape_robust()</a></code>): worst-case power and the insurance-premium sample size n_max over contextual assumptions, in the spirit of Hancock &amp; Feng (2025).</li>
@@ -161,12 +166,12 @@
 <div class="section level2">
 <h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a>
 </h2>
-<p>The engine is anchored against independent implementations: the two-proportion case reproduces <code><a href="https://rdrr.io/r/stats/power.prop.test.html" class="external-link">power.prop.test()</a></code> and Stata <code>power twoproportions</code>; APE estimates and delta-method SEs match <code>marginaleffects</code> and Stata <code>margins, dydx()</code> to ~1e-6 on fixed datasets; the AIE matches <code>ginteff</code> exactly; simulated power matches exact finite-sample enumeration in the saturated case and TOSTER under matched conventions. Panel designs match Stata’s clustered <code>margins</code> (APE and AIE double difference) to all printed digits on fixed panels, the clustered sandwich matches <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> exactly, and the engine reproduces the Donner-Klar cluster design effect. See the package tests and the design document for details.</p>
+<p>The engine is anchored against independent implementations: the two-proportion case reproduces <code><a href="https://rdrr.io/r/stats/power.prop.test.html" class="external-link">power.prop.test()</a></code> and Stata <code>power twoproportions</code>; APE estimates and delta-method SEs match <code>marginaleffects</code> and Stata <code>margins, dydx()</code> to ~1e-6 on fixed datasets; the AIE matches <code>ginteff</code> exactly; simulated power matches exact finite-sample enumeration in the saturated case and TOSTER under matched conventions. Panel designs match Stata’s clustered <code>margins</code> (APE and AIE double difference) to all printed digits on fixed panels, the clustered sandwich matches <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> exactly, and the engine reproduces the Donner-Klar cluster design effect. The control-function route reproduces Stata’s <code>cfprobit</code> across all four first-stage models — coefficients, stacked robust/clustered SEs, and <code>margins</code> ASF effects to ~1e-6 — including the endogenous-interaction design run with Stata’s own syntax. See the package tests and the validation battery for details.</p>
 </div>
 <div class="section level2">
 <h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
-<p>Five vignettes cover the workflows: <code><a href="articles/minimum-effect.html">vignette("minimum-effect")</a></code>, <code><a href="articles/classic-sesoi-detection.html">vignette("classic-sesoi-detection")</a></code>, <code><a href="articles/equivalence.html">vignette("equivalence")</a></code>, <code><a href="articles/interaction-effects.html">vignette("interaction-effects")</a></code>, and <code><a href="articles/panel-designs.html">vignette("panel-designs")</a></code>.</p>
+<p>Six vignettes cover the workflows: <code><a href="articles/minimum-effect.html">vignette("minimum-effect")</a></code>, <code><a href="articles/classic-sesoi-detection.html">vignette("classic-sesoi-detection")</a></code>, <code><a href="articles/equivalence.html">vignette("equivalence")</a></code>, <code><a href="articles/interaction-effects.html">vignette("interaction-effects")</a></code>, <code><a href="articles/panel-designs.html">vignette("panel-designs")</a></code>, and <code><a href="articles/iv-designs.html">vignette("iv-designs")</a></code>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

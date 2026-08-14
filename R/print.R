@@ -32,6 +32,12 @@ print.powerape_dgp <- function(x, ...) {
   if (identical(x$route, "panel"))
     cat(sprintf("  panel: %d periods per unit; rho = %.2f (latent unit share), cre_share = %.2f; CRE %s w/ Mundlak means, unit-clustered SEs\n",
                 x$n_periods, x$rho, x$cre_share, x$model))
+  if (identical(x$route, "iv"))
+    cat(sprintf("  iv: endogenous focal (%s first stage; instruments: %s); endogeneity rho = %.2f, first-stage strength = %.2f; control-function probit, stacked robust SEs\n",
+                x$first_stage,
+                paste(vapply(x$instruments, function(v) v$name, character(1)),
+                      collapse = ", "),
+                x$endogeneity, x$iv_strength))
   if (x$route == "empirical")
     cat(sprintf("  pilot rows: %d (resampled with replacement)\n", x$n_emp))
   if (identical(x$builder, "from_fit"))
@@ -72,8 +78,12 @@ print.powerape_power <- function(x, ...) {
   } else {
     sprintf("n = %d", x$n)
   }
-  cat(sprintf("  %s, %s, assumed true %s %+.4f, %.0f%% CI, nsim = %d\n",
-              x$model, n_lab, toupper(x$estimand), x$target, 100 * x$conf, x$nsim))
+  se_lab <- if (identical(x$dgp$route, "iv")) ", stacked robust SEs"
+            else if (identical(x$se, "robust")) ", robust SEs"
+            else ""
+  cat(sprintf("  %s, %s, assumed true %s %+.4f, %.0f%% CI, nsim = %d%s\n",
+              x$model, n_lab, toupper(x$estimand), x$target, 100 * x$conf,
+              x$nsim, se_lab))
   cat(sprintf("  power = %.3f (MCSE %.3f)\n", x$power, x$mcse))
   o <- x$outcomes
   cat("  outcomes:", paste(sprintf("%s %.3f", gsub("_", "-", names(o)), o),

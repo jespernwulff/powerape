@@ -11,7 +11,8 @@ ape_power(
   sesoi = NULL,
   conf = 0.95,
   nsim = 1000,
-  seed = NULL
+  seed = NULL,
+  se = c("model", "robust")
 )
 }
 \arguments{
@@ -30,6 +31,12 @@ the outcome table is still broken out against it).}
 \item{nsim}{Number of simulation replications.}
 
 \item{seed}{Optional seed (the caller's RNG state is preserved).}
+
+\item{se}{Standard errors for the exogenous cross-sectional routes:
+\code{"model"} (default, expected-information ML) or \code{"robust"}
+(heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+Panel designs always use unit-clustered SEs and IV designs the
+stacked method-of-moments robust sandwich; \code{se} is ignored there.}
 }
 \value{
 A \code{powerape_power} object: power, Monte Carlo standard error,

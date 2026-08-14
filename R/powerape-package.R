@@ -9,7 +9,7 @@
 #' (Hancock and Feng, 2025).
 #'
 #' @keywords internal
-#' @importFrom stats aggregate binomial dlogis dnorm glm.fit isoreg plogis pnorm qlogis qnorm rbinom rnorm sd uniroot var
+#' @importFrom stats aggregate binomial dlogis dnorm glm.fit isoreg lm.fit plogis pnorm poisson qlogis qnorm rbinom rnorm rpois sd uniroot var
 #' @importFrom graphics abline arrows lines mtext points
 #' @importFrom utils packageVersion
 "_PACKAGE"

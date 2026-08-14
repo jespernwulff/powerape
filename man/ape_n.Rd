@@ -15,7 +15,8 @@ ape_n(
   n_range = c(30, 2e+06),
   max_iter = 5,
   confirm = TRUE,
-  nsim_confirm = 4 * nsim
+  nsim_confirm = 4 * nsim,
+  se = c("model", "robust")
 )
 }
 \arguments{
@@ -45,6 +46,12 @@ carries search-stage precision only.}
 
 \item{nsim_confirm}{Replications per confirmation round (default
 \code{4 * nsim}).}
+
+\item{se}{Standard errors for the exogenous cross-sectional routes:
+\code{"model"} (default, expected-information ML) or \code{"robust"}
+(heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+Panel designs always use unit-clustered SEs and IV designs the
+stacked method-of-moments robust sandwich; \code{se} is ignored there.}
 }
 \value{
 A \code{powerape_n} object: the required \code{n}, the confirmed (or, with

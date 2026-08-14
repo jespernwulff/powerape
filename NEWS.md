@@ -1,3 +1,44 @@
+# powerape 1.4.0
+
+* IV designs via control-function probit: `ape_dgp_iv()` specifies a
+  world with an **endogenous focal variable** -- linear first stage for a
+  continuous focal, probit first stage for a binary one, instruments with
+  a friendly strength knob (`iv_strength` = the share of the focal's
+  (latent) variance the instruments explain), and `endogeneity` = the
+  structural/first-stage error correlation. Estimation in the engine
+  replicates **Stata 18.5's `cfprobit`** exactly: two-step control
+  function with stacked method-of-moments standard errors (no bootstrap;
+  robust and cluster flavors verified against Stata to ~1e-7, including
+  the convention details -- observed score derivatives, generated
+  regressors as fixed instruments in the first-stage Jacobian, no
+  small-sample factors). The estimand stays the ASF-based APE/AIE, which
+  `margins` after `cfprobit` targets with the control functions held
+  fixed.
+* IV interaction designs: with a binary exogenous `moderator`, the main
+  equation gains the focal-by-moderator term, the control function, and
+  the control-function-by-moderator interaction (Stata's `interact()` +
+  `mainonly()`), and the first stage includes the moderator **and the
+  instrument-by-moderator interactions** -- the general IV requirement
+  for interaction models. Validated against Stata's exact syntax.
+* The estimator internals also cover `fprobit` and `poisson` first
+  stages, matching `cfprobit`'s fit exactly. For fractional first stages
+  we found Stata's `margins` to be internally inconsistent with its own
+  estimator (its `_remake_cfs.ado` rebuilds the control function with the
+  binary-outcome branch, ignoring the fractional value); powerape uses
+  the estimation-consistent generalized residuals, and the discrepancy is
+  reproduced to 7 decimals in the validation battery.
+* Robust standard errors for the standard routes: `ape_power()`,
+  `ape_curve()`, and `ape_n()` gain `se = c("model", "robust")` --
+  heteroskedasticity-robust (HC0) sandwich matching
+  `sandwich::vcovHC(type = "HC0")` exactly. Panel designs keep their
+  unit-clustered SEs and IV designs their stacked robust sandwich (a
+  warning explains this if `se` is passed there).
+* Validation: battery gains V10 (the seven-case Stata equivalence table,
+  the fprobit attribution, engine consistency and coverage, and the "IV
+  price" anchor -- at zero endogeneity the CF estimator's SE exceeds the
+  exogenous estimator's by about sqrt(1/iv_strength), the 2SLS variance
+  logic).
+
 # powerape 1.3.0
 
 * Panel AIE designs (binary x binary): `ape_dgp_panel()` gains a

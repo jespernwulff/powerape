@@ -7,6 +7,7 @@ rebuild_dgp <- function(dgp, spec) {
            from_fit = do.call(ape_dgp_from_fit, spec),
            empirical = do.call(ape_dgp_empirical, spec),
            panel = do.call(ape_dgp_panel, spec),
+           iv = do.call(ape_dgp_iv, spec),
            do.call(ape_dgp, spec))
   )
 }
@@ -69,6 +70,7 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                     from_fit = "baseline",
                     empirical = c("baseline", "signal"),
                     panel = c("baseline", "signal", "rho"),
+                    iv = c("baseline", "signal", "endogeneity", "iv_strength"),
                     c("baseline", "signal", "correlation"))
   bad <- setdiff(names(vary), allowed)
   if (length(bad))

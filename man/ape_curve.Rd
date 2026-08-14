@@ -12,7 +12,8 @@ ape_curve(
   sesoi = NULL,
   conf = 0.95,
   nsim = 1000,
-  seed = NULL
+  seed = NULL,
+  se = c("model", "robust")
 )
 
 \method{plot}{powerape_curve}(x, target_power = NULL, ...)
@@ -33,6 +34,12 @@ the outcome table is still broken out against it).}
 \item{nsim}{Replications per grid point.}
 
 \item{seed}{Optional; grid point i uses \code{seed + i - 1}.}
+
+\item{se}{Standard errors for the exogenous cross-sectional routes:
+\code{"model"} (default, expected-information ML) or \code{"robust"}
+(heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+Panel designs always use unit-clustered SEs and IV designs the
+stacked method-of-moments robust sandwich; \code{se} is ignored there.}
 
 \item{x}{A \code{powerape_curve} object.}
 

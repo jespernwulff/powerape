@@ -59,6 +59,7 @@ reg_draw_parametric <- function(focal, moderator, covariates, R, n_int, seed_int
 # focal draws, centered moderator draws (if any), and the nuisance index
 # z'gamma, under the route's covariate distribution. Deterministic.
 integration_draw <- function(dgp) {
+  if (identical(dgp$route, "iv")) return(iv_integration(dgp))
   if (dgp$route == "empirical") {
     idxz <- if (dgp$k > 0L) drop(dgp$emp_x %*% dgp$gamma) else rep(0, dgp$n_emp)
     if (!is.null(dgp$emp_xd)) {
@@ -216,6 +217,7 @@ ape_dgp <- function(model = c("probit", "logit"), focal, moderator = NULL,
 #   moderator:     [1, focal, mod, focal*mod, Z]   cols 2, 3, 4
 draw_x <- function(dgp, n) {
   if (identical(dgp$route, "panel")) return(draw_x_panel(dgp, n))
+  if (identical(dgp$route, "iv")) return(draw_x_iv(dgp, n))
   if (dgp$route == "empirical") return(draw_x_empirical(dgp, n))
   U <- draw_std_mvn(n, dgp$R_chol)
   d <- transform_u(U[, 1], dgp$focal)

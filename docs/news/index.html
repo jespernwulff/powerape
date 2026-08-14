@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,6 +23,7 @@
     <li><a class="dropdown-item" href="../articles/equivalence.html">Powering for equivalence: showing an effect is too small to matter</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
+    <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -39,6 +40,14 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.4.0" id="powerape-140">powerape 1.4.0<a class="anchor" aria-label="anchor" href="#powerape-140"></a></h2>
+<ul><li>IV designs via control-function probit: <code><a href="../reference/ape_dgp_iv.html">ape_dgp_iv()</a></code> specifies a world with an <strong>endogenous focal variable</strong> – linear first stage for a continuous focal, probit first stage for a binary one, instruments with a friendly strength knob (<code>iv_strength</code> = the share of the focal’s (latent) variance the instruments explain), and <code>endogeneity</code> = the structural/first-stage error correlation. Estimation in the engine replicates <strong>Stata 18.5’s <code>cfprobit</code></strong> exactly: two-step control function with stacked method-of-moments standard errors (no bootstrap; robust and cluster flavors verified against Stata to ~1e-7, including the convention details – observed score derivatives, generated regressors as fixed instruments in the first-stage Jacobian, no small-sample factors). The estimand stays the ASF-based APE/AIE, which <code>margins</code> after <code>cfprobit</code> targets with the control functions held fixed.</li>
+<li>IV interaction designs: with a binary exogenous <code>moderator</code>, the main equation gains the focal-by-moderator term, the control function, and the control-function-by-moderator interaction (Stata’s <code>interact()</code> + <code>mainonly()</code>), and the first stage includes the moderator <strong>and the instrument-by-moderator interactions</strong> – the general IV requirement for interaction models. Validated against Stata’s exact syntax.</li>
+<li>The estimator internals also cover <code>fprobit</code> and <code>poisson</code> first stages, matching <code>cfprobit</code>’s fit exactly. For fractional first stages we found Stata’s <code>margins</code> to be internally inconsistent with its own estimator (its <code>_remake_cfs.ado</code> rebuilds the control function with the binary-outcome branch, ignoring the fractional value); powerape uses the estimation-consistent generalized residuals, and the discrepancy is reproduced to 7 decimals in the validation battery.</li>
+<li>Robust standard errors for the standard routes: <code><a href="../reference/ape_power.html">ape_power()</a></code>, <code><a href="../reference/ape_curve.html">ape_curve()</a></code>, and <code><a href="../reference/ape_n.html">ape_n()</a></code> gain <code>se = c("model", "robust")</code> – heteroskedasticity-robust (HC0) sandwich matching <code>sandwich::vcovHC(type = "HC0")</code> exactly. Panel designs keep their unit-clustered SEs and IV designs their stacked robust sandwich (a warning explains this if <code>se</code> is passed there).</li>
+<li>Validation: battery gains V10 (the seven-case Stata equivalence table, the fprobit attribution, engine consistency and coverage, and the “IV price” anchor – at zero endogeneity the CF estimator’s SE exceeds the exogenous estimator’s by about sqrt(1/iv_strength), the 2SLS variance logic).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.3.0" id="powerape-130">powerape 1.3.0<a class="anchor" aria-label="anchor" href="#powerape-130"></a></h2>
 <ul><li>Panel AIE designs (binary x binary): <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> gains a <code>moderator</code> argument, and <code><a href="../reference/set_aie.html">set_aie()</a></code> pins the average interaction effect of a CRE panel world. All anchors – baseline, the two conditional-at-reference main-effect APEs, and the target AIE – are defined on the average structural function (unit effects integrated exactly, Mundlak means held fixed), so the panel AIE is the same population quantity a cross-sectional AIE design targets. The estimating model includes the interaction’s own Mundlak mean whenever the product term is time-varying (the mean of a product is not the product of means); inference is unit-clustered throughout, and <code><a href="../reference/ape_robust.html">ape_robust()</a></code>, <code><a href="../reference/ape_curve.html">ape_curve()</a></code>, <code><a href="../reference/ape_n.html">ape_n()</a></code>, and <code><a href="../reference/power_statement.html">power_statement()</a></code> all work unchanged.</li>

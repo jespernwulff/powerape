@@ -21,15 +21,18 @@
 #' }
 #' @export
 ape_curve <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
-                      sesoi = NULL, conf = 0.95, nsim = 1000, seed = NULL) {
+                      sesoi = NULL, conf = 0.95, nsim = 1000, seed = NULL,
+                      se = c("model", "robust")) {
   claim <- match.arg(claim)
+  se <- match.arg(se)
   n <- sort(unique(as.integer(n)))
   stopifnot(length(n) >= 2L, all(n >= 20))
   check_coherence(dgp, claim, sesoi, conf)
   rows <- vector("list", length(n))
   for (i in seq_along(n)) {
     si <- if (is.null(seed)) NULL else seed + i - 1L
-    p <- power_once(dgp, n[i], claim, sesoi, conf, nsim, si, enforce = FALSE)
+    p <- power_once(dgp, n[i], claim, sesoi, conf, nsim, si, enforce = FALSE,
+                    se = se)
     rows[[i]] <- data.frame(n = n[i], power = p$power, mcse = p$mcse,
                             failed = p$outcomes[["failed"]])
   }
@@ -117,8 +120,10 @@ plot.powerape_curve <- function(x, target_power = NULL, ...) {
 ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence"),
                   sesoi = NULL, conf = 0.95, nsim = 1500, seed = NULL,
                   n_range = c(30, 2e6), max_iter = 5,
-                  confirm = TRUE, nsim_confirm = 4 * nsim) {
+                  confirm = TRUE, nsim_confirm = 4 * nsim,
+                  se = c("model", "robust")) {
   claim <- match.arg(claim)
+  se <- match.arg(se)
   stopifnot(is.numeric(power), length(power) == 1L, power > 0.5, power < 0.999)
   check_coherence(dgp, claim, sesoi, conf)
   t_abs <- abs(dgp$target_est)
@@ -139,7 +144,8 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
 
   n_pilot <- 2000L
   ps <- sim_ci(dgp, n_pilot, 300L, conf,
-               seed = if (is.null(seed)) NULL else seed - 1L)
+               seed = if (is.null(seed)) NULL else seed - 1L,
+               se_type = if (dgp$route %in% c("panel", "iv")) "model" else se)
   if (mean(ps$ok) < 0.5)
     stop("Most pilot replications failed to fit; the design looks degenerate (e.g. very rare outcome).",
          call. = FALSE)
@@ -152,7 +158,8 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   for (it in seq_len(max_iter)) {
     n_i <- as.integer(max(n_range[1], min(n_range[2], n_i)))
     si <- if (is.null(seed)) NULL else seed + it
-    pw <- power_once(dgp, n_i, claim, sesoi, conf, nsim, si, enforce = FALSE)
+    pw <- power_once(dgp, n_i, claim, sesoi, conf, nsim, si, enforce = FALSE,
+                     se = se)
     hist <- rbind(hist, data.frame(stage = "search", iter = it, n = n_i,
                                    power = pw$power, mcse = pw$mcse))
     if (is.null(best) || abs(pw$power - power) < abs(best$power - power))
@@ -170,7 +177,7 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
     for (cr in seq_len(3L)) {
       sc <- if (is.null(seed)) NULL else seed + 100L + cr
       pwc <- power_once(dgp, n_c, claim, sesoi, conf, nsim_confirm, sc,
-                        enforce = FALSE)
+                        enforce = FALSE, se = se)
       hist <- rbind(hist, data.frame(stage = "confirm", iter = cr, n = n_c,
                                      power = pwc$power, mcse = pwc$mcse))
       best <- list(n = n_c, power = pwc$power, mcse = pwc$mcse)

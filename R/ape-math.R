@@ -26,6 +26,19 @@ vcov_from_glmfit <- function(fit) {
   chol2inv(fit$qr$qr[p1, p1, drop = FALSE])
 }
 
+# Heteroskedasticity-robust (HC0) sandwich for the probit/logit MLE:
+# expected-information bread (as in R's sandwich package), score outer
+# products as the meat. No small-sample adjustment.
+vcov_sandwich <- function(fit, X, link) {
+  G <- if (link == "probit") pnorm else plogis
+  gd <- if (link == "probit") dnorm else dlogis
+  eta <- drop(X %*% fit$coefficients)
+  mu <- G(eta)
+  w <- gd(eta) * (fit$y - mu) / pmax(mu * (1 - mu), 1e-12)
+  B <- vcov_from_glmfit(fit)
+  B %*% crossprod(X * w) %*% B
+}
+
 # Cluster-robust (CR) sandwich for the pooled probit/logit MLE: score-based
 # meat aggregated by cluster, bread from the IRLS QR, with the G/(G-1)
 # multiplier that matches Stata's vce(cluster) convention for ML estimators

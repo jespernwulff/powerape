@@ -1,6 +1,6 @@
 Package: powerape
 Title: Power Analysis for Average Partial Effects
-Version: 1.3.0
+Version: 1.4.0
 Authors@R:
     person("Jesper", "Wulff", email = "jwulff@econ.au.dk", role = c("aut", "cre"))
 Description: Simulation-based power analysis in which the effect size of
@@ -30,6 +30,7 @@ Suggests:
     knitr,
     marginaleffects,
     rmarkdown,
+    sandwich,
     testthat (>= 3.0.0),
     TOSTER
 VignetteBuilder: knitr

@@ -4,33 +4,52 @@
 # APE/AIE, the delta-method SE, and a convergence flag per replication.
 # Replications that fail (non-convergence, separation, degenerate y) get
 # ok = FALSE and count against every claim downstream (conservative).
-sim_ci <- function(dgp, n, nsim, conf, seed = NULL) {
+sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model") {
   z <- zcrit(conf)
   is_aie <- identical(dgp$estimand, "aie")
   is_panel <- identical(dgp$route, "panel")
-  bt <- if (is_panel) NULL else beta_true(dgp)
+  is_iv <- identical(dgp$route, "iv")
+  bt <- if (is_panel || is_iv) NULL else beta_true(dgp)
   with_seed(seed, {
     l <- u <- se <- rep(NA_real_, nsim)
     ok <- logical(nsim)
     for (r in seq_len(nsim)) {
       xx <- draw_x(dgp, n)
-      pr <- if (is_panel) xx$pr else dgp$G(drop(xx$X %*% bt))
-      y <- rbinom(length(pr), 1L, pr)
-      if (all(y == y[1L])) next
-      ft <- fit_index_model(xx$X, y, dgp$link,
-                            start = if (is_panel) xx$start else bt)
-      if (!ft$ok) next
-      est <- if (is_aie) {
-        aie_est(ft$fit$coefficients, xx$X, dgp$link,
-                dgp$focal$type, dgp$moderator$type)
+      if (is_iv) {
+        ## y is drawn from the latent index inside draw_x_iv (the
+        ## endogeneity lives in the joint (u, v) draw)
+        y <- xx$y
+        if (all(y == y[1L])) next
+        ft <- cf_fit(y, xx$d, m = xx$m, Z = xx$Zx, X1 = xx$X1,
+                     first = dgp$first_stage, start = xx$start)
+        if (!isTRUE(ft$ok)) next
+        est <- if (is_aie) {
+          cf_aie_est(ft$theta, ft$W, dgp$focal$type, ft$cf_col, ft$cfm_col)
+        } else {
+          cf_ape_est(ft$theta, ft$W, dgp$focal$type, ft$cf_col, ft$cfm_col)
+        }
+        V <- ft$V_main
       } else {
-        ape_est(ft$fit$coefficients, xx$X, xx$focal_col, dgp$link,
-                dgp$focal$type)
-      }
-      V <- if (is_panel) {
-        vcov_cluster(ft$fit, xx$X, xx$id, dgp$link)
-      } else {
-        vcov_from_glmfit(ft$fit)
+        pr <- if (is_panel) xx$pr else dgp$G(drop(xx$X %*% bt))
+        y <- rbinom(length(pr), 1L, pr)
+        if (all(y == y[1L])) next
+        ft <- fit_index_model(xx$X, y, dgp$link,
+                              start = if (is_panel) xx$start else bt)
+        if (!ft$ok) next
+        est <- if (is_aie) {
+          aie_est(ft$fit$coefficients, xx$X, dgp$link,
+                  dgp$focal$type, dgp$moderator$type)
+        } else {
+          ape_est(ft$fit$coefficients, xx$X, xx$focal_col, dgp$link,
+                  dgp$focal$type)
+        }
+        V <- if (is_panel) {
+          vcov_cluster(ft$fit, xx$X, xx$id, dgp$link)
+        } else if (identical(se_type, "robust")) {
+          vcov_sandwich(ft$fit, xx$X, dgp$link)
+        } else {
+          vcov_from_glmfit(ft$fit)
+        }
       }
       s_ <- sqrt(max(0, drop(t(est$jac) %*% V %*% est$jac)))
       if (!is.finite(s_) || s_ <= 0) next
@@ -111,20 +130,27 @@ summarize_sim <- function(sim, target, claim, sesoi, nsim) {
 # Shared power computation. `enforce = FALSE` skips the coherence guards --
 # used by ape_robust(), where scenario drift can legitimately push the
 # implied effect across a claim boundary and the point is to SHOW that.
-power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE) {
+power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE,
+                       se = "model") {
   stopifnot(is.numeric(n), length(n) == 1L, n >= 20)
   if (identical(dgp$route, "panel") && n < 30)
     warning("Fewer than 30 units (clusters): cluster-robust inference is unreliable at this size.")
   stopifnot(is.numeric(conf), length(conf) == 1L, conf > 0.5, conf < 1)
   stopifnot(is.numeric(nsim), length(nsim) == 1L, nsim >= 20)
+  if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
+    warning(sprintf(paste("`se` is fixed by the route: panel designs use",
+                          "unit-clustered SEs, IV designs the stacked robust",
+                          "sandwich; `se = \"%s\"` is ignored."), se))
+    se <- "model"
+  }
   if (enforce) check_coherence(dgp, claim, sesoi, conf)
-  sim <- sim_ci(dgp, n, nsim, conf, seed)
+  sim <- sim_ci(dgp, n, nsim, conf, seed, se_type = se)
   res <- summarize_sim(sim, dgp$target_est, claim, sesoi, nsim)
   structure(
     c(res, list(claim = claim, sesoi = sesoi, conf = conf, n = as.integer(n),
                 nsim = as.integer(nsim), target = dgp$target_est,
                 estimand = dgp$estimand %||% "ape",
-                model = dgp$model, dgp = dgp)),
+                se = se, model = dgp$model, dgp = dgp)),
     class = "powerape_power"
   )
 }
@@ -148,6 +174,11 @@ power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE) {
 #' @param conf CI level (default 0.95).
 #' @param nsim Number of simulation replications.
 #' @param seed Optional seed (the caller's RNG state is preserved).
+#' @param se Standard errors for the exogenous cross-sectional routes:
+#'   `"model"` (default, expected-information ML) or `"robust"`
+#'   (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+#'   Panel designs always use unit-clustered SEs and IV designs the
+#'   stacked method-of-moments robust sandwich; `se` is ignored there.
 #'
 #' @return A `powerape_power` object: power, Monte Carlo standard error,
 #'   outcome distribution, the failed-fit count (failures count against
@@ -161,7 +192,9 @@ power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE) {
 #' }
 #' @export
 ape_power <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
-                      sesoi = NULL, conf = 0.95, nsim = 1000, seed = NULL) {
+                      sesoi = NULL, conf = 0.95, nsim = 1000, seed = NULL,
+                      se = c("model", "robust")) {
   claim <- match.arg(claim)
-  power_once(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE)
+  se <- match.arg(se)
+  power_once(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE, se = se)
 }

@@ -27,7 +27,7 @@ and AIE designs alike."><meta property="og:image" content="https://jespernwulff.
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@ and AIE designs alike."><meta property="og:image" content="https://jespernwulff.
     <li><a class="dropdown-item" href="../articles/equivalence.html">Powering for equivalence: showing an effect is too small to matter</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
+    <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -87,7 +88,8 @@ and AIE designs alike.</p>
 <span>  n_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">2e+06</span><span class="op">)</span>,</span>
 <span>  max_iter <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  confirm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  nsim_confirm <span class="op">=</span> <span class="fl">4</span> <span class="op">*</span> <span class="va">nsim</span></span>
+<span>  nsim_confirm <span class="op">=</span> <span class="fl">4</span> <span class="op">*</span> <span class="va">nsim</span>,</span>
+<span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -142,6 +144,14 @@ carries search-stage precision only.</p></dd>
 <dt id="arg-nsim-confirm">nsim_confirm<a class="anchor" aria-label="anchor" href="#arg-nsim-confirm"></a></dt>
 <dd><p>Replications per confirmation round (default
 <code>4 * nsim</code>).</p></dd>
+
+
+<dt id="arg-se">se<a class="anchor" aria-label="anchor" href="#arg-se"></a></dt>
+<dd><p>Standard errors for the exogenous cross-sectional routes:
+<code>"model"</code> (default, expected-information ML) or <code>"robust"</code>
+(heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+Panel designs always use unit-clustered SEs and IV designs the
+stacked method-of-moments robust sandwich; <code>se</code> is ignored there.</p></dd>
 
 </dl></div>
     <div class="section level2">

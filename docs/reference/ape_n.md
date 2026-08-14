@@ -26,7 +26,8 @@ ape_n(
   n_range = c(30, 2e+06),
   max_iter = 5,
   confirm = TRUE,
-  nsim_confirm = 4 * nsim
+  nsim_confirm = 4 * nsim,
+  se = c("model", "robust")
 )
 ```
 
@@ -82,6 +83,14 @@ ape_n(
 - nsim_confirm:
 
   Replications per confirmation round (default `4 * nsim`).
+
+- se:
+
+  Standard errors for the exogenous cross-sectional routes: `"model"`
+  (default, expected-information ML) or `"robust"`
+  (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+  Panel designs always use unit-clustered SEs and IV designs the stacked
+  method-of-moments robust sandwich; `se` is ignored there.
 
 ## Value
 
