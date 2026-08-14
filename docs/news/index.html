@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,16 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.3.0" id="powerape-130">powerape 1.3.0<a class="anchor" aria-label="anchor" href="#powerape-130"></a></h2>
+<ul><li>Panel AIE designs (binary x binary): <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> gains a <code>moderator</code> argument, and <code><a href="../reference/set_aie.html">set_aie()</a></code> pins the average interaction effect of a CRE panel world. All anchors – baseline, the two conditional-at-reference main-effect APEs, and the target AIE – are defined on the average structural function (unit effects integrated exactly, Mundlak means held fixed), so the panel AIE is the same population quantity a cross-sectional AIE design targets. The estimating model includes the interaction’s own Mundlak mean whenever the product term is time-varying (the mean of a product is not the product of means); inference is unit-clustered throughout, and <code><a href="../reference/ape_robust.html">ape_robust()</a></code>, <code><a href="../reference/ape_curve.html">ape_curve()</a></code>, <code><a href="../reference/ape_n.html">ape_n()</a></code>, and <code><a href="../reference/power_statement.html">power_statement()</a></code> all work unchanged.</li>
+<li>Validation: the ASF double difference matches Stata (<code>probit i.d##i.m ... , vce(cluster id)</code> + <code>margins</code> + <code>lincom</code>) to all printed digits on a fixed panel, with the clustered-SE gap again fully attributed to Stata’s observed-Hessian bread (reproduced to 7 decimals); ginteff reproduces the double difference and model-based SE on the identical fit to 1e-6; exact reduction of the inversion to the cross-sectional case at rho = 0; estimator consistency and nominal clustered-CI coverage of the true AIE. Battery gains V9.</li>
+<li>Continuous focal or moderator pairs in panel AIE designs are not yet supported (clean error); cross-sectional AIE keeps all four type pairs.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.2.1" id="powerape-121">powerape 1.2.1<a class="anchor" aria-label="anchor" href="#powerape-121"></a></h2>
+<ul><li>Fixed: for <strong>logit</strong> panel DGPs with a pure random-effects component (<code>rho &gt; 0</code> and <code>cre_share &lt; 1</code>), calibration and true values integrated the unit effect with the probit closed form (index divided by <code>sqrt(1 + var_a)</code>), which over-attenuates a logistic kernel. A requested baseline .30 / APE .10 logit world at <code>rho = .5, cre_share = 0</code> actually had baseline .269 and true APE .116, so simulated power for such designs was optimistic. The unit effect is now integrated by 20-node Gauss-Hermite quadrature for logit; probit keeps the exact closed form and is numerically unchanged. Realized-vs-requested calibration is regression-tested for both links.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.2.0" id="powerape-120">powerape 1.2.0<a class="anchor" aria-label="anchor" href="#powerape-120"></a></h2>
 <ul><li>Panel designs: <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> specifies a correlated random effects (CRE) probit/logit world – Mundlak heterogeneity on observed unit means, latent unit-effect share <code>rho</code> (xtprobit convention), <code>cre_share</code> for the heterogeneity-regressor correlation, and per-variable within-unit persistence via <code>pa_var(..., icc =)</code> (icc = 1 gives unit-level, time-constant variables). Estimation in the engine is pooled probit/logit with Mundlak means and unit-clustered standard errors; the target remains the ASF-based APE, which the pooled CRE estimator recovers even though coefficients are attenuated. Sample-size arguments count <strong>units (clusters)</strong>; each contributes <code>n_periods</code> observations.</li>

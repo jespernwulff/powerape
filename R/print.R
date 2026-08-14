@@ -30,8 +30,8 @@ print.powerape_dgp <- function(x, ...) {
     cat("  covariates: none\n")
   }
   if (identical(x$route, "panel"))
-    cat(sprintf("  panel: %d periods per unit; rho = %.2f (latent unit share), cre_share = %.2f; CRE probit w/ Mundlak means, unit-clustered SEs\n",
-                x$n_periods, x$rho, x$cre_share))
+    cat(sprintf("  panel: %d periods per unit; rho = %.2f (latent unit share), cre_share = %.2f; CRE %s w/ Mundlak means, unit-clustered SEs\n",
+                x$n_periods, x$rho, x$cre_share, x$model))
   if (x$route == "empirical")
     cat(sprintf("  pilot rows: %d (resampled with replacement)\n", x$n_emp))
   if (identical(x$builder, "from_fit"))

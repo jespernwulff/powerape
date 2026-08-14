@@ -94,7 +94,7 @@ set_ape <- function(dgp, target) {
       solve_cont_panel(dgp, target, id$xd_c, id$q)
     }
     dgp$p1 <- if (dgp$focal$type == "binary") {
-      mean(dgp$G((dgp$beta0 + root + id$q) / dgp$scale_a))
+      mean(dgp$mix_P(dgp$beta0 + root + id$q))
     } else NULL
     dgp$beta_focal <- root
     dgp$estimand <- "ape"

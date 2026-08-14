@@ -29,13 +29,16 @@ panel_regressor_draw <- function(vars, iccs, R, n_units, T_p, seed = NULL) {
 }
 
 # Deterministic integration pieces for calibration/inversion/truth:
-# centered focal draws, q_it = z'gamma + m_i (heterogeneity's Mundlak part).
+# centered focal (and moderator) draws, q_it = z'gamma + m_i (the
+# heterogeneity's Mundlak part). The design variables' structural terms are
+# excluded -- their coefficients are what inversion solves for.
 panel_integration <- function(dgp) {
-  vars <- c(list(dgp$focal), dgp$covariates)
+  has_m <- !is.null(dgp$moderator)
+  vars <- c(list(dgp$focal), if (has_m) list(dgp$moderator), dgp$covariates)
   rd <- panel_regressor_draw(vars, dgp$iccs, dgp$R, dgp$n_int, dgp$n_periods,
                              dgp$seed_int)
   idxz <- if (dgp$k > 0L) {
-    Z <- do.call(cbind, rd$x[-1L])
+    Z <- do.call(cbind, rd$x[-seq_len(1L + has_m)])
     drop(Z %*% dgp$gamma)
   } else {
     rep(0, dgp$n_int * dgp$n_periods)
@@ -46,7 +49,9 @@ panel_integration <- function(dgp) {
   } else {
     rep(0, dgp$n_int)
   }
-  list(xd_c = rd$x[[1L]] - dgp$focal_ref, q = idxz + m_i[rd$unit])
+  list(xd_c = rd$x[[1L]] - dgp$focal_ref,
+       xm_c = if (has_m) rd$x[[2L]] - dgp$mod_ref else NULL,
+       q = idxz + m_i[rd$unit])
 }
 
 # Gauss-Hermite nodes/weights (physicists' convention) via Golub-Welsch:
@@ -100,6 +105,11 @@ panel_mix_funs <- function(model, var_a) {
 #' @inheritParams ape_dgp
 #' @param focal,covariates [pa_var()] objects; use their `icc` argument to
 #'   set within-unit persistence (default 0; `icc = 1` = time-constant).
+#' @param moderator Optional binary [pa_var()] for panel AIE designs: the
+#'   index gains the moderator and a focal-by-moderator interaction, the
+#'   estimand becomes the AIE (pin it with [set_aie()]), and the estimating
+#'   model gains the interaction's own Mundlak mean whenever the product is
+#'   time-varying. Currently binary focal x binary moderator only.
 #' @param n_periods Number of periods per unit (balanced; >= 2).
 #' @param rho Latent unit-effect share `Var(c) / (Var(c) + 1)` — the
 #'   xtprobit-style rho. 0 = no unobserved heterogeneity.
@@ -113,8 +123,9 @@ panel_mix_funs <- function(model, var_a) {
 #'   calibration and inversion.
 #'
 #' @return An object of class `powerape_dgp` (route `"panel"`). Pin the
-#'   effect with [set_ape()]; moderators (AIE) and the empirical/pilot
-#'   routes are not yet available for panel DGPs.
+#'   effect with [set_ape()] (no moderator) or [set_aie()] (with
+#'   moderator); the empirical/pilot routes are not yet available for
+#'   panel DGPs.
 #' @examples
 #' \donttest{
 #' d <- ape_dgp_panel(
@@ -127,7 +138,8 @@ panel_mix_funs <- function(model, var_a) {
 #' ape_power(d, n = 150, claim = "detect", nsim = 300, seed = 1)  # n = units
 #' }
 #' @export
-ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list(),
+ape_dgp_panel <- function(model = c("probit", "logit"), focal, moderator = NULL,
+                          covariates = list(),
                           n_periods, rho = 0, cre_share = 0, correlation = NULL,
                           baseline, signal = 0,
                           n_int = 1e5, seed_int = 20260814L) {
@@ -135,6 +147,16 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
   if (inherits(covariates, "pa_var")) covariates <- list(covariates)
   stopifnot(inherits(focal, "pa_var"),
             all(vapply(covariates, inherits, logical(1), "pa_var")))
+  has_m <- !is.null(moderator)
+  if (has_m) {
+    stopifnot(inherits(moderator, "pa_var"))
+    if (identical(moderator$name, focal$name))
+      stop("`moderator` must be a different variable than `focal`.", call. = FALSE)
+    if (focal$type != "binary" || moderator$type != "binary")
+      stop(paste("Panel AIE designs currently support a binary focal x binary",
+                 "moderator; continuous pairs are on the roadmap."),
+           call. = FALSE)
+  }
   T_p <- as.integer(n_periods)
   stopifnot(length(T_p) == 1L, T_p >= 2L)
   stopifnot(is.numeric(rho), length(rho) == 1L, rho >= 0, rho < 1)
@@ -145,7 +167,7 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
   stopifnot(is.numeric(signal), length(signal) == 1L, signal >= 0, signal < 1)
   stopifnot(is.numeric(n_int), n_int >= 2e4)
 
-  vars <- c(list(focal), covariates)
+  vars <- c(list(focal), if (has_m) list(moderator), covariates)
   k <- length(covariates)
   iccs <- vapply(vars, function(v) v$icc %||% 0, numeric(1))
   tv_idx <- which(iccs < 1)                # Mundlak means only for time-varying
@@ -154,14 +176,14 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
   if (cre_share > 0 && rho > 0 && length(tv_idx) == 0L)
     stop(paste("cre_share > 0 needs at least one time-varying regressor",
                "(icc < 1) for the heterogeneity to load on."), call. = FALSE)
-  R <- build_corr(k + 1L, correlation)
+  R <- build_corr(k + 1L + has_m, correlation)
   lf <- link_funs(model)
 
   rd <- panel_regressor_draw(vars, iccs, R, n_int, T_p, seed_int)
 
   ## nuisance coefficients from per-period signal (equal standardized weights)
   if (k > 0L) {
-    Z <- do.call(cbind, rd$x[-1L])
+    Z <- do.call(cbind, rd$x[-seq_len(1L + has_m)])
     if (signal == 0) {
       gamma <- rep(0, k)
     } else {
@@ -210,7 +232,7 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
 
   structure(list(
     model = model, link = model, G = lf$G, g = lf$g,
-    focal = focal, moderator = NULL, covariates = covariates, k = k,
+    focal = focal, moderator = moderator, covariates = covariates, k = k,
     R = R, R_chol = chol(R),
     baseline = baseline, signal = signal,
     signal_implied = s2 / (1 + s2), s2 = s2,
@@ -223,9 +245,10 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
     var_a = var_a, scale_a = scale_a, mix_P = mx$P, mix_p = mx$p,
     iccs = iccs, tv_idx = tv_idx, xi = xi, xbar_center = xbar_center,
     focal_ref = if (focal$type == "binary") 0 else focal$mean,
-    mod_ref = NULL,
+    mod_ref = if (has_m) 0 else NULL,
     n_int = as.integer(n_int), seed_int = seed_int,
-    spec = list(model = model, focal = focal, covariates = covariates,
+    spec = list(model = model, focal = focal, moderator = moderator,
+                covariates = covariates,
                 n_periods = n_periods, rho = rho, cre_share = cre_share,
                 correlation = correlation, baseline = baseline,
                 signal = signal, n_int = n_int, seed_int = seed_int)
@@ -235,15 +258,15 @@ ape_dgp_panel <- function(model = c("probit", "logit"), focal, covariates = list
 ## ---- inversion and truth (panel) --------------------------------------------
 
 # Binary focal: solve E_a mean(G(b0 + b + q + a)) - p0 = target.
-solve_binary_panel <- function(dgp, target, q) {
+solve_binary_panel <- function(dgp, target, q, label = "APE") {
   P <- dgp$mix_P
   p0 <- mean(P(dgp$beta0 + q))
   eps <- 1e-4
   if (target <= -p0 + eps || target >= (1 - p0) - eps)
     stop(sprintf(paste(
-      "Target APE %.4f is infeasible for this panel DGP: with baseline",
-      "P(Y=1 | reference) = %.3f the attainable APE range is (%.3f, %.3f)."),
-      target, p0, -p0, 1 - p0), call. = FALSE)
+      "Target %s %.4f is infeasible for this panel DGP: with baseline",
+      "P(Y=1 | reference) = %.3f the attainable range is (%.3f, %.3f)."),
+      label, target, p0, -p0, 1 - p0), call. = FALSE)
   uniroot(function(b) mean(P(dgp$beta0 + b + q)) - p0 - target,
           c(-8, 8) * dgp$scale_a, extendInt = "upX", tol = 1e-9)$root
 }
@@ -278,25 +301,51 @@ true_ape_panel <- function(dgp) {
   }
 }
 
+# True panel AIE (binary x binary): ASF double difference over the four
+# counterfactual cells, Mundlak means held fixed, a_i integrated exactly.
+true_aie_panel <- function(dgp) {
+  id <- panel_integration(dgp)
+  P <- dgp$mix_P
+  b0 <- dgp$beta0
+  bf <- dgp$beta_focal
+  bm <- dgp$beta_mod
+  bi <- dgp$beta_int
+  mean(P(b0 + bf + bm + bi + id$q)) - mean(P(b0 + bm + id$q)) -
+    mean(P(b0 + bf + id$q)) + mean(P(b0 + id$q))
+}
+
 ## ---- engine draw (panel) -----------------------------------------------------
 
 # One simulated panel of n units x T rows. Returns the design matrix with
-# Mundlak means (raw, uncentered) for time-varying regressors, the cluster
-# id, the true outcome probabilities (structural index + drawn a_i), and
-# pseudo-true start values (attenuated coefficients) for the pooled fit.
+# Mundlak means (raw, uncentered) for time-varying regressors -- plus, for
+# moderated designs, the interaction's own mean whenever the product is
+# time-varying (the mean of a product is not the product of means) -- the
+# cluster id, the true outcome probabilities (structural index + drawn
+# a_i), and pseudo-true start values (attenuated coefficients).
 draw_x_panel <- function(dgp, n_units) {
   if (is.null(dgp$beta_focal))
-    stop("This DGP has no target effect yet - call set_ape() first.", call. = FALSE)
-  vars <- c(list(dgp$focal), dgp$covariates)
+    stop("This DGP has no target effect yet - call set_ape() (or set_aie()) first.",
+         call. = FALSE)
+  has_m <- !is.null(dgp$moderator)
+  vars <- c(list(dgp$focal), if (has_m) list(dgp$moderator), dgp$covariates)
   T_p <- dgp$n_periods
   rd <- panel_regressor_draw(vars, dgp$iccs, dgp$R, n_units, T_p)
   d <- rd$x[[1L]]
-  Z <- if (dgp$k > 0L) do.call(cbind, rd$x[-1L]) else NULL
+  m <- if (has_m) rd$x[[2L]] else NULL
+  Z <- if (dgp$k > 0L) do.call(cbind, rd$x[-seq_len(1L + has_m)]) else NULL
   Mbar_cols <- if (length(dgp$tv_idx)) {
     Mb <- do.call(cbind, rd$xbar[dgp$tv_idx])
     Mb[rd$unit, , drop = FALSE]
   } else NULL
-  X <- cbind(1, d, Z, Mbar_cols)
+  if (has_m) {
+    dm <- d * m
+    dmbar_col <- if (dgp$iccs[1L] < 1 || dgp$iccs[2L] < 1) {
+      (rowsum(dm, rd$unit)[, 1L] / T_p)[rd$unit]
+    } else NULL
+    X <- cbind(1, d, m, dm, Z, Mbar_cols, dmbar_col)
+  } else {
+    X <- cbind(1, d, Z, Mbar_cols)
+  }
 
   ## structural probabilities
   idxz <- if (dgp$k > 0L) drop(Z %*% dgp$gamma) else 0
@@ -307,12 +356,17 @@ draw_x_panel <- function(dgp, n_units) {
   }
   a_i <- if (dgp$var_a > 0) rnorm(n_units, 0, sqrt(dgp$var_a)) else rep(0, n_units)
   eta <- dgp$beta0 + dgp$beta_focal * d + idxz + (m_i + a_i)[rd$unit]
+  if (has_m) eta <- eta + dgp$beta_mod * m + dgp$beta_int * dm
   pr <- dgp$G(eta)
 
-  ## pseudo-true (attenuated) coefficients as IRLS start values
+  ## pseudo-true (attenuated) coefficients as IRLS start values; the
+  ## interaction-mean column's structural coefficient is 0
   s <- dgp$scale_a
   start <- c(dgp$beta0 - sum(dgp$xi * dgp$xbar_center),
-             dgp$beta_focal, dgp$gamma, dgp$xi) / s
+             dgp$beta_focal,
+             if (has_m) c(dgp$beta_mod, dgp$beta_int),
+             dgp$gamma, dgp$xi,
+             if (has_m && (dgp$iccs[1L] < 1 || dgp$iccs[2L] < 1)) 0) / s
 
   list(X = X, focal_col = 2L, id = rd$unit, pr = pr, start = start)
 }

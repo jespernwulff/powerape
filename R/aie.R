@@ -46,7 +46,13 @@ truth_aie <- function(dgp, bf, bm, bi, id) {
 #' binary-by-binary, the four counterfactual cell rates must stay in (0,1);
 #' otherwise the AIE plateaus in the interaction coefficient).
 #'
-#' @param dgp A `powerape_dgp` from [ape_dgp()] with a `moderator`.
+#' For panel DGPs ([ape_dgp_panel()] with a `moderator`; binary x binary),
+#' all anchors are defined on the average structural function: unit effects
+#' are integrated out and the Mundlak means held fixed, so the panel AIE is
+#' the same population quantity a cross-sectional AIE design targets.
+#'
+#' @param dgp A `powerape_dgp` from [ape_dgp()] or [ape_dgp_panel()], with
+#'   a `moderator`.
 #' @param target Assumed true AIE (the planning value), in APE units.
 #' @param main_focal,main_moderator Conditional-at-reference APEs anchoring
 #'   the two main effects.
@@ -73,6 +79,41 @@ set_aie <- function(dgp, target, main_focal, main_moderator) {
   stopifnot(is.numeric(target), length(target) == 1L, is.finite(target),
             is.numeric(main_focal), length(main_focal) == 1L,
             is.numeric(main_moderator), length(main_moderator) == 1L)
+
+  if (identical(dgp$route, "panel")) {
+    ## Binary x binary counterfactual-cell inversion on the a-integrated
+    ## panel index: the mains are ordinary shifts at the other's reference
+    ## (interaction drops out), the interaction coefficient comes from the
+    ## implied (1,1) cell rate. Mundlak means live inside q and stay fixed.
+    id <- panel_integration(dgp)
+    q <- id$q
+    P <- dgp$mix_P
+    p00 <- mean(P(dgp$beta0 + q))
+    bf <- solve_binary_panel(dgp, main_focal, q, "main-effect APE (focal)")
+    bm <- solve_binary_panel(dgp, main_moderator, q, "main-effect APE (moderator)")
+    p11_target <- p00 + main_focal + main_moderator + target
+    eps <- 1e-4
+    if (p11_target <= eps || p11_target >= 1 - eps)
+      stop(sprintf(paste(
+        "Target AIE %.4f is infeasible for this panel DGP: it implies the",
+        "counterfactual cell rate P(Y=1 | focal=1, moderator=1) = %.4f,",
+        "outside (0,1). With baseline %.3f and main-effect anchors %.4f and",
+        "%.4f, the attainable AIE range is (%.4f, %.4f)."),
+        target, p11_target, p00, main_focal, main_moderator,
+        eps - p00 - main_focal - main_moderator,
+        1 - eps - p00 - main_focal - main_moderator), call. = FALSE)
+    bi <- uniroot(function(b) mean(P(dgp$beta0 + bf + bm + b + q)) - p11_target,
+                  c(-8, 8) * dgp$scale_a, extendInt = "upX", tol = 1e-9)$root
+    dgp$beta_focal <- bf
+    dgp$beta_mod <- bm
+    dgp$beta_int <- bi
+    dgp$main_focal <- main_focal
+    dgp$main_moderator <- main_moderator
+    dgp$estimand <- "aie"
+    dgp$target_est <- target
+    dgp$p1 <- NULL
+    return(dgp)
+  }
 
   G <- dgp$G
   id <- integration_draw(dgp)
@@ -121,5 +162,6 @@ set_aie <- function(dgp, target, main_focal, main_moderator) {
 true_aie <- function(dgp) {
   if (!identical(dgp$estimand, "aie"))
     stop("This DGP has no pinned AIE - call set_aie() first.", call. = FALSE)
+  if (identical(dgp$route, "panel")) return(true_aie_panel(dgp))
   truth_aie(dgp, dgp$beta_focal, dgp$beta_mod, dgp$beta_int, integration_draw(dgp))
 }

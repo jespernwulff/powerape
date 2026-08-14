@@ -22,6 +22,8 @@ set_aie(dgp, target, main_focal, main_moderator)
 
   A `powerape_dgp` from
   [`ape_dgp()`](https://jespernwulff.github.io/powerape/reference/ape_dgp.md)
+  or
+  [`ape_dgp_panel()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_panel.md),
   with a `moderator`.
 
 - target:
@@ -43,6 +45,13 @@ All three anchors are explicit – there are no silent defaults. Errors
 report the attainable range when a target is infeasible (for
 binary-by-binary, the four counterfactual cell rates must stay in (0,1);
 otherwise the AIE plateaus in the interaction coefficient).
+
+For panel DGPs
+([`ape_dgp_panel()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_panel.md)
+with a `moderator`; binary x binary), all anchors are defined on the
+average structural function: unit effects are integrated out and the
+Mundlak means held fixed, so the panel AIE is the same population
+quantity a cross-sectional AIE design targets.
 
 ## Examples
 

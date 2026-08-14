@@ -16,6 +16,7 @@ CRE estimator recovers even though its coefficients are attenuated.
 ape_dgp_panel(
   model = c("probit", "logit"),
   focal,
+  moderator = NULL,
   covariates = list(),
   n_periods,
   rho = 0,
@@ -39,6 +40,18 @@ ape_dgp_panel(
   [`pa_var()`](https://jespernwulff.github.io/powerape/reference/pa_var.md)
   objects; use their `icc` argument to set within-unit persistence
   (default 0; `icc = 1` = time-constant).
+
+- moderator:
+
+  Optional binary
+  [`pa_var()`](https://jespernwulff.github.io/powerape/reference/pa_var.md)
+  for panel AIE designs: the index gains the moderator and a
+  focal-by-moderator interaction, the estimand becomes the AIE (pin it
+  with
+  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md)),
+  and the estimating model gains the interaction's own Mundlak mean
+  whenever the product is time-varying. Currently binary focal x binary
+  moderator only.
 
 - n_periods:
 
@@ -85,9 +98,11 @@ ape_dgp_panel(
 ## Value
 
 An object of class `powerape_dgp` (route `"panel"`). Pin the effect with
-[`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md);
-moderators (AIE) and the empirical/pilot routes are not yet available
-for panel DGPs.
+[`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md)
+(no moderator) or
+[`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md)
+(with moderator); the empirical/pilot routes are not yet available for
+panel DGPs.
 
 ## Details
 

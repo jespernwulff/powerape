@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -207,20 +207,20 @@ lets the implied effect drift.</p>
 <span>                nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.2.0), following the</span></span>
+<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.3.0), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable treat (binary, prevalence</span></span>
 <span><span class="co">#&gt; 0.50); parametric covariates (age, female; Gaussian-copula dependence);</span></span>
 <span><span class="co">#&gt; baseline outcome rate 0.300 with the focal at reference; nuisance covariates</span></span>
 <span><span class="co">#&gt; contribute a latent pseudo-R-squared of 0.15. The assumed true APE was 0.100</span></span>
-<span><span class="co">#&gt; (10.0 percentage points). At a total sample size of n = 2200, simulated power</span></span>
-<span><span class="co">#&gt; for the minimum-effect claim (the 95% confidence interval's lower bound</span></span>
-<span><span class="co">#&gt; exceeding the smallest effect size of interest, 0.050) was 0.710 (Monte Carlo</span></span>
-<span><span class="co">#&gt; SE 0.020; 500 replications). Across replications, the probability of</span></span>
-<span><span class="co">#&gt; concluding a meaningful effect was 0.710, of detection without meaningfulness</span></span>
-<span><span class="co">#&gt; 0.290, of an inconclusive result 0.000, and of equivalence 0.000. Estimation</span></span>
-<span><span class="co">#&gt; used maximum likelihood with delta-method Wald confidence intervals;</span></span>
-<span><span class="co">#&gt; replications that failed to converge (0.0%) counted against the claim.</span></span></code></pre></div>
+<span><span class="co">#&gt; (10.0 percentage points). At a sample size of n = 2200, simulated power for</span></span>
+<span><span class="co">#&gt; the minimum-effect claim (the 95% confidence interval's lower bound exceeding</span></span>
+<span><span class="co">#&gt; the smallest effect size of interest, 0.050) was 0.710 (Monte Carlo SE 0.020;</span></span>
+<span><span class="co">#&gt; 500 replications). Across replications, the probability of concluding a</span></span>
+<span><span class="co">#&gt; meaningful effect was 0.710, of detection without meaningfulness 0.290, of an</span></span>
+<span><span class="co">#&gt; inconclusive result 0.000, and of equivalence 0.000. Estimation used maximum</span></span>
+<span><span class="co">#&gt; likelihood with delta-method Wald confidence intervals; replications that</span></span>
+<span><span class="co">#&gt; failed to converge (0.0%) counted against the claim.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

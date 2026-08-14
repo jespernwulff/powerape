@@ -175,3 +175,135 @@ test_that("gauss_hermite integrates normal moments exactly", {
   expect_equal(sum(gh$weights * gh$nodes^2) / sqrt(pi), 0.5, tolerance = 1e-12)
   expect_equal(sum(gh$weights * gh$nodes^4) / sqrt(pi), 0.75, tolerance = 1e-12)
 })
+
+## ---- panel AIE (binary x binary) --------------------------------------------
+
+panel_aie_base <- function(rho = 0.3, cre = 0.5, T_p = 4, pins = TRUE) {
+  d <- ape_dgp_panel(
+    focal = pa_var("treat", "binary", p = 0.5, icc = 1),
+    moderator = pa_var("public", "binary", p = 0.4, icc = 0.7),
+    covariates = list(pa_var("size", "normal", icc = 0.6)),
+    n_periods = T_p, rho = rho, cre_share = cre,
+    baseline = 0.30, signal = 0.10, n_int = 4e4, seed_int = 3L
+  )
+  if (pins) d <- set_aie(d, 0.06, main_focal = 0.10, main_moderator = 0.05)
+  d
+}
+
+test_that("panel AIE construction, anchors, and guards", {
+  d <- panel_aie_base()
+  expect_equal(true_aie(d), 0.06, tolerance = 1e-7)
+  ## the two main anchors are reproduced on the a-integrated ASF
+  id <- powerape:::panel_integration(d)
+  P <- d$mix_P
+  p00 <- mean(P(d$beta0 + id$q))
+  expect_equal(mean(P(d$beta0 + d$beta_focal + id$q)) - p00, 0.10,
+               tolerance = 1e-7)
+  expect_equal(mean(P(d$beta0 + d$beta_mod + id$q)) - p00, 0.05,
+               tolerance = 1e-7)
+  ## X layout: 1, d, m, dm, size, means(public, size), dm-bar
+  set.seed(1)
+  xx <- powerape:::draw_x_panel(d, 150)
+  expect_identical(ncol(xx$X), 8L)
+  expect_identical(length(xx$start), 8L)
+  expect_true(all(xx$X[, 4] == xx$X[, 2] * xx$X[, 3]))
+  ## unit-level pair: no Mundlak means, no interaction mean
+  d2 <- ape_dgp_panel(focal = pa_var("t", "binary", p = .5, icc = 1),
+                      moderator = pa_var("m", "binary", p = .4, icc = 1),
+                      n_periods = 3, rho = .2, baseline = .3,
+                      n_int = 2e4, seed_int = 4L)
+  d2 <- set_aie(d2, 0.05, main_focal = 0.08, main_moderator = 0.04)
+  set.seed(2)
+  x2 <- powerape:::draw_x_panel(d2, 100)
+  expect_identical(ncol(x2$X), 4L)
+  ## guards
+  expect_error(ape_dgp_panel(focal = pa_var("t", "binary", p = .5, icc = 1),
+                             moderator = pa_var("w", "normal"),
+                             n_periods = 3, baseline = .3),
+               "binary focal x binary moderator")
+  expect_error(set_ape(panel_aie_base(pins = FALSE), 0.1), "set_aie")
+  expect_error(set_aie(panel_base(), 0.05, 0.1, 0.05), "no moderator")
+  expect_error(set_aie(panel_aie_base(pins = FALSE), 0.7,
+                       main_focal = 0.10, main_moderator = 0.05),
+               "counterfactual cell")
+})
+
+test_that("panel AIE and model-based SE match ginteff on a fixed panel", {
+  skip_if_not_installed("ginteff")
+  d <- panel_aie_base()
+  set.seed(42)
+  xx <- powerape:::draw_x_panel(d, 400)
+  y <- rbinom(nrow(xx$X), 1, xx$pr)
+  X <- xx$X
+  ## one fitted model, two estimators: ginteff on the glm (binaries as
+  ## factors in dydxs, Mundlak means as plain columns = the ASF
+  ## convention), our aie_est on the same fit with the design reordered
+  ## into the engine's (1, d, m, dm, ...) layout -- isolates the estimand
+  ## correspondence from fit-convergence noise
+  df <- data.frame(y = y, d = factor(X[, 2]), m = factor(X[, 3]),
+                   size = X[, 5], mbar = X[, 6], sbar = X[, 7],
+                   dmbar = X[, 8])
+  fit <- glm(y ~ d * m + size + mbar + sbar + dmbar, binomial("probit"),
+             data = df)
+  MM <- model.matrix(fit)
+  ord <- c(1L, 2L, 3L, 8L, 4L, 5L, 6L, 7L)   # d:m sits last in the glm matrix
+  e <- powerape:::aie_est(coef(fit)[ord], MM[, ord], "probit",
+                          "binary", "binary")
+  se_model <- sqrt(drop(t(e$jac) %*% vcov(fit)[ord, ord] %*% e$jac))
+  g <- ginteff::ginteff(fit, dydxs = c("d", "m"))
+  expect_equal(e$ape, unname(g$aie), tolerance = 1e-6)
+  expect_equal(se_model, unname(g$se), tolerance = 1e-6)
+})
+
+test_that("panel AIE reduces to the cross-sectional AIE at rho = 0 with unit-level pairs", {
+  dp <- ape_dgp_panel(focal = pa_var("t", "binary", p = .5, icc = 1),
+                      moderator = pa_var("m", "binary", p = .4, icc = 1),
+                      n_periods = 3, rho = 0, baseline = .30,
+                      n_int = 4e4, seed_int = 6L)
+  dp <- set_aie(dp, 0.06, main_focal = 0.10, main_moderator = 0.05)
+  dc <- ape_dgp(focal = pa_var("t", "binary", p = .5),
+                moderator = pa_var("m", "binary", p = .4),
+                baseline = .30)
+  dc <- set_aie(dc, 0.06, main_focal = 0.10, main_moderator = 0.05)
+  ## with q = 0 both inversions solve the same scalar equations
+  expect_equal(dp$beta_focal, dc$beta_focal, tolerance = 1e-6)
+  expect_equal(dp$beta_mod, dc$beta_mod, tolerance = 1e-6)
+  expect_equal(dp$beta_int, dc$beta_int, tolerance = 1e-6)
+  expect_equal(true_aie(dp), true_aie(dc), tolerance = 1e-7)
+  ## power: 300 units x 3 periods vs 900 independent observations (cluster
+  ## SEs and design granularity differ, so equality is approximate)
+  pp <- ape_power(dp, n = 300, claim = "detect", nsim = 800, seed = 7)
+  pc <- ape_power(dc, n = 900, claim = "detect", nsim = 800, seed = 8)
+  expect_lt(abs(pp$power - pc$power),
+            4 * sqrt(pp$mcse^2 + pc$mcse^2) + 0.01)
+})
+
+test_that("panel AIE estimator recovers the target with calibrated clustered SEs", {
+  d <- panel_aie_base()
+  sims <- powerape:::sim_ci(d, 400, 300, 0.95, seed = 51)
+  expect_gt(mean(sims$ok), 0.99)
+  est <- (sims$l + sims$u)[sims$ok] / 2
+  expect_equal(mean(est), 0.06, tolerance = 0.012)
+  ratio <- mean(sims$se[sims$ok]) / sd(est)
+  expect_lt(abs(ratio - 1), 0.25)
+})
+
+test_that("clustered CIs cover the true panel AIE at nominal rate", {
+  d <- panel_aie_base()
+  s <- powerape:::sim_ci(d, 300, 1200, 0.95, seed = 61)
+  expect_gt(mean(s$ok), 0.99)
+  cov <- mean((s$l[s$ok] <= 0.06) & (s$u[s$ok] >= 0.06))
+  expect_gt(cov, 0.925)
+  expect_lt(cov, 0.975)
+})
+
+test_that("panel AIE statement and print compose", {
+  d <- panel_aie_base()
+  pw <- ape_power(d, n = 200, claim = "detect", nsim = 60, seed = 71)
+  txt <- unclass(power_statement(pw))
+  expect_match(txt, "average interaction effect")
+  expect_match(txt, "correlated random effects")
+  expect_match(txt, "moderator public")
+  expect_match(txt, "units observed over")
+  expect_output(print(d), "moderator: public")
+})

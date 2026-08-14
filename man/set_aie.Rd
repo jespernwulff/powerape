@@ -7,7 +7,8 @@
 set_aie(dgp, target, main_focal, main_moderator)
 }
 \arguments{
-\item{dgp}{A \code{powerape_dgp} from \code{\link[=ape_dgp]{ape_dgp()}} with a \code{moderator}.}
+\item{dgp}{A \code{powerape_dgp} from \code{\link[=ape_dgp]{ape_dgp()}} or \code{\link[=ape_dgp_panel]{ape_dgp_panel()}}, with
+a \code{moderator}.}
 
 \item{target}{Assumed true AIE (the planning value), in APE units.}
 
@@ -34,6 +35,11 @@ All three anchors are explicit -- there are no silent defaults. Errors
 report the attainable range when a target is infeasible (for
 binary-by-binary, the four counterfactual cell rates must stay in (0,1);
 otherwise the AIE plateaus in the interaction coefficient).
+
+For panel DGPs (\code{\link[=ape_dgp_panel]{ape_dgp_panel()}} with a \code{moderator}; binary x binary),
+all anchors are defined on the average structural function: unit effects
+are integrated out and the Mundlak means held fixed, so the panel AIE is
+the same population quantity a cross-sectional AIE design targets.
 }
 \examples{
 d <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5),

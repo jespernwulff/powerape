@@ -10,12 +10,12 @@ Source:
 [`DESCRIPTION`](https://github.com/jespernwulff/powerape/blob/HEAD/DESCRIPTION)
 
 Wulff J (2026). *powerape: Power Analysis for Average Partial Effects*.
-R package version 1.2.0, <https://jespernwulff.github.io/powerape/>.
+R package version 1.3.0, <https://jespernwulff.github.io/powerape/>.
 
     @Manual{,
       title = {powerape: Power Analysis for Average Partial Effects},
       author = {Jesper Wulff},
       year = {2026},
-      note = {R package version 1.2.0},
+      note = {R package version 1.3.0},
       url = {https://jespernwulff.github.io/powerape/},
     }

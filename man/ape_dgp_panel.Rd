@@ -7,6 +7,7 @@
 ape_dgp_panel(
   model = c("probit", "logit"),
   focal,
+  moderator = NULL,
   covariates = list(),
   n_periods,
   rho = 0,
@@ -23,6 +24,12 @@ ape_dgp_panel(
 
 \item{focal, covariates}{\code{\link[=pa_var]{pa_var()}} objects; use their \code{icc} argument to
 set within-unit persistence (default 0; \code{icc = 1} = time-constant).}
+
+\item{moderator}{Optional binary \code{\link[=pa_var]{pa_var()}} for panel AIE designs: the
+index gains the moderator and a focal-by-moderator interaction, the
+estimand becomes the AIE (pin it with \code{\link[=set_aie]{set_aie()}}), and the estimating
+model gains the interaction's own Mundlak mean whenever the product is
+time-varying. Currently binary focal x binary moderator only.}
 
 \item{n_periods}{Number of periods per unit (balanced; >= 2).}
 
@@ -55,8 +62,9 @@ calibration and inversion.}
 }
 \value{
 An object of class \code{powerape_dgp} (route \code{"panel"}). Pin the
-effect with \code{\link[=set_ape]{set_ape()}}; moderators (AIE) and the empirical/pilot
-routes are not yet available for panel DGPs.
+effect with \code{\link[=set_ape]{set_ape()}} (no moderator) or \code{\link[=set_aie]{set_aie()}} (with
+moderator); the empirical/pilot routes are not yet available for
+panel DGPs.
 }
 \description{
 Panel power analysis under the most general applied panel binary-response
