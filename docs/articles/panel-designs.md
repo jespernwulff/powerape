@@ -124,9 +124,15 @@ ape_power(cs, n = 1200, claim = "minimum", sesoi = 0.05,
 #>   outcomes: minimum 0.465 | detect-only 0.502 | inconclusive 0.032 | equivalence 0.000 | failed 0.000
 ```
 
-Same 1,200 observations, visibly more power. Reviewers who treat panel
-rows as independent observations overstate their design; this pair of
-calls is the antidote.
+How the two compare is a *computable property of the design*, not a rule
+of thumb. Here — with half of the firm heterogeneity loading on
+observable means that the Mundlak terms absorb — the panel’s rows turn
+out to be worth nearly as much as independent ones (high-replication
+runs put the two powers within a point of each other). Push `rho` up, or
+set `cre_share` toward zero so the heterogeneity is unobservable, and
+the panel discount grows sharply. Reviewers who either count panel rows
+as independent observations *or* apply a crude cluster-trial discount
+are both guessing; this pair of calls replaces the guess.
 
 Since `rho` is usually a guess, sweep it – with `pin = "ape"` the true
 effect is re-pinned in every scenario, so only the precision channel

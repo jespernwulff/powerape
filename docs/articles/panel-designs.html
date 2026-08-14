@@ -191,9 +191,16 @@ number of rows. Compare the panel above with a cross-section of the same
 <span><span class="co">#&gt;   probit, n = 1200, assumed true APE +0.1000, 95% CI, nsim = 400</span></span>
 <span><span class="co">#&gt;   power = 0.465 (MCSE 0.025)</span></span>
 <span><span class="co">#&gt;   outcomes: minimum 0.465 | detect-only 0.502 | inconclusive 0.032 | equivalence 0.000 | failed 0.000</span></span></code></pre></div>
-<p>Same 1,200 observations, visibly more power. Reviewers who treat
-panel rows as independent observations overstate their design; this pair
-of calls is the antidote.</p>
+<p>How the two compare is a <em>computable property of the design</em>,
+not a rule of thumb. Here — with half of the firm heterogeneity loading
+on observable means that the Mundlak terms absorb — the panel’s rows
+turn out to be worth nearly as much as independent ones
+(high-replication runs put the two powers within a point of each other).
+Push <code>rho</code> up, or set <code>cre_share</code> toward zero so
+the heterogeneity is unobservable, and the panel discount grows sharply.
+Reviewers who either count panel rows as independent observations
+<em>or</em> apply a crude cluster-trial discount are both guessing; this
+pair of calls replaces the guess.</p>
 <p>Since <code>rho</code> is usually a guess, sweep it – with
 <code>pin = "ape"</code> the true effect is re-pinned in every scenario,
 so only the precision channel moves:</p>
