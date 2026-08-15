@@ -76,6 +76,22 @@ test_that("ape_robust mode = 'mde' sweeps the MDE and flags the worst", {
   expect_output(print(rb), "MDE range")
 })
 
+test_that("IV-route MDE inverts the Design E anchor", {
+  de <- ape_dgp_iv(
+    focal       = pa_var("training", "binary", p = 0.4),
+    covariates  = list(pa_var("size", "normal")),
+    instruments = pa_var("subsidy", "binary", p = 0.5),
+    endogeneity = 0.4, iv_strength = 0.2,
+    baseline    = 0.30, signal = 0.10, n_int = 4e4, seed_int = 2L
+  )
+  ## Section 5 Design E: n = 6,433 reaches ~80% detect power at target .10,
+  ## so the MDE at that n must come back near .10 (verified at high nsim
+  ## with confirmation: 0.104)
+  m <- ape_mde(de, n = 6433, claim = "detect", nsim = 300, seed = 81,
+               confirm = FALSE)
+  expect_lt(abs(m$mde - 0.10), 0.02)
+})
+
 test_that("MDE guards fire", {
   da <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5),
                 moderator = pa_var("female", "binary", p = 0.55),
