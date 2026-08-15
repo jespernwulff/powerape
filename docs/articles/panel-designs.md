@@ -98,6 +98,22 @@ observations, fitted by pooled probit with Mundlak means and
 unit-clustered SEs in every replication. (Below 30 clusters the package
 warns: cluster-robust inference is not trustworthy there.)
 
+For archival panels the units are usually *given*, and the honest
+question inverts: what is the smallest APE this panel can reliably
+demonstrate?
+[`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+answers it with n still counted in units:
+
+``` r
+
+ape_mde(d, n = 400, claim = "minimum", sesoi = 0.05,
+        nsim = 400, seed = 9)
+#> powerape minimum detectable APE -- minimum claim
+#>   MDE = 0.1173 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.791, MCSE 0.010)
+#>   smallest effect demonstrably above sesoi 0.050
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.
+```
+
 ## Panels are not free observations
 
 With a time-constant treatment, T waves of the same units add much less

@@ -94,6 +94,26 @@ cv <- ape_curve(d, n = seq(500, 3000, by = 500), claim = "minimum",
 plot(cv, target_power = 0.80)
 ```
 
+## When n is fixed: the minimum detectable effect
+
+Often the design question runs the other way: the archive has the firms
+it has, and the honest question is what the study can *find*, not what
+it would need. `ape_mde()` inverts the search — the world and the claim
+stay fixed, and the smallest effect that reaches the target power is
+solved for, with the same conservative confirmation stage as `ape_n()`
+(pushed upward, never down, when the high-precision run falls short):
+
+```{r}
+ape_mde(d, n = 1500, claim = "minimum", sesoi = 0.05,
+        nsim = 500, seed = 6)
+```
+
+If the answer is larger than any effect you would defend as plausible,
+the design cannot support the study — knowable before the data are
+touched. The contextual guesses matter here too:
+`ape_robust(mode = "mde")` reports the minimum detectable effect per
+scenario, with the *largest* MDE as the worst case.
+
 ## Step 5: how fragile is this to the contextual guesses?
 
 The baseline rate and the covariate signal are guesses, and power computed

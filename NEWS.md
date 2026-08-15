@@ -23,6 +23,8 @@
   (n = 712) returns the anchor's target (~0.10), the exact-enumeration
   power of the decision rule at the returned MDE sits at the goal, and
   the analytic inverse from `power.prop.test()` agrees.
+* The minimum-effect and panel vignettes gain fixed-n sections
+  demonstrating `ape_mde()`.
 
 # powerape 1.4.0
 

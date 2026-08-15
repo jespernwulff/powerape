@@ -107,6 +107,34 @@ plot(cv, target_power = 0.80)
 
 ![](minimum-effect_files/figure-html/unnamed-chunk-6-1.png)
 
+## When n is fixed: the minimum detectable effect
+
+Often the design question runs the other way: the archive has the firms
+it has, and the honest question is what the study can *find*, not what
+it would need.
+[`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+inverts the search — the world and the claim stay fixed, and the
+smallest effect that reaches the target power is solved for, with the
+same conservative confirmation stage as
+[`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+(pushed upward, never down, when the high-precision run falls short):
+
+``` r
+
+ape_mde(d, n = 1500, claim = "minimum", sesoi = 0.05,
+        nsim = 500, seed = 6)
+#> powerape minimum detectable APE -- minimum claim
+#>   MDE = 0.1167 at n = 1500 for 80% target power (confirmed 0.807, MCSE 0.009)
+#>   smallest effect demonstrably above sesoi 0.050
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
+```
+
+If the answer is larger than any effect you would defend as plausible,
+the design cannot support the study — knowable before the data are
+touched. The contextual guesses matter here too:
+`ape_robust(mode = "mde")` reports the minimum detectable effect per
+scenario, with the *largest* MDE as the worst case.
+
 ## Step 5: how fragile is this to the contextual guesses?
 
 The baseline rate and the covariate signal are guesses, and power

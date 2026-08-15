@@ -32,6 +32,9 @@
   the analytic inverse from
   [`power.prop.test()`](https://rdrr.io/r/stats/power.prop.test.html)
   agrees.
+- The minimum-effect and panel vignettes gain fixed-n sections
+  demonstrating
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md).
 
 ## powerape 1.4.0
 

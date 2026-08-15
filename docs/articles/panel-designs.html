@@ -167,6 +167,17 @@ logit), and errors informatively if the target is infeasible.</p>
 unit-period observations, fitted by pooled probit with Mundlak means and
 unit-clustered SEs in every replication. (Below 30 clusters the package
 warns: cluster-robust inference is not trustworthy there.)</p>
+<p>For archival panels the units are usually <em>given</em>, and the
+honest question inverts: what is the smallest APE this panel can
+reliably demonstrate? <code><a href="../reference/ape_mde.html">ape_mde()</a></code> answers it with n still
+counted in units:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_mde.html">ape_mde</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">400</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>        nsim <span class="op">=</span> <span class="fl">400</span>, seed <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
+<span><span class="co">#&gt; powerape minimum detectable APE -- minimum claim</span></span>
+<span><span class="co">#&gt;   MDE = 0.1173 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.791, MCSE 0.010)</span></span>
+<span><span class="co">#&gt;   smallest effect demonstrably above sesoi 0.050</span></span>
+<span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="panels-are-not-free-observations">Panels are not free observations<a class="anchor" aria-label="anchor" href="#panels-are-not-free-observations"></a>
@@ -176,7 +187,7 @@ less than T-fold information: the outcome is correlated within units, so
 the effective sample is closer to the number of clusters than to the
 number of rows. Compare the panel above with a cross-section of the same
 <em>total</em> size:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp.html">ape_dgp</a></span><span class="op">(</span></span>
 <span>  model      <span class="op">=</span> <span class="st">"probit"</span>,</span>
 <span>  focal      <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
@@ -204,7 +215,7 @@ pair of calls replaces the guess.</p>
 <p>Since <code>rho</code> is usually a guess, sweep it – with
 <code>pin = "ape"</code> the true effect is re-pinned in every scenario,
 so only the precision channel moves:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_robust.html">ape_robust</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">300</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>           vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>, grid_points <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>           nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">3</span>, nmax <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -229,7 +240,7 @@ counterfactual cell probabilities – and for panel DGPs it is defined on
 the same ASF as the APE: unit effects integrated out, Mundlak means held
 fixed. It is the same population quantity a cross-sectional AIE design
 targets.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">di</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp_panel.html">ape_dgp_panel</a></span><span class="op">(</span></span>
 <span>  model      <span class="op">=</span> <span class="st">"probit"</span>,</span>
 <span>  focal      <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span>, icc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -259,7 +270,7 @@ varies within units, the estimating model includes the interaction’s
 the means).</p>
 <p>Interactions are expensive, and panels make them more so – the
 interaction tax and the clustering penalty compound:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">di</span>, n <span class="op">=</span> <span class="fl">400</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">250</span>, seed <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
 <span><span class="co">#&gt;   probit, n = 400 units x 4 periods (1600 obs), assumed true AIE +0.0600, 95% CI, nsim = 250</span></span>
