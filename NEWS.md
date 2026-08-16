@@ -1,3 +1,24 @@
+# powerape 1.5.1
+
+* Verification expansion (battery V12-V17, adversarially refereed):
+  exact enumeration of the *clustered* panel decision rule (within half
+  a Monte Carlo SE of simulation at 24 and 40 clusters); a size audit
+  across all routes (nominal at the standard/panel routes and at the
+  minimum-claim boundary; the small-G cluster over-rejection and the IV
+  route's conservative null quantified and decomposed); a recursive
+  bivariate-probit anchor separating the binary-endogenous control
+  function's plim gap (-0.011) from the truth; an asymptotic-SE
+  identity for the CF route; xtprobit agreement (pure-RE and
+  Mundlak-augmented) to ~0.001; and bootstrap-vs-delta SE ratios within
+  2% on all three routes. New stochastic consistency/coverage test for
+  the IV-AIE.
+* Documentation: `ape_dgp_iv()` now records two properties of the
+  control-function estimator found in validation -- the conservative
+  null of the binary-endogenous generalized residual, and the
+  observed-pairs vs product-measure ASF wedge for continuous endogenous
+  focal variables (the margins convention, replicated exactly; a
+  product-measure option is on the roadmap).
+
 # powerape 1.5.0
 
 * Minimum detectable effect: `ape_mde()` inverts the design question --

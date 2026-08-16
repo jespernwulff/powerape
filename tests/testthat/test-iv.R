@@ -123,6 +123,23 @@ test_that("IV CIs cover the true APE at nominal rate", {
   expect_lt(cov, 0.98)
 })
 
+test_that("IV-AIE estimator is consistent with calibrated SEs (stochastic)", {
+  di <- ape_dgp_iv(
+    focal = pa_var("t", "binary", p = .4),
+    moderator = pa_var("m", "binary", p = .5),
+    covariates = list(pa_var("x", "normal")),
+    instruments = pa_var("z", "binary", p = .5),
+    endogeneity = .4, iv_strength = .25,
+    baseline = .30, signal = .10, n_int = 4e4, seed_int = 4L
+  )
+  di <- set_aie(di, .06, main_focal = .10, main_moderator = .05)
+  s <- powerape:::sim_ci(di, 2000, 300, .95, seed = 172)
+  expect_gt(mean(s$ok), 0.98)
+  est <- (s$l + s$u)[s$ok] / 2
+  expect_lt(abs(mean(est) - 0.06), 0.015)
+  expect_lt(abs(mean(s$se[s$ok]) / sd(est) - 1), 0.25)
+})
+
 test_that("se option: robust works on standard routes, guarded elsewhere", {
   ds <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5), baseline = 0.30)
   ds <- set_ape(ds, 0.10)

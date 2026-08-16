@@ -73,6 +73,22 @@ with a binary exogenous moderator). Because the structural error is
 standard normal marginally, targets, feasibility, and truth evaluation
 work exactly as in \code{\link[=ape_dgp]{ape_dgp()}}.
 
+Two documented properties of the control-function estimator (validation
+battery V13-V15): (1) for a \strong{binary} endogenous focal the generalized
+residual is the standard Wooldridge approximation, with a small
+negative bias (about -0.01 at \code{endogeneity = 0.4},
+\code{iv_strength = 0.2}) that makes the directional detect claim
+\emph{conservative} at the null (empirical size ~1.6\% against the nominal
+2.5\%; the standard errors themselves are correctly calibrated);
+(2) for a \strong{continuous} endogenous focal, the margins convention
+(control functions held at observed values) evaluates the ASF over
+the observed (focal, residual) pairs, which understates the
+product-measure ASF slightly (about -0.005 on a 0.08 effect at
+\code{endogeneity = 0.5}, \code{iv_strength = 0.3}) because the focal and its
+residual are correlated by construction. powerape replicates the
+field-standard (cfprobit/margins) convention exactly; a
+product-measure ASF option is on the roadmap.
+
 For AIE designs the estimating model includes the focal-by-moderator
 term, the control function, and the control-function-by-moderator
 interaction (Stata: \code{interact()} + \code{mainonly()}); the first stage
