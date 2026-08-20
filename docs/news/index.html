@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,16 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.6.0" id="powerape-160">powerape 1.6.0<a class="anchor" aria-label="anchor" href="#powerape-160"></a></h2>
+<ul><li>
+<strong>Breaking: panel designs are probit-only.</strong> <code>ape_dgp_panel(model = "logit")</code> is now refused with a teaching error instead of building a world. Rationale: the exact ASF recovery that justifies the CRE panel route is probit-specific (a normal unit effect rescales the index by <code>sqrt(1 + var_a)</code>); a pooled CRE <em>logit</em> estimates only a quasi-ML approximation of the ASF (measured gap in the least favorable validated configuration: -0.0002, Monte Carlo SE 0.001 – small, but an approximation, and <code>powerape</code> does not price designs with an approximate estimand). Calibrated to the same baseline and probability-point target, the probit panel world is practically indistinguishable on the probability scale. The 1.2.1 Gauss-Hermite calibration machinery remains internally (and tested) for the mixture integrals; no public route reaches its logit branch.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.5.1" id="powerape-151">powerape 1.5.1<a class="anchor" aria-label="anchor" href="#powerape-151"></a></h2>
+<ul><li>Verification expansion (battery V12-V17, adversarially refereed): exact enumeration of the <em>clustered</em> panel decision rule (within half a Monte Carlo SE of simulation at 24 and 40 clusters); a size audit across all routes (nominal at the standard/panel routes and at the minimum-claim boundary; the small-G cluster over-rejection and the IV route’s conservative null quantified and decomposed); a recursive bivariate-probit anchor separating the binary-endogenous control function’s plim gap (-0.011) from the truth; an asymptotic-SE identity for the CF route; xtprobit agreement (pure-RE and Mundlak-augmented) to ~0.001; and bootstrap-vs-delta SE ratios within 2% on all three routes. New stochastic consistency/coverage test for the IV-AIE.</li>
+<li>Documentation: <code><a href="../reference/ape_dgp_iv.html">ape_dgp_iv()</a></code> now records two properties of the control-function estimator found in validation – the conservative null of the binary-endogenous generalized residual, and the observed-pairs vs product-measure ASF wedge for continuous endogenous focal variables (the margins convention, replicated exactly; a product-measure option is on the roadmap).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.5.0" id="powerape-150">powerape 1.5.0<a class="anchor" aria-label="anchor" href="#powerape-150"></a></h2>
 <ul><li>Minimum detectable effect: <code><a href="../reference/ape_mde.html">ape_mde()</a></code> inverts the design question – the sample size is fixed (an archive of so many firms, a panel of so many units and waves) and the function finds the smallest APE or AIE the design reliably concludes at a target power. Detect and minimum-effect claims search over the assumed effect, re-running the APE/AIE inversion at every candidate; the equivalence claim holds the pinned truth and returns the tightest establishable margin instead. Every route works unchanged (parametric, empirical, pilot-model, panel with n in units, IV), and the answer is verified with the same conservative confirmation stage as <code><a href="../reference/ape_n.html">ape_n()</a></code> (pushed upward, never down, when the high-precision run falls short). Feasibility ceilings produce a teaching error reporting the largest attainable effect and the power available there.</li>

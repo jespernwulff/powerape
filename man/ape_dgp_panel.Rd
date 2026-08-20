@@ -2,10 +2,10 @@
 % Please edit documentation in R/panel.R
 \name{ape_dgp_panel}
 \alias{ape_dgp_panel}
-\title{Specify a panel DGP: correlated random effects probit/logit}
+\title{Specify a panel DGP: correlated random effects probit}
 \usage{
 ape_dgp_panel(
-  model = c("probit", "logit"),
+  model = "probit",
   focal,
   moderator = NULL,
   covariates = list(),
@@ -20,7 +20,8 @@ ape_dgp_panel(
 )
 }
 \arguments{
-\item{model}{\code{"probit"} (default) or \code{"logit"}.}
+\item{model}{\code{"probit"} (the only panel link; see Details for why a
+\code{"logit"} request is refused with a teaching error).}
 
 \item{focal, covariates}{\code{\link[=pa_var]{pa_var()}} objects; use their \code{icc} argument to
 set within-unit persistence (default 0; \code{icc = 1} = time-constant).}
@@ -69,7 +70,7 @@ panel DGPs.
 \description{
 Panel power analysis under the most general applied panel binary-response
 model: a correlated random effects (CRE) specification estimated by
-pooled probit/logit with Mundlak means and unit-clustered standard
+pooled probit with Mundlak means and unit-clustered standard
 errors (Wooldridge, 2010, ch. 15). Unobserved unit heterogeneity
 \verb{c_i = xi'(centered observed unit means of time-varying regressors) + a_i}
 may correlate with the regressors through the Mundlak part; the target
@@ -77,6 +78,16 @@ effect remains the ASF-based average partial effect, which the pooled
 CRE estimator recovers even though its coefficients are attenuated.
 }
 \details{
+The panel route is \strong{probit-only}. The exactness above rests on the
+normal-normal convolution (a normal unit effect rescales the probit
+index by \code{sqrt(1 + var_a)}); the logistic link has no such stability,
+so a pooled CRE logit estimates only a quasi-maximum-likelihood
+approximation of the ASF. Rather than price designs with an
+approximate estimand, \code{ape_dgp_panel(model = "logit")} is refused with
+an error explaining this. On the probability scale a probit world
+calibrated to the same baseline and effect is practically
+indistinguishable from the logit world it replaces.
+
 Sample-size arguments of \code{\link[=ape_power]{ape_power()}}, \code{\link[=ape_curve]{ape_curve()}}, \code{\link[=ape_n]{ape_n()}}, and
 \code{\link[=ape_robust]{ape_robust()}} refer to the \strong{number of units (clusters)} for panel
 DGPs; each unit contributes \code{n_periods} observations.

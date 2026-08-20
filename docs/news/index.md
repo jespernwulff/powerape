@@ -1,5 +1,43 @@
 # Changelog
 
+## powerape 1.6.0
+
+- **Breaking: panel designs are probit-only.**
+  `ape_dgp_panel(model = "logit")` is now refused with a teaching error
+  instead of building a world. Rationale: the exact ASF recovery that
+  justifies the CRE panel route is probit-specific (a normal unit effect
+  rescales the index by `sqrt(1 + var_a)`); a pooled CRE *logit*
+  estimates only a quasi-ML approximation of the ASF (measured gap in
+  the least favorable validated configuration: -0.0002, Monte Carlo SE
+  0.001 – small, but an approximation, and `powerape` does not price
+  designs with an approximate estimand). Calibrated to the same baseline
+  and probability-point target, the probit panel world is practically
+  indistinguishable on the probability scale. The 1.2.1 Gauss-Hermite
+  calibration machinery remains internally (and tested) for the mixture
+  integrals; no public route reaches its logit branch.
+
+## powerape 1.5.1
+
+- Verification expansion (battery V12-V17, adversarially refereed):
+  exact enumeration of the *clustered* panel decision rule (within half
+  a Monte Carlo SE of simulation at 24 and 40 clusters); a size audit
+  across all routes (nominal at the standard/panel routes and at the
+  minimum-claim boundary; the small-G cluster over-rejection and the IV
+  route’s conservative null quantified and decomposed); a recursive
+  bivariate-probit anchor separating the binary-endogenous control
+  function’s plim gap (-0.011) from the truth; an asymptotic-SE identity
+  for the CF route; xtprobit agreement (pure-RE and Mundlak-augmented)
+  to ~0.001; and bootstrap-vs-delta SE ratios within 2% on all three
+  routes. New stochastic consistency/coverage test for the IV-AIE.
+- Documentation:
+  [`ape_dgp_iv()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_iv.md)
+  now records two properties of the control-function estimator found in
+  validation – the conservative null of the binary-endogenous
+  generalized residual, and the observed-pairs vs product-measure ASF
+  wedge for continuous endogenous focal variables (the margins
+  convention, replicated exactly; a product-measure option is on the
+  roadmap).
+
 ## powerape 1.5.0
 
 - Minimum detectable effect:

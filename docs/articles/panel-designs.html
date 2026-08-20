@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,13 +79,23 @@
 </h2>
 <p>Much applied binary-outcome work is panel work: firm-years,
 person-waves, plant-quarters. The workhorse model for that setting is a
-<strong>correlated random effects (CRE) probit or logit</strong> –
-pooled estimation with Mundlak means and unit-clustered standard errors
+<strong>correlated random effects (CRE) probit</strong> – pooled
+estimation with Mundlak means and unit-clustered standard errors
 (Wooldridge, 2010, ch. 15). It nests the pure random-effects model,
 allows the unit heterogeneity to correlate with the regressors through
 their observed unit means, and is what <code>xtprobit</code>-style
 advice converges to when the heterogeneity cannot credibly be assumed
 independent.</p>
+<p>The panel route is deliberately <strong>probit-only</strong>. The
+exactness that makes CRE design analysis clean – a normal unit effect
+just rescales the probit index by <code>sqrt(1 + var_a)</code>, so the
+pooled estimator recovers the ASF – is a property of the normal link; a
+pooled CRE <em>logit</em> estimates only a quasi-ML approximation of the
+estimand. <code>ape_dgp_panel(model = "logit")</code> is therefore
+refused with an error saying exactly this. If your cross-sectional taste
+is logit, nothing substantive is lost: calibrated to the same baseline
+rate and probability-point effect, the probit panel world is practically
+indistinguishable on the probability scale.</p>
 <p>The good news for design is that <strong>the estimand does not
 change</strong>. The target is still the APE – here the
 average-structural-function (ASF) version: the effect on P(Y = 1)
@@ -150,8 +160,8 @@ variation.</p>
 <code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_ape.html">set_ape</a></span><span class="op">(</span><span class="va">d</span>, target <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span></code></pre></div>
 <p>Identical to the cross-sectional workflow – the inversion solves the
 focal coefficient so the true ASF-APE is exactly 0.10, integrating the
-unit effects (in closed form for probit, by Gauss-Hermite quadrature for
-logit), and errors informatively if the target is infeasible.</p>
+unit effects in closed form, and errors informatively if the target is
+infeasible.</p>
 </div>
 <div class="section level2">
 <h2 id="step-3-power-in-units">Step 3: power, in units<a class="anchor" aria-label="anchor" href="#step-3-power-in-units"></a>

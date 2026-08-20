@@ -1,8 +1,8 @@
-# Specify a panel DGP: correlated random effects probit/logit
+# Specify a panel DGP: correlated random effects probit
 
 Panel power analysis under the most general applied panel
 binary-response model: a correlated random effects (CRE) specification
-estimated by pooled probit/logit with Mundlak means and unit-clustered
+estimated by pooled probit with Mundlak means and unit-clustered
 standard errors (Wooldridge, 2010, ch. 15). Unobserved unit
 heterogeneity
 `c_i = xi'(centered observed unit means of time-varying regressors) + a_i`
@@ -14,7 +14,7 @@ CRE estimator recovers even though its coefficients are attenuated.
 
 ``` r
 ape_dgp_panel(
-  model = c("probit", "logit"),
+  model = "probit",
   focal,
   moderator = NULL,
   covariates = list(),
@@ -33,7 +33,8 @@ ape_dgp_panel(
 
 - model:
 
-  `"probit"` (default) or `"logit"`.
+  `"probit"` (the only panel link; see Details for why a `"logit"`
+  request is refused with a teaching error).
 
 - focal, covariates:
 
@@ -105,6 +106,16 @@ An object of class `powerape_dgp` (route `"panel"`). Pin the effect with
 panel DGPs.
 
 ## Details
+
+The panel route is **probit-only**. The exactness above rests on the
+normal-normal convolution (a normal unit effect rescales the probit
+index by `sqrt(1 + var_a)`); the logistic link has no such stability, so
+a pooled CRE logit estimates only a quasi-maximum-likelihood
+approximation of the ASF. Rather than price designs with an approximate
+estimand, `ape_dgp_panel(model = "logit")` is refused with an error
+explaining this. On the probability scale a probit world calibrated to
+the same baseline and effect is practically indistinguishable from the
+logit world it replaces.
 
 Sample-size arguments of
 [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md),

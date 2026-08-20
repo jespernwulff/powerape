@@ -1,11 +1,16 @@
-# Panel designs: correlated random effects probit/logit ------------------------
+# Panel designs: correlated random effects probit -----------------------------
 # DESIGN.md section 11. Model: y_it = 1[b0 + b_d d_it + z'gamma + c_i + u_it > 0],
 # c_i = xi'(centered observed unit means of time-varying regressors) + a_i,
-# a_i ~ N(0, var_a). Estimation: pooled probit/logit with Mundlak means and
+# a_i ~ N(0, var_a). Estimation: pooled probit with Mundlak means and
 # unit-clustered SEs. Estimand: ASF-based APE (means held at observed values).
 # True values integrate a_i exactly: probit in closed form via
-# scale_a = sqrt(1 + var_a); logit by Gauss-Hermite quadrature (the probit
-# scale division over-attenuates a logistic kernel).
+# scale_a = sqrt(1 + var_a).
+# Probit-only by design (JW, 2026-08-20): the normal-normal convolution that
+# makes the pooled CRE estimator recover the ASF has no logistic counterpart,
+# so a pooled CRE logit is a QMLE approximation; ape_dgp_panel refuses
+# model = "logit" with a teaching error. The Gauss-Hermite machinery in
+# panel_mix_funs is retained for the general-link mixture (and gauss_hermite
+# remains unit-tested), but no public route reaches its logit branch.
 
 # One draw of all regressor paths for n_units x T rows (unit-major order).
 # Cross-regressor dependence R is applied at both the unit and within level.
@@ -87,22 +92,34 @@ panel_mix_funs <- function(model, var_a) {
   list(P = mix(lf$G), p = mix(lf$g))
 }
 
-#' Specify a panel DGP: correlated random effects probit/logit
+#' Specify a panel DGP: correlated random effects probit
 #'
 #' Panel power analysis under the most general applied panel binary-response
 #' model: a correlated random effects (CRE) specification estimated by
-#' pooled probit/logit with Mundlak means and unit-clustered standard
+#' pooled probit with Mundlak means and unit-clustered standard
 #' errors (Wooldridge, 2010, ch. 15). Unobserved unit heterogeneity
 #' `c_i = xi'(centered observed unit means of time-varying regressors) + a_i`
 #' may correlate with the regressors through the Mundlak part; the target
 #' effect remains the ASF-based average partial effect, which the pooled
 #' CRE estimator recovers even though its coefficients are attenuated.
 #'
+#' The panel route is **probit-only**. The exactness above rests on the
+#' normal-normal convolution (a normal unit effect rescales the probit
+#' index by `sqrt(1 + var_a)`); the logistic link has no such stability,
+#' so a pooled CRE logit estimates only a quasi-maximum-likelihood
+#' approximation of the ASF. Rather than price designs with an
+#' approximate estimand, `ape_dgp_panel(model = "logit")` is refused with
+#' an error explaining this. On the probability scale a probit world
+#' calibrated to the same baseline and effect is practically
+#' indistinguishable from the logit world it replaces.
+#'
 #' Sample-size arguments of [ape_power()], [ape_curve()], [ape_n()], and
 #' [ape_robust()] refer to the **number of units (clusters)** for panel
 #' DGPs; each unit contributes `n_periods` observations.
 #'
 #' @inheritParams ape_dgp
+#' @param model `"probit"` (the only panel link; see Details for why a
+#'   `"logit"` request is refused with a teaching error).
 #' @param focal,covariates [pa_var()] objects; use their `icc` argument to
 #'   set within-unit persistence (default 0; `icc = 1` = time-constant).
 #' @param moderator Optional binary [pa_var()] for panel AIE designs: the
@@ -138,12 +155,27 @@ panel_mix_funs <- function(model, var_a) {
 #' ape_power(d, n = 150, claim = "detect", nsim = 300, seed = 1)  # n = units
 #' }
 #' @export
-ape_dgp_panel <- function(model = c("probit", "logit"), focal, moderator = NULL,
+ape_dgp_panel <- function(model = "probit", focal, moderator = NULL,
                           covariates = list(),
                           n_periods, rho = 0, cre_share = 0, correlation = NULL,
                           baseline, signal = 0,
                           n_int = 1e5, seed_int = 20260814L) {
-  model <- match.arg(model)
+  model <- as.character(model)[1L]
+  if (identical(model, "logit"))
+    stop(paste0(
+      "Panel designs are probit-only.\n",
+      "The device that lets a pooled CRE estimator recover the average\n",
+      "structural function is specific to the probit link: a normal unit\n",
+      "effect convolved with a normal error just rescales the index by\n",
+      "sqrt(1 + var_a). The logistic link has no such stability, so a pooled\n",
+      "CRE logit estimates only a quasi-ML approximation of the ASF, and\n",
+      "powerape does not price designs with an approximate estimand.\n",
+      "Use ape_dgp_panel(model = \"probit\", ...): the probit panel route is\n",
+      "validated exactly (battery V8, V12, V16), and on the probability\n",
+      "scale the two links describe nearly identical worlds anyway."),
+      call. = FALSE)
+  if (!identical(model, "probit"))
+    stop("`model` must be \"probit\" for panel DGPs.", call. = FALSE)
   if (inherits(covariates, "pa_var")) covariates <- list(covariates)
   stopifnot(inherits(focal, "pa_var"),
             all(vapply(covariates, inherits, logical(1), "pa_var")))

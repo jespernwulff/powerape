@@ -21,7 +21,7 @@ averaging turns back into the APE/AIE."><meta property="og:image" content="https
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -152,6 +152,21 @@ effect with <code><a href="set_ape.html">set_ape()</a></code> or, with a moderat
 with a binary exogenous moderator). Because the structural error is
 standard normal marginally, targets, feasibility, and truth evaluation
 work exactly as in <code><a href="ape_dgp.html">ape_dgp()</a></code>.</p>
+<p>Two documented properties of the control-function estimator (validation
+battery V13-V15): (1) for a <strong>binary</strong> endogenous focal the generalized
+residual is the standard Wooldridge approximation, with a small
+negative bias (about -0.01 at <code>endogeneity = 0.4</code>,
+<code>iv_strength = 0.2</code>) that makes the directional detect claim
+<em>conservative</em> at the null (empirical size ~1.6% against the nominal
+2.5%; the standard errors themselves are correctly calibrated);
+(2) for a <strong>continuous</strong> endogenous focal, the margins convention
+(control functions held at observed values) evaluates the ASF over
+the observed (focal, residual) pairs, which understates the
+product-measure ASF slightly (about -0.005 on a 0.08 effect at
+<code>endogeneity = 0.5</code>, <code>iv_strength = 0.3</code>) because the focal and its
+residual are correlated by construction. powerape replicates the
+field-standard (cfprobit/margins) convention exactly; a
+product-measure ASF option is on the roadmap.</p>
 <p>For AIE designs the estimating model includes the focal-by-moderator
 term, the control function, and the control-function-by-moderator
 interaction (Stata: <code>interact()</code> + <code>mainonly()</code>); the first stage

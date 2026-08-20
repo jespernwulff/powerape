@@ -16,12 +16,22 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
 
 Much applied binary-outcome work is panel work: firm-years, person-waves,
 plant-quarters. The workhorse model for that setting is a **correlated
-random effects (CRE) probit or logit** -- pooled estimation with Mundlak
+random effects (CRE) probit** -- pooled estimation with Mundlak
 means and unit-clustered standard errors (Wooldridge, 2010, ch. 15). It
 nests the pure random-effects model, allows the unit heterogeneity to
 correlate with the regressors through their observed unit means, and is
 what `xtprobit`-style advice converges to when the heterogeneity cannot
 credibly be assumed independent.
+
+The panel route is deliberately **probit-only**. The exactness that makes
+CRE design analysis clean -- a normal unit effect just rescales the probit
+index by `sqrt(1 + var_a)`, so the pooled estimator recovers the ASF --
+is a property of the normal link; a pooled CRE *logit* estimates only a
+quasi-ML approximation of the estimand. `ape_dgp_panel(model = "logit")`
+is therefore refused with an error saying exactly this. If your
+cross-sectional taste is logit, nothing substantive is lost: calibrated
+to the same baseline rate and probability-point effect, the probit panel
+world is practically indistinguishable on the probability scale.
 
 The good news for design is that **the estimand does not change**. The
 target is still the APE -- here the average-structural-function (ASF)
@@ -77,8 +87,8 @@ d <- set_ape(d, target = 0.10)
 
 Identical to the cross-sectional workflow -- the inversion solves the
 focal coefficient so the true ASF-APE is exactly 0.10, integrating the
-unit effects (in closed form for probit, by Gauss-Hermite quadrature for
-logit), and errors informatively if the target is infeasible.
+unit effects in closed form, and errors informatively if the target is
+infeasible.
 
 ## Step 3: power, in units
 

@@ -74,11 +74,13 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   four variable-type pairs.
 - **Panel designs**
   ([`ape_dgp_panel()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_panel.md)):
-  correlated random effects probit/logit — Mundlak means, unit-clustered
-  SEs, per-variable within-unit persistence via `pa_var(icc = )`, and
-  sample sizes counted in **units (clusters)**. The target stays the
-  ASF-based APE, which the pooled CRE estimator recovers;
-  binary-by-binary panel AIE designs included.
+  correlated random effects probit — Mundlak means, unit-clustered SEs,
+  per-variable within-unit persistence via `pa_var(icc = )`, and sample
+  sizes counted in **units (clusters)**. The target stays the ASF-based
+  APE, which the pooled CRE estimator recovers; binary-by-binary panel
+  AIE designs included. Probit-only by design: a pooled CRE logit would
+  estimate the ASF only approximately, so `model = "logit"` is refused
+  with a teaching error.
 - **IV designs**
   ([`ape_dgp_iv()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_iv.md)):
   endogenous focal variables via control-function probit — the estimator
