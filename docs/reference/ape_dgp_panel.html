@@ -21,7 +21,7 @@ CRE estimator recovers even though its coefficients are attenuated."><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,6 +74,8 @@ CRE estimator recovers even though its coefficients are attenuated.</p>
 <span>  moderator <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">n_periods</span>,</span>
+<span>  p_periods <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  retention <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rho <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  cre_share <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  correlation <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -107,7 +109,20 @@ time-varying. Currently binary focal x binary moderator only.</p></dd>
 
 
 <dt id="arg-n-periods">n_periods<a class="anchor" aria-label="anchor" href="#arg-n-periods"></a></dt>
-<dd><p>Number of periods per unit (balanced; &gt;= 2).</p></dd>
+<dd><p>Number of periods per unit: a scalar for a balanced
+panel, or an integer vector of possible lengths for an unbalanced
+one (see Details). At least some units must have &gt;= 2 periods.</p></dd>
+
+
+<dt id="arg-p-periods">p_periods<a class="anchor" aria-label="anchor" href="#arg-p-periods"></a></dt>
+<dd><p>Probabilities for a vector <code>n_periods</code> (same length;
+equal weights if omitted). Not combined with <code>retention</code>.</p></dd>
+
+
+<dt id="arg-retention">retention<a class="anchor" aria-label="anchor" href="#arg-retention"></a></dt>
+<dd><p>Per-wave retention rate in (0, 1] for monotone
+attrition from a scalar <code>n_periods</code> maximum; <code>retention = 1</code> is the
+balanced panel. Not combined with <code>p_periods</code>.</p></dd>
 
 
 <dt id="arg-rho">rho<a class="anchor" aria-label="anchor" href="#arg-rho"></a></dt>
@@ -144,9 +159,9 @@ pseudo-R-squared of the nuisance index, i.e. <code>Var(z'gamma) / (Var(z'gamma) 
 
 
 <dt id="arg-n-int-seed-int">n_int, seed_int<a class="anchor" aria-label="anchor" href="#arg-n-int-seed-int"></a></dt>
-<dd><p>Size (in <strong>units</strong>, each contributing <code>n_periods</code>
-rows) and seed of the deterministic integration draw used for
-calibration and inversion.</p></dd>
+<dd><p>Size (in <strong>units</strong>, each contributing its drawn
+number of rows) and seed of the deterministic integration draw used
+for calibration and inversion.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -169,7 +184,22 @@ calibrated to the same baseline and effect is practically
 indistinguishable from the logit world it replaces.</p>
 <p>Sample-size arguments of <code><a href="ape_power.html">ape_power()</a></code>, <code><a href="ape_curve.html">ape_curve()</a></code>, <code><a href="ape_n.html">ape_n()</a></code>, and
 <code><a href="ape_robust.html">ape_robust()</a></code> refer to the <strong>number of units (clusters)</strong> for panel
-DGPs; each unit contributes <code>n_periods</code> observations.</p>
+DGPs; each unit contributes its own number of observed periods.</p>
+<p><strong>Unbalanced panels</strong> (Wooldridge, 2019) are specified by a
+distribution over panel lengths: either give <code>n_periods</code> a vector of
+possible lengths with probabilities <code>p_periods</code> (equal weights if
+omitted), or give a scalar <code>n_periods</code> plus a <code>retention</code> rate, which
+generates monotone attrition (each wave a unit remains with
+probability <code>retention</code>; <code>P(T_i = t) = retention^(t-1) (1-retention)</code>
+below the maximum). Selection is completely at random by
+construction. Mundlak means are computed over each unit's observed
+periods, and the estimating model gains period-count cohort
+indicators, the workhorse specification of Wooldridge (2019); their
+population coefficients are zero here, so their sample-size cost is
+priced, exactly like the Mundlak insurance premium. <code>rho</code> remains
+the latent unit-effect share averaged over the length mixture
+(conditional on a unit's length it varies mildly with the number of
+periods, through the sampling variance of the observed means).</p>
     </div>
 
     <div class="section level2">

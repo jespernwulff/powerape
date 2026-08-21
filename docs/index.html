@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -150,7 +150,7 @@
 <li>
 <strong>Interaction designs</strong>: pin the average interaction effect — the <a href="https://github.com/jespernwulff/ginteff" class="external-link"><code>ginteff</code></a> estimand — with <code><a href="reference/set_aie.html">set_aie()</a></code>; the internal AIE is unit-tested to reproduce <code>ginteff</code> exactly for all four variable-type pairs.</li>
 <li>
-<strong>Panel designs</strong> (<code><a href="reference/ape_dgp_panel.html">ape_dgp_panel()</a></code>): correlated random effects probit — Mundlak means, unit-clustered SEs, per-variable within-unit persistence via <code>pa_var(icc = )</code>, and sample sizes counted in <strong>units (clusters)</strong>. The target stays the ASF-based APE, which the pooled CRE estimator recovers; binary-by-binary panel AIE designs included. Probit-only by design: a pooled CRE logit would estimate the ASF only approximately, so <code>model = "logit"</code> is refused with a teaching error.</li>
+<strong>Panel designs</strong> (<code><a href="reference/ape_dgp_panel.html">ape_dgp_panel()</a></code>): correlated random effects probit — Mundlak means, unit-clustered SEs, per-variable within-unit persistence via <code>pa_var(icc = )</code>, and sample sizes counted in <strong>units (clusters)</strong>. The target stays the ASF-based APE, which the pooled CRE estimator recovers; binary-by-binary panel AIE designs included. <strong>Unbalanced panels</strong> follow Wooldridge (2019): give a distribution of panel lengths or a per-wave <code>retention</code> rate, and the engine uses observed-period Mundlak means plus period-count cohort indicators (<code>retention</code> is sweepable in <code><a href="reference/ape_robust.html">ape_robust()</a></code>). Probit-only by design: a pooled CRE logit would estimate the ASF only approximately, so <code>model = "logit"</code> is refused with a teaching error.</li>
 <li>
 <strong>IV designs</strong> (<code><a href="reference/ape_dgp_iv.html">ape_dgp_iv()</a></code>): endogenous focal variables via control-function probit — the estimator of Stata’s <code>cfprobit</code>, replicated exactly with its stacked no-bootstrap standard errors (robust and clustered). Friendly knobs: <code>endogeneity</code> (error correlation) and <code>iv_strength</code> (first-stage share of the focal’s variance); endogenous-interaction AIE designs include the instrument-by-moderator first-stage terms.</li>
 <li>

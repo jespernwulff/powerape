@@ -247,7 +247,7 @@ finish_mde <- function(dgp, n, best, hist, power, claim, sesoi, conf, nsim,
 #' @export
 print.powerape_mde <- function(x, ...) {
   unit_lab <- if (identical(x$dgp$route, "panel")) {
-    sprintf("n = %d units (x %d periods)", x$n, x$dgp$n_periods)
+    sprintf("n = %d units (x %s periods)", x$n, panel_len_label(x$dgp))
   } else {
     sprintf("n = %d", x$n)
   }

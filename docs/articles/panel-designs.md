@@ -182,6 +182,68 @@ ape_robust(d, n = 300, claim = "minimum", sesoi = 0.05,
 #>  0.5            0.1 0.3900000 0.02816026
 ```
 
+## Unbalanced panels and attrition (Wooldridge, 2019)
+
+Real archival panels are rarely balanced: firms enter late, exit early,
+or drop out. The CRE logic extends cleanly (Wooldridge, 2019): Mundlak
+means are computed over each unit’s *observed* periods, and the
+estimating model adds period-count cohort indicators. `powerape` prices
+exactly that estimator. Describe the imbalance either as an explicit
+distribution of panel lengths or, more naturally for a proposal, as a
+per-wave **retention rate**:
+
+``` r
+
+da <- ape_dgp_panel(
+  model      = "probit",
+  focal      = pa_var("treat", "binary", p = 0.5, icc = 1),
+  covariates = list(pa_var("size", "normal", icc = 0.6)),
+  n_periods  = 6,          # planned waves
+  retention  = 0.85,       # each wave, 85% of units remain
+  rho        = 0.30,
+  cre_share  = 0.50,
+  baseline   = 0.30,
+  signal     = 0.10
+)
+da <- set_ape(da, target = 0.10)
+da
+#> powerape DGP -- probit
+#>   focal: treat (binary, p = 0.50, icc = 1.00)
+#>   covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60) 
+#>   panel: 1-6 (unbalanced, mean 4.15) periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/ Mundlak means over observed periods + T-cohort dummies (Wooldridge 2019), unit-clustered SEs
+#>   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+#>   true APE pinned at +0.1000 (beta_focal = 0.3611, implied P(Y=1 | focal=1) = 0.400)
+```
+
+`n` still counts units; the printout reports the expected panel length
+and total observations. Attrition costs real power – sweep the retention
+guess to price it:
+
+``` r
+
+ape_robust(da, n = 300, claim = "minimum", sesoi = 0.05,
+           vary = list(retention = c(0.7, 1)), grid_points = 3,
+           nsim = 300, seed = 5, nmax = FALSE)
+#> powerape robustness sweep -- minimum claim, APE, pin = ape
+#>   n = 300, nsim = 300 per scenario, 3 scenario(s) over: retention
+#>   power range [0.350, 0.493]; worst scenario:
+#>  retention implied_effect power       mcse
+#>        0.7            0.1  0.35 0.02753785
+#>   scenarios:
+#>  retention implied_effect     power       mcse
+#>       0.70            0.1 0.3500000 0.02753785
+#>       0.85            0.1 0.3900000 0.02816026
+#>       1.00            0.1 0.4933333 0.02886495
+```
+
+Two facts from the validation battery are worth knowing at the design
+stage. Power is monotone in retention, and the cost is material (in the
+battery’s example, going from no attrition to 30% annual attrition costs
+about 13 points of power at fixed units). But a *mean-preserving*
+mixture of panel lengths showed no penalty against the balanced panel of
+the same average length – the crude “unequal clusters hurt” discount is
+a guess too, and the simulation replaces it.
+
 ## Panel interactions: the AIE under CRE
 
 Moderation questions survive the move to panels: does a governance
@@ -248,22 +310,29 @@ units and periods correctly.
 The panel machinery is validated the same way as the rest of the
 package: the ASF-based APE and the AIE double difference match Stata
 (`probit ..., vce(cluster id)` + `margins`) to all printed digits on
-fixed panels, with the small clustered-SE difference fully attributed to
-Stata’s observed-Hessian bread; the clustered sandwich matches
-[`sandwich::vcovCL`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html)
-exactly; the AIE reproduces `ginteff` on the identical fit; and the
-engine reduces to exact enumeration and to the Donner-Klar cluster
-design effect in the cases where those are available. See the validation
-battery in the repository for the full dossier.
+fixed panels – balanced and unbalanced alike (the unbalanced check
+matches the APE to all seven decimals with cohort dummies in the model)
+– with the small clustered-SE difference fully attributed to Stata’s
+observed-Hessian bread; the clustered sandwich matches
+[`sandwich::vcovCL`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html);
+unbalanced pure-RE panels anchor against `xtprobit`; the AIE reproduces
+`ginteff` on the identical fit; and the engine reduces to exact
+enumeration and to the Donner-Klar cluster design effect in the cases
+where those are available. Degenerate length mixtures reproduce the
+balanced route bit-identically. See the validation battery in the
+repository for the full dossier.
 
-Current scope: balanced panels, the parametric covariate route, and
-binary-by-binary panel interactions; continuous panel pairs, unbalanced
-panels, and time effects are on the roadmap.
+Current scope: the parametric covariate route and binary-by-binary panel
+interactions; selection is completely at random in unbalanced worlds
+(attrition correlated with the unit effect, continuous panel pairs, and
+time effects are on the roadmap).
 
 ## References
 
 - Mundlak, Y. (1978). On the pooling of time series and cross section
   data. *Econometrica*, 46(1), 69-85.
+- Wooldridge, J. M. (2019). Correlated random effects models with
+  unbalanced panels. *Journal of Econometrics*, 211(1), 137-150.
 - Riesthuis, P. (2024). Simulation-based power analyses for the smallest
   effect size of interest: A confidence-interval approach for
   minimum-effect and equivalence testing. *AMPPS*, 7(2).

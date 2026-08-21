@@ -1,6 +1,6 @@
 Package: powerape
 Title: Power Analysis for Average Partial Effects
-Version: 1.6.0
+Version: 1.7.0
 Authors@R:
     person("Jesper", "Wulff", email = "jwulff@econ.au.dk", role = c("aut", "cre"))
 Description: Simulation-based power analysis in which the effect size of

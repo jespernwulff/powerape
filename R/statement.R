@@ -6,12 +6,15 @@ describe_dgp <- function(d) {
     else sprintf("%s (continuous, mean %.1f, SD %.1f)", v$name, v$mean, v$sd)
   }
   parts <- if (identical(d$route, "panel")) {
-    sprintf(paste0("a correlated random effects %s model over %d periods per ",
+    sprintf(paste0("a correlated random effects %s model over %s periods per ",
                    "unit (latent unit-effect share rho = %.2f, %.0f%% of it ",
                    "loaded on regressor means), estimated by pooled %s with ",
-                   "Mundlak means and unit-clustered standard errors, with ",
+                   "Mundlak means%s and unit-clustered standard errors, with ",
                    "focal variable %s"),
-            d$model, d$n_periods, d$rho, 100 * d$cre_share, d$model,
+            d$model, panel_len_label(d), d$rho, 100 * d$cre_share, d$model,
+            if (isTRUE(d$unbalanced))
+              " over observed periods plus period-count cohort indicators (Wooldridge, 2019)"
+            else "",
             var_desc(d$focal))
   } else if (identical(d$route, "iv")) {
     sprintf(paste0("a probit model with an endogenous focal variable %s ",
@@ -114,8 +117,8 @@ power_statement <- function(x) {
   }
   is_panel <- identical(d$route, "panel")
   n_text <- if (is_panel) {
-    sprintf("n = %d units observed over %d periods (%d unit-period observations)",
-            x$n, d$n_periods, x$n * d$n_periods)
+    sprintf("n = %d units observed over %s periods (%s unit-period observations)",
+            x$n, panel_len_label(d), panel_obs_label(d, x$n))
   } else {
     sprintf("n = %d", x$n)
   }

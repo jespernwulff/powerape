@@ -10,6 +10,8 @@ ape_dgp_panel(
   moderator = NULL,
   covariates = list(),
   n_periods,
+  p_periods = NULL,
+  retention = NULL,
   rho = 0,
   cre_share = 0,
   correlation = NULL,
@@ -32,7 +34,16 @@ estimand becomes the AIE (pin it with \code{\link[=set_aie]{set_aie()}}), and th
 model gains the interaction's own Mundlak mean whenever the product is
 time-varying. Currently binary focal x binary moderator only.}
 
-\item{n_periods}{Number of periods per unit (balanced; >= 2).}
+\item{n_periods}{Number of periods per unit: a scalar for a balanced
+panel, or an integer vector of possible lengths for an unbalanced
+one (see Details). At least some units must have >= 2 periods.}
+
+\item{p_periods}{Probabilities for a vector \code{n_periods} (same length;
+equal weights if omitted). Not combined with \code{retention}.}
+
+\item{retention}{Per-wave retention rate in (0, 1] for monotone
+attrition from a scalar \code{n_periods} maximum; \code{retention = 1} is the
+balanced panel. Not combined with \code{p_periods}.}
 
 \item{rho}{Latent unit-effect share \code{Var(c) / (Var(c) + 1)} — the
 xtprobit-style rho. 0 = no unobserved heterogeneity.}
@@ -57,9 +68,9 @@ reproduce it.}
 pseudo-R-squared of the nuisance index, i.e. \verb{Var(z'gamma) / (Var(z'gamma) + 1)}. Equal standardized weights, scaled to hit
 \code{signal}. Ignored when \code{gamma} is supplied.}
 
-\item{n_int, seed_int}{Size (in \strong{units}, each contributing \code{n_periods}
-rows) and seed of the deterministic integration draw used for
-calibration and inversion.}
+\item{n_int, seed_int}{Size (in \strong{units}, each contributing its drawn
+number of rows) and seed of the deterministic integration draw used
+for calibration and inversion.}
 }
 \value{
 An object of class \code{powerape_dgp} (route \code{"panel"}). Pin the
@@ -90,7 +101,23 @@ indistinguishable from the logit world it replaces.
 
 Sample-size arguments of \code{\link[=ape_power]{ape_power()}}, \code{\link[=ape_curve]{ape_curve()}}, \code{\link[=ape_n]{ape_n()}}, and
 \code{\link[=ape_robust]{ape_robust()}} refer to the \strong{number of units (clusters)} for panel
-DGPs; each unit contributes \code{n_periods} observations.
+DGPs; each unit contributes its own number of observed periods.
+
+\strong{Unbalanced panels} (Wooldridge, 2019) are specified by a
+distribution over panel lengths: either give \code{n_periods} a vector of
+possible lengths with probabilities \code{p_periods} (equal weights if
+omitted), or give a scalar \code{n_periods} plus a \code{retention} rate, which
+generates monotone attrition (each wave a unit remains with
+probability \code{retention}; \code{P(T_i = t) = retention^(t-1) (1-retention)}
+below the maximum). Selection is completely at random by
+construction. Mundlak means are computed over each unit's observed
+periods, and the estimating model gains period-count cohort
+indicators, the workhorse specification of Wooldridge (2019); their
+population coefficients are zero here, so their sample-size cost is
+priced, exactly like the Mundlak insurance premium. \code{rho} remains
+the latent unit-effect share averaged over the length mixture
+(conditional on a unit's length it varies mildly with the number of
+periods, through the sampling variance of the observed means).
 }
 \examples{
 \donttest{

@@ -19,6 +19,8 @@ ape_dgp_panel(
   moderator = NULL,
   covariates = list(),
   n_periods,
+  p_periods = NULL,
+  retention = NULL,
   rho = 0,
   cre_share = 0,
   correlation = NULL,
@@ -56,7 +58,20 @@ ape_dgp_panel(
 
 - n_periods:
 
-  Number of periods per unit (balanced; \>= 2).
+  Number of periods per unit: a scalar for a balanced panel, or an
+  integer vector of possible lengths for an unbalanced one (see
+  Details). At least some units must have \>= 2 periods.
+
+- p_periods:
+
+  Probabilities for a vector `n_periods` (same length; equal weights if
+  omitted). Not combined with `retention`.
+
+- retention:
+
+  Per-wave retention rate in (0, 1\] for monotone attrition from a
+  scalar `n_periods` maximum; `retention = 1` is the balanced panel. Not
+  combined with `p_periods`.
 
 - rho:
 
@@ -93,8 +108,9 @@ ape_dgp_panel(
 
 - n_int, seed_int:
 
-  Size (in **units**, each contributing `n_periods` rows) and seed of
-  the deterministic integration draw used for calibration and inversion.
+  Size (in **units**, each contributing its drawn number of rows) and
+  seed of the deterministic integration draw used for calibration and
+  inversion.
 
 ## Value
 
@@ -124,7 +140,22 @@ Sample-size arguments of
 and
 [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
 refer to the **number of units (clusters)** for panel DGPs; each unit
-contributes `n_periods` observations.
+contributes its own number of observed periods.
+
+**Unbalanced panels** (Wooldridge, 2019) are specified by a distribution
+over panel lengths: either give `n_periods` a vector of possible lengths
+with probabilities `p_periods` (equal weights if omitted), or give a
+scalar `n_periods` plus a `retention` rate, which generates monotone
+attrition (each wave a unit remains with probability `retention`;
+`P(T_i = t) = retention^(t-1) (1-retention)` below the maximum).
+Selection is completely at random by construction. Mundlak means are
+computed over each unit's observed periods, and the estimating model
+gains period-count cohort indicators, the workhorse specification of
+Wooldridge (2019); their population coefficients are zero here, so their
+sample-size cost is priced, exactly like the Mundlak insurance premium.
+`rho` remains the latent unit-effect share averaged over the length
+mixture (conditional on a unit's length it varies mildly with the number
+of periods, through the sampling variance of the observed means).
 
 ## Examples
 

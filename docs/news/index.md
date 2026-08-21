@@ -1,5 +1,29 @@
 # Changelog
 
+## powerape 1.7.0
+
+- **Unbalanced panels** (Wooldridge, 2019, J. Econometrics).
+  [`ape_dgp_panel()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_panel.md)
+  accepts a distribution over panel lengths: a vector `n_periods` with
+  probabilities `p_periods` (equal weights by default), or a scalar
+  `n_periods` with a per-wave `retention` rate for monotone attrition.
+  Mundlak means are computed over each unit’s observed periods and the
+  estimating model gains period-count cohort indicators (the Wooldridge
+  2019 workhorse); selection is completely at random by construction,
+  `rho` is the length-mixture average of the latent unit-effect share,
+  and sample sizes still count units. Degenerate mixtures
+  (`retention = 1`, single support) short-circuit to the balanced code
+  path, bit-identically. `retention` is sweepable in
+  [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md).
+  Validated as battery V18: balanced-reduction identity; Stata
+  `probit i.d ... i.T, vce(cluster)` + `margins` agreement to ~5e-7 on
+  coefficients and all seven decimals on the APE, with the 0.12%
+  clustered-SE gap reproduced to 4e-8 from the observed-information
+  bread; an unbalanced `xtprobit` ASF anchor (\|diff\| .0012);
+  consistency and 95% coverage; and content anchors (power monotone in
+  retention; no unequal-cluster penalty for a mean-preserving length
+  mixture at the tested settings).
+
 ## powerape 1.6.0
 
 - **Breaking: panel designs are probit-only.**

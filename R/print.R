@@ -30,8 +30,9 @@ print.powerape_dgp <- function(x, ...) {
     cat("  covariates: none\n")
   }
   if (identical(x$route, "panel"))
-    cat(sprintf("  panel: %d periods per unit; rho = %.2f (latent unit share), cre_share = %.2f; CRE %s w/ Mundlak means, unit-clustered SEs\n",
-                x$n_periods, x$rho, x$cre_share, x$model))
+    cat(sprintf("  panel: %s periods per unit; rho = %.2f (latent unit share), cre_share = %.2f; CRE %s w/ Mundlak means%s, unit-clustered SEs\n",
+                panel_len_label(x), x$rho, x$cre_share, x$model,
+                if (isTRUE(x$unbalanced)) " over observed periods + T-cohort dummies (Wooldridge 2019)" else ""))
   if (identical(x$route, "iv"))
     cat(sprintf("  iv: endogenous focal (%s first stage; instruments: %s); endogeneity rho = %.2f, first-stage strength = %.2f; control-function probit, stacked robust SEs\n",
                 x$first_stage,
@@ -73,8 +74,8 @@ print.powerape_power <- function(x, ...) {
     equivalence = sprintf("equivalence claim (CI within +/-%.3f)", x$sesoi))
   cat(sprintf("powerape -- %s\n", claim_lab))
   n_lab <- if (identical(x$dgp$route, "panel")) {
-    sprintf("n = %d units x %d periods (%d obs)", x$n, x$dgp$n_periods,
-            x$n * x$dgp$n_periods)
+    sprintf("n = %d units x %s periods (%s obs)", x$n,
+            panel_len_label(x$dgp), panel_obs_label(x$dgp, x$n))
   } else {
     sprintf("n = %d", x$n)
   }
@@ -107,7 +108,7 @@ print.powerape_n <- function(x, ...) {
   cat(sprintf("powerape required sample size -- %s claim\n", x$claim))
   lab <- if (isTRUE(x$confirmed)) "confirmed" else "achieved"
   unit_lab <- if (identical(x$dgp$route, "panel")) {
-    sprintf("n = %d units (x %d periods)", x$n, x$dgp$n_periods)
+    sprintf("n = %d units (x %s periods)", x$n, panel_len_label(x$dgp))
   } else {
     sprintf("n = %d", x$n)
   }

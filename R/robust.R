@@ -88,7 +88,7 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   allowed <- switch(dgp$builder %||% "parametric",
                     from_fit = "baseline",
                     empirical = c("baseline", "signal"),
-                    panel = c("baseline", "signal", "rho"),
+                    panel = c("baseline", "signal", "rho", "retention"),
                     iv = c("baseline", "signal", "endogeneity", "iv_strength"),
                     c("baseline", "signal", "correlation"))
   bad <- setdiff(names(vary), allowed)

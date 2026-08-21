@@ -73,7 +73,11 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   within-unit persistence via `pa_var(icc = )`, and sample sizes counted
   in **units (clusters)**. The target stays the ASF-based APE, which the
   pooled CRE estimator recovers; binary-by-binary panel AIE designs
-  included. Probit-only by design: a pooled CRE logit would estimate the
+  included. **Unbalanced panels** follow Wooldridge (2019): give a
+  distribution of panel lengths or a per-wave `retention` rate, and the
+  engine uses observed-period Mundlak means plus period-count cohort
+  indicators (`retention` is sweepable in `ape_robust()`). Probit-only
+  by design: a pooled CRE logit would estimate the
   ASF only approximately, so `model = "logit"` is refused with a
   teaching error.
 - **IV designs** (`ape_dgp_iv()`): endogenous focal variables via

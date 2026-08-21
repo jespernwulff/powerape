@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,11 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.7.0" id="powerape-170">powerape 1.7.0<a class="anchor" aria-label="anchor" href="#powerape-170"></a></h2>
+<ul><li>
+<strong>Unbalanced panels</strong> (Wooldridge, 2019, J. Econometrics). <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> accepts a distribution over panel lengths: a vector <code>n_periods</code> with probabilities <code>p_periods</code> (equal weights by default), or a scalar <code>n_periods</code> with a per-wave <code>retention</code> rate for monotone attrition. Mundlak means are computed over each unit’s observed periods and the estimating model gains period-count cohort indicators (the Wooldridge 2019 workhorse); selection is completely at random by construction, <code>rho</code> is the length-mixture average of the latent unit-effect share, and sample sizes still count units. Degenerate mixtures (<code>retention = 1</code>, single support) short-circuit to the balanced code path, bit-identically. <code>retention</code> is sweepable in <code><a href="../reference/ape_robust.html">ape_robust()</a></code>. Validated as battery V18: balanced-reduction identity; Stata <code>probit i.d ... i.T, vce(cluster)</code> + <code>margins</code> agreement to ~5e-7 on coefficients and all seven decimals on the APE, with the 0.12% clustered-SE gap reproduced to 4e-8 from the observed-information bread; an unbalanced <code>xtprobit</code> ASF anchor (|diff| .0012); consistency and 95% coverage; and content anchors (power monotone in retention; no unequal-cluster penalty for a mean-preserving length mixture at the tested settings).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.0" id="powerape-160">powerape 1.6.0<a class="anchor" aria-label="anchor" href="#powerape-160"></a></h2>
 <ul><li>

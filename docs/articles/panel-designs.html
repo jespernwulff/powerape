@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -241,6 +241,62 @@ so only the precision channel moves:</p>
 <span><span class="co">#&gt;  0.5            0.1 0.3900000 0.02816026</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="unbalanced-panels-and-attrition-wooldridge-2019">Unbalanced panels and attrition (Wooldridge, 2019)<a class="anchor" aria-label="anchor" href="#unbalanced-panels-and-attrition-wooldridge-2019"></a>
+</h2>
+<p>Real archival panels are rarely balanced: firms enter late, exit
+early, or drop out. The CRE logic extends cleanly (Wooldridge, 2019):
+Mundlak means are computed over each unit’s <em>observed</em> periods,
+and the estimating model adds period-count cohort indicators.
+<code>powerape</code> prices exactly that estimator. Describe the
+imbalance either as an explicit distribution of panel lengths or, more
+naturally for a proposal, as a per-wave <strong>retention
+rate</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">da</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp_panel.html">ape_dgp_panel</a></span><span class="op">(</span></span>
+<span>  model      <span class="op">=</span> <span class="st">"probit"</span>,</span>
+<span>  focal      <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span>, icc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"size"</span>, <span class="st">"normal"</span>, icc <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  n_periods  <span class="op">=</span> <span class="fl">6</span>,          <span class="co"># planned waves</span></span>
+<span>  retention  <span class="op">=</span> <span class="fl">0.85</span>,       <span class="co"># each wave, 85% of units remain</span></span>
+<span>  rho        <span class="op">=</span> <span class="fl">0.30</span>,</span>
+<span>  cre_share  <span class="op">=</span> <span class="fl">0.50</span>,</span>
+<span>  baseline   <span class="op">=</span> <span class="fl">0.30</span>,</span>
+<span>  signal     <span class="op">=</span> <span class="fl">0.10</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">da</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_ape.html">set_ape</a></span><span class="op">(</span><span class="va">da</span>, target <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span>
+<span><span class="va">da</span></span>
+<span><span class="co">#&gt; powerape DGP -- probit</span></span>
+<span><span class="co">#&gt;   focal: treat (binary, p = 0.50, icc = 1.00)</span></span>
+<span><span class="co">#&gt;   covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60) </span></span>
+<span><span class="co">#&gt;   panel: 1-6 (unbalanced, mean 4.15) periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/ Mundlak means over observed periods + T-cohort dummies (Wooldridge 2019), unit-clustered SEs</span></span>
+<span><span class="co">#&gt;   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100</span></span>
+<span><span class="co">#&gt;   true APE pinned at +0.1000 (beta_focal = 0.3611, implied P(Y=1 | focal=1) = 0.400)</span></span></code></pre></div>
+<p><code>n</code> still counts units; the printout reports the expected
+panel length and total observations. Attrition costs real power – sweep
+the retention guess to price it:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_robust.html">ape_robust</a></span><span class="op">(</span><span class="va">da</span>, n <span class="op">=</span> <span class="fl">300</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>           vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>retention <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.7</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>, grid_points <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>           nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">5</span>, nmax <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; powerape robustness sweep -- minimum claim, APE, pin = ape</span></span>
+<span><span class="co">#&gt;   n = 300, nsim = 300 per scenario, 3 scenario(s) over: retention</span></span>
+<span><span class="co">#&gt;   power range [0.350, 0.493]; worst scenario:</span></span>
+<span><span class="co">#&gt;  retention implied_effect power       mcse</span></span>
+<span><span class="co">#&gt;        0.7            0.1  0.35 0.02753785</span></span>
+<span><span class="co">#&gt;   scenarios:</span></span>
+<span><span class="co">#&gt;  retention implied_effect     power       mcse</span></span>
+<span><span class="co">#&gt;       0.70            0.1 0.3500000 0.02753785</span></span>
+<span><span class="co">#&gt;       0.85            0.1 0.3900000 0.02816026</span></span>
+<span><span class="co">#&gt;       1.00            0.1 0.4933333 0.02886495</span></span></code></pre></div>
+<p>Two facts from the validation battery are worth knowing at the design
+stage. Power is monotone in retention, and the cost is material (in the
+battery’s example, going from no attrition to 30% annual attrition costs
+about 13 points of power at fixed units). But a <em>mean-preserving</em>
+mixture of panel lengths showed no penalty against the balanced panel of
+the same average length – the crude “unequal clusters hurt” discount is
+a guess too, and the simulation replaces it.</p>
+</div>
+<div class="section level2">
 <h2 id="panel-interactions-the-aie-under-cre">Panel interactions: the AIE under CRE<a class="anchor" aria-label="anchor" href="#panel-interactions-the-aie-under-cre"></a>
 </h2>
 <p>Moderation questions survive the move to panels: does a governance
@@ -250,7 +306,7 @@ counterfactual cell probabilities – and for panel DGPs it is defined on
 the same ASF as the APE: unit effects integrated out, Mundlak means held
 fixed. It is the same population quantity a cross-sectional AIE design
 targets.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">di</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp_panel.html">ape_dgp_panel</a></span><span class="op">(</span></span>
 <span>  model      <span class="op">=</span> <span class="st">"probit"</span>,</span>
 <span>  focal      <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span>, icc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -280,7 +336,7 @@ varies within units, the estimating model includes the interaction’s
 the means).</p>
 <p>Interactions are expensive, and panels make them more so – the
 interaction tax and the clustering penalty compound:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">di</span>, n <span class="op">=</span> <span class="fl">400</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">250</span>, seed <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
 <span><span class="co">#&gt;   probit, n = 400 units x 4 periods (1600 obs), assumed true AIE +0.0600, 95% CI, nsim = 250</span></span>
@@ -298,16 +354,21 @@ methods paragraph that counts units and periods correctly.</p>
 <p>The panel machinery is validated the same way as the rest of the
 package: the ASF-based APE and the AIE double difference match Stata
 (<code>probit ..., vce(cluster id)</code> + <code>margins</code>) to all
-printed digits on fixed panels, with the small clustered-SE difference
-fully attributed to Stata’s observed-Hessian bread; the clustered
-sandwich matches <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> exactly; the AIE
-reproduces <code>ginteff</code> on the identical fit; and the engine
-reduces to exact enumeration and to the Donner-Klar cluster design
-effect in the cases where those are available. See the validation
-battery in the repository for the full dossier.</p>
-<p>Current scope: balanced panels, the parametric covariate route, and
-binary-by-binary panel interactions; continuous panel pairs, unbalanced
-panels, and time effects are on the roadmap.</p>
+printed digits on fixed panels – balanced and unbalanced alike (the
+unbalanced check matches the APE to all seven decimals with cohort
+dummies in the model) – with the small clustered-SE difference fully
+attributed to Stata’s observed-Hessian bread; the clustered sandwich
+matches <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code>; unbalanced pure-RE panels anchor
+against <code>xtprobit</code>; the AIE reproduces <code>ginteff</code>
+on the identical fit; and the engine reduces to exact enumeration and to
+the Donner-Klar cluster design effect in the cases where those are
+available. Degenerate length mixtures reproduce the balanced route
+bit-identically. See the validation battery in the repository for the
+full dossier.</p>
+<p>Current scope: the parametric covariate route and binary-by-binary
+panel interactions; selection is completely at random in unbalanced
+worlds (attrition correlated with the unit effect, continuous panel
+pairs, and time effects are on the roadmap).</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -315,6 +376,9 @@ panels, and time effects are on the roadmap.</p>
 <ul>
 <li>Mundlak, Y. (1978). On the pooling of time series and cross section
 data. <em>Econometrica</em>, 46(1), 69-85.</li>
+<li>Wooldridge, J. M. (2019). Correlated random effects models with
+unbalanced panels. <em>Journal of Econometrics</em>, 211(1),
+137-150.</li>
 <li>Riesthuis, P. (2024). Simulation-based power analyses for the
 smallest effect size of interest: A confidence-interval approach for
 minimum-effect and equivalence testing. <em>AMPPS</em>, 7(2).</li>

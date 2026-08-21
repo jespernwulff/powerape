@@ -12,24 +12,38 @@
 # panel_mix_funs is retained for the general-link mixture (and gauss_hermite
 # remains unit-tested), but no public route reaches its logit branch.
 
-# One draw of all regressor paths for n_units x T rows (unit-major order).
+# One draw of all regressor paths (unit-major order). Balanced panels give
+# every unit T_p rows; unbalanced panels (t_support/t_prob set) first draw
+# each unit's length T_i from the researcher's distribution -- selection is
+# completely at random by construction (DESIGN.md section 13). Mundlak means
+# are computed over each unit's OBSERVED periods (Wooldridge, 2019). The
+# balanced branch consumes the identical RNG stream as pre-1.7.0 releases,
+# so balanced results are bit-identical.
 # Cross-regressor dependence R is applied at both the unit and within level.
-panel_regressor_draw <- function(vars, iccs, R, n_units, T_p, seed = NULL) {
+panel_regressor_draw <- function(vars, iccs, R, n_units, T_p, seed = NULL,
+                                 t_support = NULL, t_prob = NULL) {
   k <- length(vars)
   with_seed(seed, {
+    unbal <- !is.null(t_support) && length(t_support) > 1L
+    T_i <- if (unbal) {
+      as.integer(sample(t_support, n_units, replace = TRUE, prob = t_prob))
+    } else {
+      rep.int(as.integer(T_p), n_units)
+    }
+    N <- sum(T_i)
     Rc <- chol(R)
     V <- matrix(rnorm(n_units * k), n_units) %*% Rc
-    E <- matrix(rnorm(n_units * T_p * k), n_units * T_p) %*% Rc
-    ui <- rep(seq_len(n_units), each = T_p)
+    E <- matrix(rnorm(N * k), N) %*% Rc
+    ui <- rep(seq_len(n_units), times = T_i)
     x <- vector("list", k)
     xbar <- vector("list", k)
     for (j in seq_len(k)) {
       u <- sqrt(iccs[j]) * V[ui, j] + sqrt(1 - iccs[j]) * E[, j]
       xj <- transform_u(u, vars[[j]])
       x[[j]] <- xj
-      xbar[[j]] <- rowsum(xj, ui)[, 1] / T_p
+      xbar[[j]] <- rowsum(xj, ui)[, 1] / T_i
     }
-    list(x = x, xbar = xbar, unit = ui)
+    list(x = x, xbar = xbar, unit = ui, T_i = T_i)
   })
 }
 
@@ -41,12 +55,13 @@ panel_integration <- function(dgp) {
   has_m <- !is.null(dgp$moderator)
   vars <- c(list(dgp$focal), if (has_m) list(dgp$moderator), dgp$covariates)
   rd <- panel_regressor_draw(vars, dgp$iccs, dgp$R, dgp$n_int, dgp$n_periods,
-                             dgp$seed_int)
+                             dgp$seed_int,
+                             t_support = dgp$t_support, t_prob = dgp$t_prob)
   idxz <- if (dgp$k > 0L) {
     Z <- do.call(cbind, rd$x[-seq_len(1L + has_m)])
     drop(Z %*% dgp$gamma)
   } else {
-    rep(0, dgp$n_int * dgp$n_periods)
+    rep(0, length(rd$unit))
   }
   m_i <- if (length(dgp$tv_idx) && any(dgp$xi != 0)) {
     Mbar <- do.call(cbind, rd$xbar[dgp$tv_idx])
@@ -57,6 +72,23 @@ panel_integration <- function(dgp) {
   list(xd_c = rd$x[[1L]] - dgp$focal_ref,
        xm_c = if (has_m) rd$x[[2L]] - dgp$mod_ref else NULL,
        q = idxz + m_i[rd$unit])
+}
+
+# Human-readable panel-length descriptors for the print/statement methods.
+panel_len_label <- function(dgp) {
+  if (isTRUE(dgp$unbalanced)) {
+    sprintf("%d-%d (unbalanced, mean %.2f)",
+            min(dgp$t_support), max(dgp$t_support), dgp$expected_T)
+  } else {
+    sprintf("%d", dgp$n_periods)
+  }
+}
+panel_obs_label <- function(dgp, n) {
+  if (isTRUE(dgp$unbalanced)) {
+    sprintf("~%d", round(n * dgp$expected_T))
+  } else {
+    sprintf("%d", n * dgp$n_periods)
+  }
 }
 
 # Gauss-Hermite nodes/weights (physicists' convention) via Golub-Welsch:
@@ -115,7 +147,23 @@ panel_mix_funs <- function(model, var_a) {
 #'
 #' Sample-size arguments of [ape_power()], [ape_curve()], [ape_n()], and
 #' [ape_robust()] refer to the **number of units (clusters)** for panel
-#' DGPs; each unit contributes `n_periods` observations.
+#' DGPs; each unit contributes its own number of observed periods.
+#'
+#' **Unbalanced panels** (Wooldridge, 2019) are specified by a
+#' distribution over panel lengths: either give `n_periods` a vector of
+#' possible lengths with probabilities `p_periods` (equal weights if
+#' omitted), or give a scalar `n_periods` plus a `retention` rate, which
+#' generates monotone attrition (each wave a unit remains with
+#' probability `retention`; `P(T_i = t) = retention^(t-1) (1-retention)`
+#' below the maximum). Selection is completely at random by
+#' construction. Mundlak means are computed over each unit's observed
+#' periods, and the estimating model gains period-count cohort
+#' indicators, the workhorse specification of Wooldridge (2019); their
+#' population coefficients are zero here, so their sample-size cost is
+#' priced, exactly like the Mundlak insurance premium. `rho` remains
+#' the latent unit-effect share averaged over the length mixture
+#' (conditional on a unit's length it varies mildly with the number of
+#' periods, through the sampling variance of the observed means).
 #'
 #' @inheritParams ape_dgp
 #' @param model `"probit"` (the only panel link; see Details for why a
@@ -127,7 +175,14 @@ panel_mix_funs <- function(model, var_a) {
 #'   estimand becomes the AIE (pin it with [set_aie()]), and the estimating
 #'   model gains the interaction's own Mundlak mean whenever the product is
 #'   time-varying. Currently binary focal x binary moderator only.
-#' @param n_periods Number of periods per unit (balanced; >= 2).
+#' @param n_periods Number of periods per unit: a scalar for a balanced
+#'   panel, or an integer vector of possible lengths for an unbalanced
+#'   one (see Details). At least some units must have >= 2 periods.
+#' @param p_periods Probabilities for a vector `n_periods` (same length;
+#'   equal weights if omitted). Not combined with `retention`.
+#' @param retention Per-wave retention rate in (0, 1] for monotone
+#'   attrition from a scalar `n_periods` maximum; `retention = 1` is the
+#'   balanced panel. Not combined with `p_periods`.
 #' @param rho Latent unit-effect share `Var(c) / (Var(c) + 1)` — the
 #'   xtprobit-style rho. 0 = no unobserved heterogeneity.
 #' @param cre_share Fraction of `Var(c)` loaded (with equal standardized
@@ -135,9 +190,9 @@ panel_mix_funs <- function(model, var_a) {
 #'   regressors; the remainder is the independent component `a_i`.
 #'   `cre_share = 0` gives a pure random-effects world; the estimator
 #'   includes Mundlak means either way.
-#' @param n_int,seed_int Size (in **units**, each contributing `n_periods`
-#'   rows) and seed of the deterministic integration draw used for
-#'   calibration and inversion.
+#' @param n_int,seed_int Size (in **units**, each contributing its drawn
+#'   number of rows) and seed of the deterministic integration draw used
+#'   for calibration and inversion.
 #'
 #' @return An object of class `powerape_dgp` (route `"panel"`). Pin the
 #'   effect with [set_ape()] (no moderator) or [set_aie()] (with
@@ -157,7 +212,8 @@ panel_mix_funs <- function(model, var_a) {
 #' @export
 ape_dgp_panel <- function(model = "probit", focal, moderator = NULL,
                           covariates = list(),
-                          n_periods, rho = 0, cre_share = 0, correlation = NULL,
+                          n_periods, p_periods = NULL, retention = NULL,
+                          rho = 0, cre_share = 0, correlation = NULL,
                           baseline, signal = 0,
                           n_int = 1e5, seed_int = 20260814L) {
   model <- as.character(model)[1L]
@@ -189,8 +245,51 @@ ape_dgp_panel <- function(model = "probit", focal, moderator = NULL,
                  "moderator; continuous pairs are on the roadmap."),
            call. = FALSE)
   }
-  T_p <- as.integer(n_periods)
-  stopifnot(length(T_p) == 1L, T_p >= 2L)
+  ## panel-length distribution (DESIGN.md section 13): a scalar n_periods is
+  ## the balanced panel; a vector (+ optional p_periods) is an explicit length
+  ## mixture; scalar + retention is monotone attrition. Degenerate mixtures
+  ## short-circuit to the balanced code path (bit-identical numerics).
+  if (!is.null(p_periods) && !is.null(retention))
+    stop("Give either `p_periods` or `retention`, not both.", call. = FALSE)
+  T_in <- as.integer(n_periods)
+  stopifnot(length(T_in) >= 1L, all(T_in >= 1L), !anyDuplicated(T_in))
+  if (!is.null(retention)) {
+    stopifnot(length(T_in) == 1L, is.numeric(retention),
+              length(retention) == 1L, retention > 0, retention <= 1)
+    if (retention < 1) {
+      t_support <- seq_len(T_in)
+      t_prob <- retention^(t_support - 1) * (1 - retention)
+      t_prob[T_in] <- retention^(T_in - 1)
+    } else {
+      t_support <- T_in
+      t_prob <- 1
+    }
+  } else if (length(T_in) > 1L) {
+    o <- order(T_in)
+    t_support <- T_in[o]
+    t_prob <- if (is.null(p_periods)) {
+      rep(1 / length(T_in), length(T_in))
+    } else {
+      stopifnot(is.numeric(p_periods), length(p_periods) == length(T_in),
+                all(p_periods >= 0), sum(p_periods) > 0)
+      p_periods[o] / sum(p_periods)
+    }
+    keep <- t_prob > 0
+    t_support <- t_support[keep]
+    t_prob <- t_prob[keep]
+  } else {
+    if (!is.null(p_periods))
+      stop("`p_periods` needs a vector `n_periods` of the same length.",
+           call. = FALSE)
+    t_support <- T_in
+    t_prob <- 1
+  }
+  if (max(t_support) < 2L)
+    stop("Panel designs need at least two periods for some units.",
+         call. = FALSE)
+  unbalanced <- length(t_support) > 1L
+  T_p <- if (unbalanced) NA_integer_ else t_support
+  expected_T <- sum(t_support * t_prob)
   stopifnot(is.numeric(rho), length(rho) == 1L, rho >= 0, rho < 1)
   stopifnot(is.numeric(cre_share), length(cre_share) == 1L,
             cre_share >= 0, cre_share <= 1)
@@ -211,7 +310,9 @@ ape_dgp_panel <- function(model = "probit", focal, moderator = NULL,
   R <- build_corr(k + 1L + has_m, correlation)
   lf <- link_funs(model)
 
-  rd <- panel_regressor_draw(vars, iccs, R, n_int, T_p, seed_int)
+  rd <- panel_regressor_draw(vars, iccs, R, n_int, T_p, seed_int,
+                             t_support = if (unbalanced) t_support,
+                             t_prob = if (unbalanced) t_prob)
 
   ## nuisance coefficients from per-period signal (equal standardized weights)
   if (k > 0L) {
@@ -226,7 +327,7 @@ ape_dgp_panel <- function(model = "probit", focal, moderator = NULL,
     idxz <- drop(Z %*% gamma)
   } else {
     gamma <- numeric(0)
-    idxz <- rep(0, n_int * T_p)
+    idxz <- rep(0, length(rd$unit))
   }
   s2 <- if (k > 0L) var(idxz) else 0
 
@@ -274,6 +375,9 @@ ape_dgp_panel <- function(model = "probit", focal, moderator = NULL,
     main_focal = NULL, main_moderator = NULL,
     route = "panel", builder = "panel",
     n_periods = T_p, rho = rho, cre_share = cre_share,
+    unbalanced = unbalanced,
+    t_support = if (unbalanced) t_support, t_prob = if (unbalanced) t_prob,
+    expected_T = expected_T, retention = retention,
     var_a = var_a, scale_a = scale_a, mix_P = mx$P, mix_p = mx$p,
     iccs = iccs, tv_idx = tv_idx, xi = xi, xbar_center = xbar_center,
     focal_ref = if (focal$type == "binary") 0 else focal$mean,
@@ -281,7 +385,8 @@ ape_dgp_panel <- function(model = "probit", focal, moderator = NULL,
     n_int = as.integer(n_int), seed_int = seed_int,
     spec = list(model = model, focal = focal, moderator = moderator,
                 covariates = covariates,
-                n_periods = n_periods, rho = rho, cre_share = cre_share,
+                n_periods = n_periods, p_periods = p_periods,
+                retention = retention, rho = rho, cre_share = cre_share,
                 correlation = correlation, baseline = baseline,
                 signal = signal, n_int = n_int, seed_int = seed_int)
   ), class = "powerape_dgp")
@@ -360,8 +465,8 @@ draw_x_panel <- function(dgp, n_units) {
          call. = FALSE)
   has_m <- !is.null(dgp$moderator)
   vars <- c(list(dgp$focal), if (has_m) list(dgp$moderator), dgp$covariates)
-  T_p <- dgp$n_periods
-  rd <- panel_regressor_draw(vars, dgp$iccs, dgp$R, n_units, T_p)
+  rd <- panel_regressor_draw(vars, dgp$iccs, dgp$R, n_units, dgp$n_periods,
+                             t_support = dgp$t_support, t_prob = dgp$t_prob)
   d <- rd$x[[1L]]
   m <- if (has_m) rd$x[[2L]] else NULL
   Z <- if (dgp$k > 0L) do.call(cbind, rd$x[-seq_len(1L + has_m)]) else NULL
@@ -369,14 +474,26 @@ draw_x_panel <- function(dgp, n_units) {
     Mb <- do.call(cbind, rd$xbar[dgp$tv_idx])
     Mb[rd$unit, , drop = FALSE]
   } else NULL
+  ## unbalanced panels: T_i cohort dummies from the REALIZED lengths
+  ## (Wooldridge, 2019; reference = first level present; structural
+  ## coefficients 0 by construction since selection is random)
+  Tdum <- if (isTRUE(dgp$unbalanced)) {
+    lev <- sort(unique(rd$T_i))
+    if (length(lev) > 1L) {
+      cols <- vapply(lev[-1L], function(t) as.numeric(rd$T_i == t),
+                     numeric(n_units))
+      cols[rd$unit, , drop = FALSE]
+    } else NULL
+  } else NULL
+  n_dum <- if (is.null(Tdum)) 0L else ncol(Tdum)
   if (has_m) {
     dm <- d * m
     dmbar_col <- if (dgp$iccs[1L] < 1 || dgp$iccs[2L] < 1) {
-      (rowsum(dm, rd$unit)[, 1L] / T_p)[rd$unit]
+      (rowsum(dm, rd$unit)[, 1L] / rd$T_i)[rd$unit]
     } else NULL
-    X <- cbind(1, d, m, dm, Z, Mbar_cols, dmbar_col)
+    X <- cbind(1, d, m, dm, Z, Mbar_cols, dmbar_col, Tdum)
   } else {
-    X <- cbind(1, d, Z, Mbar_cols)
+    X <- cbind(1, d, Z, Mbar_cols, Tdum)
   }
 
   ## structural probabilities
@@ -392,13 +509,14 @@ draw_x_panel <- function(dgp, n_units) {
   pr <- dgp$G(eta)
 
   ## pseudo-true (attenuated) coefficients as IRLS start values; the
-  ## interaction-mean column's structural coefficient is 0
+  ## interaction-mean and cohort-dummy columns' structural coefficients are 0
   s <- dgp$scale_a
-  start <- c(dgp$beta0 - sum(dgp$xi * dgp$xbar_center),
-             dgp$beta_focal,
-             if (has_m) c(dgp$beta_mod, dgp$beta_int),
-             dgp$gamma, dgp$xi,
-             if (has_m && (dgp$iccs[1L] < 1 || dgp$iccs[2L] < 1)) 0) / s
+  start <- c(c(dgp$beta0 - sum(dgp$xi * dgp$xbar_center),
+               dgp$beta_focal,
+               if (has_m) c(dgp$beta_mod, dgp$beta_int),
+               dgp$gamma, dgp$xi,
+               if (has_m && (dgp$iccs[1L] < 1 || dgp$iccs[2L] < 1)) 0) / s,
+             rep(0, n_dum))
 
   list(X = X, focal_col = 2L, id = rd$unit, pr = pr, start = start)
 }

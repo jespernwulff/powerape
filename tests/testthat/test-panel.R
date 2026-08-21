@@ -32,7 +32,7 @@ test_that("panel construction calibrates baseline, rho, and icc as stated", {
 test_that("panel guards fire", {
   expect_error(ape_dgp_panel(focal = pa_var("t", "binary", p = .5),
                              n_periods = 1, baseline = .3),
-               "n_periods|>= 2|T_p")
+               "at least two periods")
   expect_error(ape_dgp_panel(focal = pa_var("t", "binary", p = .5, icc = 1),
                              n_periods = 4, rho = .3, cre_share = .5,
                              baseline = .3),
