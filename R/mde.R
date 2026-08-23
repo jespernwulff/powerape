@@ -58,16 +58,16 @@ repin <- function(dgp, target, mf = NULL, mm = NULL) {
 #' @export
 ape_mde <- function(dgp, n, power = 0.80,
                     claim = c("detect", "minimum", "equivalence"),
-                    sesoi = NULL, conf = 0.95, nsim = 1000, seed = NULL,
-                    main_focal = NULL, main_moderator = NULL,
+                    sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 1000,
+                    seed = NULL, main_focal = NULL, main_moderator = NULL,
                     max_iter = 6, confirm = TRUE, nsim_confirm = 4 * nsim,
                     se = c("model", "robust")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
+  conf <- claim_levels(claim, alpha, conf)$conf_claim
   stopifnot(inherits(dgp, "powerape_dgp"),
             is.numeric(n), length(n) == 1L, n >= 20,
             is.numeric(power), length(power) == 1L, power > 0.5, power < 0.999,
-            is.numeric(conf), length(conf) == 1L, conf > 0.5, conf < 1,
             is.numeric(nsim), length(nsim) == 1L, nsim >= 20)
   if (claim == "minimum" &&
       (is.null(sesoi) || !is.numeric(sesoi) || length(sesoi) != 1L || sesoi <= 0))

@@ -29,9 +29,9 @@ equivalence while assuming a true effect on or beyond the bounds.
 ape_power(d, n = 2000, claim = "equivalence", sesoi = 0.05,
           nsim = 600, seed = 1)
 #> powerape -- equivalence claim (CI within +/-0.050)
-#>   probit, n = 2000, assumed true APE +0.0000, 95% CI, nsim = 600
-#>   power = 0.417 (MCSE 0.020)
-#>   outcomes: minimum 0.000 | detect-only 0.018 | inconclusive 0.565 | equivalence 0.417 | failed 0.000
+#>   probit, n = 2000, assumed true APE +0.0000, 90% CI (alpha = 0.05), nsim = 600
+#>   power = 0.628 (MCSE 0.020)
+#>   outcomes: minimum 0.000 | detect-only 0.018 | inconclusive 0.353 | equivalence 0.628 | failed 0.000
 ```
 
 ``` r
@@ -39,9 +39,9 @@ ape_power(d, n = 2000, claim = "equivalence", sesoi = 0.05,
 ape_n(d, power = 0.80, claim = "equivalence", sesoi = 0.05,
       nsim = 500, seed = 2)
 #> powerape required sample size -- equivalence claim
-#>   n = 3584 for 80% target power (confirmed 0.855, MCSE 0.008)
-#>   assumed true APE +0.0000, sesoi 0.050, 95% CI, probit
-#>   search: 4 step(s); confirmed in 1 round(s) at nsim = 2000.
+#>   n = 2669 for 80% target power (confirmed 0.799, MCSE 0.009)
+#>   assumed true APE +0.0000, sesoi 0.050, 90% CI, probit
+#>   search: 3 step(s); confirmed in 1 round(s) at nsim = 2000.
 ```
 
 Equivalence needs the CI to be *narrow*, not just centered near zero, so
@@ -71,22 +71,24 @@ ape_robust(d, n = 2600, claim = "equivalence", sesoi = 0.05,
            nsim = 300, seed = 4, nmax = FALSE)
 #> powerape robustness sweep -- equivalence claim, APE, pin = ape
 #>   n = 2600, nsim = 300 per scenario, 3 scenario(s) over: baseline
-#>   power range [0.513, 0.807]; worst scenario:
+#>   power range [0.703, 0.903]; worst scenario:
 #>  baseline implied_effect     power       mcse
-#>       0.5              0 0.5133333 0.02885725
+#>       0.5              0 0.7033333 0.02637269
 #>   scenarios:
 #>  baseline implied_effect     power       mcse
-#>      0.20              0 0.8066667 0.02280026
-#>      0.35              0 0.5700000 0.02858321
-#>      0.50              0 0.5133333 0.02885725
+#>      0.20              0 0.9033333 0.01706089
+#>      0.35              0 0.7233333 0.02582778
+#>      0.50              0 0.7033333 0.02637269
 ```
 
 ## Reporting
 
 [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
-works for equivalence designs too, and states the CI convention
-explicitly – with a 95% interval the implied two one-sided tests run at
-the conservative 2.5% level (Riesthuis, 2024).
+works for equivalence designs too, and states the error-rate convention
+explicitly: the equivalence claim is a TOST at `alpha = .05`, read off
+the 90% interval (Lakens, 2017; Riesthuis, 2024), the same convention
+TOSTER uses. The conservative alternative of a 95% interval (a TOST at
+2.5%) is available via `conf = 0.95`.
 
 ``` r
 
@@ -94,18 +96,18 @@ pw <- ape_power(d, n = 2600, claim = "equivalence", sesoi = 0.05,
                 nsim = 500, seed = 5)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.7.0), following the
+#> (APE) of treat using the powerape package (version 1.8.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); parametric covariates (age; Gaussian-copula dependence); baseline
 #> outcome rate 0.300 with the focal at reference; nuisance covariates
 #> contribute a latent pseudo-R-squared of 0.10. The assumed true APE was 0.000
 #> (0.0 percentage points). At a sample size of n = 2600, simulated power for
-#> the equivalence claim (the 95% confidence interval lying within +/-0.050) was
-#> 0.632 (Monte Carlo SE 0.022; 500 replications). Across replications, the
-#> probability of concluding a meaningful effect was 0.000, of detection without
-#> meaningfulness 0.018, of an inconclusive result 0.350, and of equivalence
-#> 0.632. Estimation used maximum likelihood with delta-method Wald confidence
-#> intervals; replications that failed to converge (0.0%) counted against the
-#> claim.
+#> the equivalence claim (the 90% confidence interval lying within +/-0.050; two
+#> one-sided tests at alpha = 5%) was 0.764 (Monte Carlo SE 0.019; 500
+#> replications). Across replications, the probability of concluding a
+#> meaningful effect was 0.000, of detection without meaningfulness 0.018, of an
+#> inconclusive result 0.218, and of equivalence 0.764. Estimation used maximum
+#> likelihood with delta-method Wald confidence intervals; replications that
+#> failed to converge (0.0%) counted against the claim.
 ```

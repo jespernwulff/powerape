@@ -21,7 +21,7 @@ CRE estimator recovers even though its coefficients are attenuated."><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -214,7 +214,7 @@ periods, through the sampling variance of the observed means).</p>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="set_ape.html">set_ape</a></span><span class="op">(</span><span class="va">d</span>, target <span class="op">=</span> <span class="fl">0.08</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">150</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>  <span class="co"># n = units</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> powerape -- detection claim (CI excludes 0, directional)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   probit, n = 150 units x 4 periods (600 obs), assumed true APE +0.0800, 95% CI, nsim = 300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   probit, n = 150 units x 4 periods (600 obs), assumed true APE +0.0800, 95% CI (alpha = 0.05), nsim = 300</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   power = 0.490 (MCSE 0.029)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   outcomes: detect 0.490 | inconclusive 0.510 | failed 0.000 </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>

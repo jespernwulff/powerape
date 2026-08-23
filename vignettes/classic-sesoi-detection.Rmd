@@ -47,7 +47,7 @@ ape_power(d, n = 5000, claim = "minimum", sesoi = 0.05)
 ```
 
 On the null boundary of the minimum-effect test, the claim succeeds with
-probability equal to the test size (about 2.5% with a 95% CI) at *any*
+probability equal to the test size (5% for the one-sided minimum-effect test) at *any*
 sample size.
 
 ## The two coherent moves

@@ -20,9 +20,9 @@ d <- set_ape(d, target = 0.05)   # truth = SESOI = 5 pp
 ape_power(d, n = 5000, claim = "detect", sesoi = 0.05,
           nsim = 600, seed = 1)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 5000, assumed true APE +0.0500, 95% CI, nsim = 600
+#>   probit, n = 5000, assumed true APE +0.0500, 95% CI (alpha = 0.05), nsim = 600
 #>   power = 0.962 (MCSE 0.008)
-#>   outcomes: minimum 0.030 | detect-only 0.932 | inconclusive 0.008 | equivalence 0.030 | failed 0.000
+#>   outcomes: minimum 0.052 | detect-only 0.888 | inconclusive 0.000 | equivalence 0.060 | failed 0.000
 ```
 
 Note what the outcome distribution shows: even with ample detection
@@ -41,12 +41,12 @@ returning a useless number:
 
 ape_power(d, n = 5000, claim = "minimum", sesoi = 0.05)
 #> Error:
-#> ! Assumed true APE (0.0500 in magnitude) does not exceed the SESOI (0.0500). On or below the null boundary of the minimum-effect test the claim succeeds with probability ~2.5% (the test size) at ANY sample size, so no n delivers meaningful power. Either assume a planning value above the SESOI, or run the classic SESOI analysis instead: claim = "detect" with the target set to the SESOI.
+#> ! Assumed true APE (0.0500 in magnitude) does not exceed the SESOI (0.0500). On or below the null boundary of the minimum-effect test the claim succeeds with probability ~5.0% (the test size) at ANY sample size, so no n delivers meaningful power. Either assume a planning value above the SESOI, or run the classic SESOI analysis instead: claim = "detect" with the target set to the SESOI.
 ```
 
 On the null boundary of the minimum-effect test, the claim succeeds with
-probability equal to the test size (about 2.5% with a 95% CI) at *any*
-sample size.
+probability equal to the test size (5% for the one-sided minimum-effect
+test) at *any* sample size.
 
 ## The two coherent moves
 
@@ -68,9 +68,9 @@ d8 <- set_ape(d, target = 0.08)
 ape_n(d8, power = 0.80, claim = "minimum", sesoi = 0.05,
       nsim = 500, seed = 3)
 #> powerape required sample size -- minimum claim
-#>   n = 8054 for 80% target power (confirmed 0.826, MCSE 0.008)
-#>   assumed true APE +0.0800, sesoi 0.050, 95% CI, probit
-#>   search: 1 step(s); confirmed in 2 round(s) at nsim = 2000.
+#>   n = 6117 for 80% target power (confirmed 0.788, MCSE 0.009)
+#>   assumed true APE +0.0800, sesoi 0.050, 90% CI, probit
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
 ```
 
 The gap between those two n’s is the price of concluding “meaningfully
@@ -89,7 +89,7 @@ rate.
 d0 <- set_ape(d, target = 0)
 ape_power(d0, n = 2000, claim = "detect", nsim = 600, seed = 4)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 2000, assumed true APE +0.0000, 95% CI, nsim = 600
+#>   probit, n = 2000, assumed true APE +0.0000, 95% CI (alpha = 0.05), nsim = 600
 #>   power = 0.022 (MCSE 0.006)
 #>   outcomes: detect 0.022 | inconclusive 0.978 | failed 0.000
 ```

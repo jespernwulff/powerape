@@ -21,7 +21,8 @@ ape_mde(
   power = 0.8,
   claim = c("detect", "minimum", "equivalence"),
   sesoi = NULL,
-  conf = 0.95,
+  alpha = 0.05,
+  conf = NULL,
   nsim = 1000,
   seed = NULL,
   main_focal = NULL,
@@ -60,9 +61,17 @@ ape_mde(
   `"minimum"` and `"equivalence"`; optional for `"detect"` (if supplied,
   the outcome table is still broken out against it).
 
+- alpha:
+
+  The claim's error rate (default 0.05): two-sided for `"detect"`,
+  one-sided for `"minimum"`, TOST for `"equivalence"`.
+
 - conf:
 
-  CI level (default 0.95).
+  Optional override: the interval level used for the claim itself
+  (`1 - alpha` for detection, `1 - 2 alpha` otherwise). Supplying
+  `conf = 0.95` for a minimum-effect or equivalence claim reproduces the
+  pre-1.8.0 behavior (one-sided error rate 2.5%).
 
 - nsim:
 

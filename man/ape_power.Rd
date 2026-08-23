@@ -9,7 +9,8 @@ ape_power(
   n,
   claim = c("minimum", "detect", "equivalence"),
   sesoi = NULL,
-  conf = 0.95,
+  alpha = 0.05,
+  conf = NULL,
   nsim = 1000,
   seed = NULL,
   se = c("model", "robust")
@@ -26,7 +27,13 @@ ape_power(
 \code{"minimum"} and \code{"equivalence"}; optional for \code{"detect"} (if supplied,
 the outcome table is still broken out against it).}
 
-\item{conf}{CI level (default 0.95).}
+\item{alpha}{The claim's error rate (default 0.05): two-sided for
+\code{"detect"}, one-sided for \code{"minimum"}, TOST for \code{"equivalence"}.}
+
+\item{conf}{Optional override: the interval level used for the claim
+itself (\code{1 - alpha} for detection, \verb{1 - 2 alpha} otherwise). Supplying
+\code{conf = 0.95} for a minimum-effect or equivalence claim reproduces the
+pre-1.8.0 behavior (one-sided error rate 2.5\%).}
 
 \item{nsim}{Number of simulation replications.}
 
@@ -52,6 +59,19 @@ claim (Riesthuis, 2024): \code{"minimum"} (CI lower bound above the SESOI --
 the default and the package's point), \code{"detect"} (CI excludes 0,
 directional), or \code{"equivalence"} (CI within +/- SESOI). Also reports the
 full outcome distribution.
+}
+\details{
+\strong{Error-rate convention.} Every claim is tested at \code{alpha} (default
+0.05) in its conventional form. Detection is the two-sided test at
+\code{alpha}, read off the \code{1 - alpha} (95\%) interval (only correctly signed
+rejections count, which costs no power). The minimum-effect claim is a
+one-sided test at \code{alpha} and equivalence a two-one-sided-tests (TOST)
+procedure at \code{alpha}; both read off the \verb{1 - 2 alpha} (90\%) interval,
+the convention of Lakens (2017), Lakens et al. (2018), TOSTER, and
+Riesthuis (2024) for equivalence. The outcome distribution uses both
+intervals accordingly. To reproduce the more conservative choice of a
+95\% interval for the minimum-effect test (Riesthuis, 2024) pass
+\code{conf = 0.95}, which sets that claim's one-sided error rate to 2.5\%.
 }
 \examples{
 \donttest{

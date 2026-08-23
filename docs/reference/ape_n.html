@@ -27,7 +27,7 @@ and AIE designs alike."><meta property="og:image" content="https://jespernwulff.
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,7 +82,8 @@ and AIE designs alike.</p>
 <span>  power <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  claim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"minimum"</span>, <span class="st">"detect"</span>, <span class="st">"equivalence"</span><span class="op">)</span>,</span>
 <span>  sesoi <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  conf <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  conf <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nsim <span class="op">=</span> <span class="fl">1500</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">2e+06</span><span class="op">)</span>,</span>
@@ -115,8 +116,16 @@ and AIE designs alike.</p>
 the outcome table is still broken out against it).</p></dd>
 
 
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>The claim's error rate (default 0.05): two-sided for
+<code>"detect"</code>, one-sided for <code>"minimum"</code>, TOST for <code>"equivalence"</code>.</p></dd>
+
+
 <dt id="arg-conf">conf<a class="anchor" aria-label="anchor" href="#arg-conf"></a></dt>
-<dd><p>CI level (default 0.95).</p></dd>
+<dd><p>Optional override: the interval level used for the claim
+itself (<code>1 - alpha</code> for detection, <code>1 - 2 alpha</code> otherwise). Supplying
+<code>conf = 0.95</code> for a minimum-effect or equivalence claim reproduces the
+pre-1.8.0 behavior (one-sided error rate 2.5%).</p></dd>
 
 
 <dt id="arg-nsim">nsim<a class="anchor" aria-label="anchor" href="#arg-nsim"></a></dt>

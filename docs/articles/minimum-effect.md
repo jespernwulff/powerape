@@ -76,9 +76,9 @@ infeasible (an APE of +0.40 cannot exist at a baseline rate of 0.85).
 ape_power(d, n = 1500, claim = "minimum", sesoi = 0.05,
           nsim = 500, seed = 1)
 #> powerape -- minimum-effect claim (CI lower bound > 0.050)
-#>   probit, n = 1500, assumed true APE +0.1000, 95% CI, nsim = 500
-#>   power = 0.562 (MCSE 0.022)
-#>   outcomes: minimum 0.562 | detect-only 0.430 | inconclusive 0.008 | equivalence 0.000 | failed 0.000
+#>   probit, n = 1500, assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 500
+#>   power = 0.656 (MCSE 0.021)
+#>   outcomes: minimum 0.656 | detect-only 0.336 | inconclusive 0.008 | equivalence 0.000 | failed 0.000
 ```
 
 Read the **outcome distribution**, not just the power number: some
@@ -93,8 +93,8 @@ the SESOI (“detect-only”) – exactly the inconclusiveness Riesthuis
 ape_n(d, power = 0.80, claim = "minimum", sesoi = 0.05,
       nsim = 500, seed = 2)
 #> powerape required sample size -- minimum claim
-#>   n = 2673 for 80% target power (confirmed 0.799, MCSE 0.009)
-#>   assumed true APE +0.1000, sesoi 0.050, 95% CI, probit
+#>   n = 2106 for 80% target power (confirmed 0.806, MCSE 0.009)
+#>   assumed true APE +0.1000, sesoi 0.050, 90% CI, probit
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
 ```
 
@@ -124,7 +124,7 @@ same conservative confirmation stage as
 ape_mde(d, n = 1500, claim = "minimum", sesoi = 0.05,
         nsim = 500, seed = 6)
 #> powerape minimum detectable APE -- minimum claim
-#>   MDE = 0.1167 at n = 1500 for 80% target power (confirmed 0.807, MCSE 0.009)
+#>   MDE = 0.1092 at n = 1500 for 80% target power (confirmed 0.805, MCSE 0.009)
 #>   smallest effect demonstrably above sesoi 0.050
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
 ```
@@ -151,14 +151,14 @@ ape_robust(d, n = 2200, claim = "minimum", sesoi = 0.05,
            nsim = 300, seed = 4, nmax = FALSE)
 #> powerape robustness sweep -- minimum claim, APE, pin = ape
 #>   n = 2200, nsim = 300 per scenario, 3 scenario(s) over: baseline
-#>   power range [0.687, 0.773]; worst scenario:
-#>  baseline implied_effect     power       mcse
-#>       0.4            0.1 0.6866667 0.02678031
+#>   power range [0.797, 0.847]; worst scenario:
+#>  baseline implied_effect     power      mcse
+#>       0.4            0.1 0.7966667 0.0232371
 #>   scenarios:
 #>  baseline implied_effect     power       mcse
-#>       0.2            0.1 0.7733333 0.02417222
-#>       0.3            0.1 0.7333333 0.02553139
-#>       0.4            0.1 0.6866667 0.02678031
+#>       0.2            0.1 0.8466667 0.02080242
+#>       0.3            0.1 0.8466667 0.02080242
+#>       0.4            0.1 0.7966667 0.02323710
 ```
 
 By default the APE is **re-pinned in every scenario** (`pin = "ape"`),
@@ -173,20 +173,21 @@ pw <- ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05,
                 nsim = 500, seed = 5)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.7.0), following the
+#> (APE) of treat using the powerape package (version 1.8.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); parametric covariates (age, female; Gaussian-copula dependence);
 #> baseline outcome rate 0.300 with the focal at reference; nuisance covariates
 #> contribute a latent pseudo-R-squared of 0.15. The assumed true APE was 0.100
 #> (10.0 percentage points). At a sample size of n = 2200, simulated power for
-#> the minimum-effect claim (the 95% confidence interval's lower bound exceeding
-#> the smallest effect size of interest, 0.050) was 0.710 (Monte Carlo SE 0.020;
-#> 500 replications). Across replications, the probability of concluding a
-#> meaningful effect was 0.710, of detection without meaningfulness 0.290, of an
-#> inconclusive result 0.000, and of equivalence 0.000. Estimation used maximum
-#> likelihood with delta-method Wald confidence intervals; replications that
-#> failed to converge (0.0%) counted against the claim.
+#> the minimum-effect claim (the 90% confidence interval's lower bound exceeding
+#> the smallest effect size of interest, 0.050; a one-sided test at alpha = 5%)
+#> was 0.808 (Monte Carlo SE 0.018; 500 replications). Across replications, the
+#> probability of concluding a meaningful effect was 0.808, of detection without
+#> meaningfulness 0.192, of an inconclusive result 0.000, and of equivalence
+#> 0.000. Estimation used maximum likelihood with delta-method Wald confidence
+#> intervals; replications that failed to converge (0.0%) counted against the
+#> claim.
 ```
 
 ## References

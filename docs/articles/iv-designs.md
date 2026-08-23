@@ -63,7 +63,7 @@ stage instead; the pinning step is identical.
 
 ape_power(d, n = 1200, claim = "detect", nsim = 400, seed = 1)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 1200, assumed true APE +0.1000, 95% CI, nsim = 400, stacked robust SEs
+#>   probit, n = 1200, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 400, stacked robust SEs
 #>   power = 0.210 (MCSE 0.020)
 #>   outcomes: detect 0.210 | inconclusive 0.790 | failed 0.000
 ```
@@ -82,7 +82,7 @@ ds <- ape_dgp(
 ds <- set_ape(ds, target = 0.10)
 ape_power(ds, n = 1200, claim = "detect", nsim = 400, seed = 2)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 1200, assumed true APE +0.1000, 95% CI, nsim = 400
+#>   probit, n = 1200, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 400
 #>   power = 0.955 (MCSE 0.010)
 #>   outcomes: detect 0.955 | inconclusive 0.045 | failed 0.000
 ```
@@ -138,7 +138,7 @@ di <- ape_dgp_iv(
 di <- set_aie(di, target = 0.06, main_focal = 0.10, main_moderator = 0.05)
 ape_power(di, n = 2000, claim = "detect", nsim = 250, seed = 4)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 2000, assumed true AIE +0.0600, 95% CI, nsim = 250, stacked robust SEs
+#>   probit, n = 2000, assumed true AIE +0.0600, 95% CI (alpha = 0.05), nsim = 250, stacked robust SEs
 #>   power = 0.064 (MCSE 0.015)
 #>   outcomes: detect 0.064 | inconclusive 0.936 | failed 0.000
 ```

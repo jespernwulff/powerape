@@ -1,5 +1,35 @@
 # Changelog
 
+## powerape 1.8.0
+
+- **Breaking: error-rate convention.** Every claim is now tested at
+  `alpha` (new argument, default 0.05) in its conventional form.
+  Detection stays the two-sided 5% test (95% interval, directional
+  counting); the minimum-effect claim is a one-sided test at 5% and
+  equivalence a TOST at 5%, both read off the **90%** interval – the
+  convention of Lakens (2017), Lakens et al. (2018), TOSTER, and
+  Riesthuis (2024) for equivalence. Before 1.8.0 all three claims read
+  the 95% interval, which made the SESOI claims one-sided tests at 2.5%
+  (a TOST at 2.5%): internally consistent but stricter than the field’s
+  convention without a stated reason. Consequences: minimum-effect and
+  equivalence power rise and required n falls (Design A’s minimum-claim
+  requirement moves from ~2,600 to ~2,100); detection results are
+  unchanged. `conf` remains as an explicit override of the claim’s own
+  interval level (`conf = 0.95` on a SESOI claim reproduces the old
+  numbers). The outcome distribution uses both intervals accordingly.
+  [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+  now names the claim’s error rate.
+- Verification: the TOSTER concordance test and battery V7 now audit the
+  DEFAULT convention (powerape’s default must match TOSTER at TOSTER’s
+  default alpha with no remapping), and a new battery check V19 measures
+  size at the claim boundaries (.05 for the SESOI claims, .025 for
+  directional detection). Why the old battery did not flag the issue:
+  V1/V7/V13 verified that the engine implements its stated rule exactly
+  – V7 even matched TOSTER at a remapped alpha = .025 and guarded that
+  .05 “did not match” – so a convention choice could not be caught by a
+  convention-matched check. The new checks pin the default to the
+  field’s default.
+
 ## powerape 1.7.0
 
 - **Unbalanced panels** (Wooldridge, 2019, J. Econometrics).

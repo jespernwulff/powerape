@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,9 +93,9 @@ probability”. In <code>powerape</code> this is
 <span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">5000</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>          nsim <span class="op">=</span> <span class="fl">600</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
-<span><span class="co">#&gt;   probit, n = 5000, assumed true APE +0.0500, 95% CI, nsim = 600</span></span>
+<span><span class="co">#&gt;   probit, n = 5000, assumed true APE +0.0500, 95% CI (alpha = 0.05), nsim = 600</span></span>
 <span><span class="co">#&gt;   power = 0.962 (MCSE 0.008)</span></span>
-<span><span class="co">#&gt;   outcomes: minimum 0.030 | detect-only 0.932 | inconclusive 0.008 | equivalence 0.030 | failed 0.000</span></span></code></pre></div>
+<span><span class="co">#&gt;   outcomes: minimum 0.052 | detect-only 0.888 | inconclusive 0.000 | equivalence 0.060 | failed 0.000</span></span></code></pre></div>
 <p>Note what the outcome distribution shows: even with ample detection
 power, essentially <strong>no study can claim the effect is meaningfully
 large</strong> (<code>minimum</code> outcome near zero), because when
@@ -111,10 +111,10 @@ explanation rather than returning a useless number:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">5000</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Assumed true APE (0.0500 in magnitude) does not exceed the SESOI (0.0500). On or below the null boundary of the minimum-effect test the claim succeeds with probability ~2.5% (the test size) at ANY sample size, so no n delivers meaningful power. Either assume a planning value above the SESOI, or run the classic SESOI analysis instead: claim = "detect" with the target set to the SESOI.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Assumed true APE (0.0500 in magnitude) does not exceed the SESOI (0.0500). On or below the null boundary of the minimum-effect test the claim succeeds with probability ~5.0% (the test size) at ANY sample size, so no n delivers meaningful power. Either assume a planning value above the SESOI, or run the classic SESOI analysis instead: claim = "detect" with the target set to the SESOI.</span></span></code></pre></div>
 <p>On the null boundary of the minimum-effect test, the claim succeeds
-with probability equal to the test size (about 2.5% with a 95% CI) at
-<em>any</em> sample size.</p>
+with probability equal to the test size (5% for the one-sided
+minimum-effect test) at <em>any</em> sample size.</p>
 </div>
 <div class="section level2">
 <h2 id="the-two-coherent-moves">The two coherent moves<a class="anchor" aria-label="anchor" href="#the-two-coherent-moves"></a>
@@ -136,9 +136,9 @@ more observations:</p>
 <span><span class="fu"><a href="../reference/ape_n.html">ape_n</a></span><span class="op">(</span><span class="va">d8</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>      nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape required sample size -- minimum claim</span></span>
-<span><span class="co">#&gt;   n = 8054 for 80% target power (confirmed 0.826, MCSE 0.008)</span></span>
-<span><span class="co">#&gt;   assumed true APE +0.0800, sesoi 0.050, 95% CI, probit</span></span>
-<span><span class="co">#&gt;   search: 1 step(s); confirmed in 2 round(s) at nsim = 2000.</span></span></code></pre></div>
+<span><span class="co">#&gt;   n = 6117 for 80% target power (confirmed 0.788, MCSE 0.009)</span></span>
+<span><span class="co">#&gt;   assumed true APE +0.0800, sesoi 0.050, 90% CI, probit</span></span>
+<span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.</span></span></code></pre></div>
 <p>The gap between those two n’s is the price of concluding
 “meaningfully large” instead of “not zero”. Making that price visible –
 in APE units, before data collection – is precisely what a SESOI-based
@@ -154,7 +154,7 @@ rate.</p>
 <code class="sourceCode R"><span><span class="va">d0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_ape.html">set_ape</a></span><span class="op">(</span><span class="va">d</span>, target <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d0</span>, n <span class="op">=</span> <span class="fl">2000</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">600</span>, seed <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
-<span><span class="co">#&gt;   probit, n = 2000, assumed true APE +0.0000, 95% CI, nsim = 600</span></span>
+<span><span class="co">#&gt;   probit, n = 2000, assumed true APE +0.0000, 95% CI (alpha = 0.05), nsim = 600</span></span>
 <span><span class="co">#&gt;   power = 0.022 (MCSE 0.006)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.022 | inconclusive 0.978 | failed 0.000</span></span></code></pre></div>
 </div>

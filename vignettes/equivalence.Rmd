@@ -69,9 +69,11 @@ ape_robust(d, n = 2600, claim = "equivalence", sesoi = 0.05,
 
 ## Reporting
 
-`power_statement()` works for equivalence designs too, and states the CI
-convention explicitly -- with a 95% interval the implied two one-sided
-tests run at the conservative 2.5% level (Riesthuis, 2024).
+`power_statement()` works for equivalence designs too, and states the
+error-rate convention explicitly: the equivalence claim is a TOST at
+`alpha = .05`, read off the 90% interval (Lakens, 2017; Riesthuis, 2024),
+the same convention TOSTER uses. The conservative alternative of a 95%
+interval (a TOST at 2.5%) is available via `conf = 0.95`.
 
 ```{r}
 pw <- ape_power(d, n = 2600, claim = "equivalence", sesoi = 0.05,

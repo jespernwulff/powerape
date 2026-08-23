@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -140,7 +140,7 @@ linear first stage instead; the pinning step is identical.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">1200</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">400</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
-<span><span class="co">#&gt;   probit, n = 1200, assumed true APE +0.1000, 95% CI, nsim = 400, stacked robust SEs</span></span>
+<span><span class="co">#&gt;   probit, n = 1200, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 400, stacked robust SEs</span></span>
 <span><span class="co">#&gt;   power = 0.210 (MCSE 0.020)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.210 | inconclusive 0.790 | failed 0.000</span></span></code></pre></div>
 <p>Compare that with the same world <em>without</em> endogeneity,
@@ -155,7 +155,7 @@ estimated by plain probit:</p>
 <span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_ape.html">set_ape</a></span><span class="op">(</span><span class="va">ds</span>, target <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">ds</span>, n <span class="op">=</span> <span class="fl">1200</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">400</span>, seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
-<span><span class="co">#&gt;   probit, n = 1200, assumed true APE +0.1000, 95% CI, nsim = 400</span></span>
+<span><span class="co">#&gt;   probit, n = 1200, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 400</span></span>
 <span><span class="co">#&gt;   power = 0.955 (MCSE 0.010)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.955 | inconclusive 0.045 | failed 0.000</span></span></code></pre></div>
 <p>The gap is <strong>the IV price</strong>: the CF estimator identifies
@@ -206,7 +206,7 @@ interactions</strong> – as instruments must in interaction models.</p>
 <span><span class="va">di</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_aie.html">set_aie</a></span><span class="op">(</span><span class="va">di</span>, target <span class="op">=</span> <span class="fl">0.06</span>, main_focal <span class="op">=</span> <span class="fl">0.10</span>, main_moderator <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">di</span>, n <span class="op">=</span> <span class="fl">2000</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">250</span>, seed <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
-<span><span class="co">#&gt;   probit, n = 2000, assumed true AIE +0.0600, 95% CI, nsim = 250, stacked robust SEs</span></span>
+<span><span class="co">#&gt;   probit, n = 2000, assumed true AIE +0.0600, 95% CI (alpha = 0.05), nsim = 250, stacked robust SEs</span></span>
 <span><span class="co">#&gt;   power = 0.064 (MCSE 0.015)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.064 | inconclusive 0.936 | failed 0.000</span></span></code></pre></div>
 <p>The interaction tax and the IV price compound. Interaction claims

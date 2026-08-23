@@ -82,8 +82,9 @@ print.powerape_power <- function(x, ...) {
   se_lab <- if (identical(x$dgp$route, "iv")) ", stacked robust SEs"
             else if (identical(x$se, "robust")) ", robust SEs"
             else ""
-  cat(sprintf("  %s, %s, assumed true %s %+.4f, %.0f%% CI, nsim = %d%s\n",
-              x$model, n_lab, toupper(x$estimand), x$target, 100 * x$conf,
+  al <- if (identical(x$claim, "detect")) 1 - x$conf else (1 - x$conf) / 2
+  cat(sprintf("  %s, %s, assumed true %s %+.4f, %.0f%% CI (alpha = %g), nsim = %d%s\n",
+              x$model, n_lab, toupper(x$estimand), x$target, 100 * x$conf, al,
               x$nsim, se_lab))
   cat(sprintf("  power = %.3f (MCSE %.3f)\n", x$power, x$mcse))
   o <- x$outcomes

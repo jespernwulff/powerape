@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,6 +101,7 @@
 </tr>
 </tbody>
 </table>
+<p>Every claim is tested at <code>alpha = .05</code> in its conventional form: detection is the two-sided test (95% interval); the minimum-effect claim is a one-sided test and equivalence a TOST, both read off the 90% interval (Lakens, 2017; Riesthuis, 2024).</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -170,7 +171,7 @@
 <div class="section level2">
 <h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a>
 </h2>
-<p>The engine is anchored against independent implementations: the two-proportion case reproduces <code><a href="https://rdrr.io/r/stats/power.prop.test.html" class="external-link">power.prop.test()</a></code> and Stata <code>power twoproportions</code>; APE estimates and delta-method SEs match <code>marginaleffects</code> and Stata <code>margins, dydx()</code> to ~1e-6 on fixed datasets; the AIE matches <code>ginteff</code> exactly; simulated power matches exact finite-sample enumeration in the saturated case and TOSTER under matched conventions. Panel designs match Stata’s clustered <code>margins</code> (APE and AIE double difference) to all printed digits on fixed panels, the clustered sandwich matches <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> exactly, and the engine reproduces the Donner-Klar cluster design effect. The control-function route reproduces Stata’s <code>cfprobit</code> across all four first-stage models — coefficients, stacked robust/clustered SEs, and <code>margins</code> ASF effects to ~1e-6 — including the endogenous-interaction design run with Stata’s own syntax. See the package tests and the validation battery for details.</p>
+<p>The engine is anchored against independent implementations: the two-proportion case reproduces <code><a href="https://rdrr.io/r/stats/power.prop.test.html" class="external-link">power.prop.test()</a></code> and Stata <code>power twoproportions</code>; APE estimates and delta-method SEs match <code>marginaleffects</code> and Stata <code>margins, dydx()</code> to ~1e-6 on fixed datasets; the AIE matches <code>ginteff</code> exactly; simulated power matches exact finite-sample enumeration in the saturated case and TOSTER at its own default alpha (every claim runs at alpha = .05 in its conventional form). Panel designs match Stata’s clustered <code>margins</code> (APE and AIE double difference) to all printed digits on fixed panels, the clustered sandwich matches <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> exactly, and the engine reproduces the Donner-Klar cluster design effect. The control-function route reproduces Stata’s <code>cfprobit</code> across all four first-stage models — coefficients, stacked robust/clustered SEs, and <code>margins</code> ASF effects to ~1e-6 — including the endogenous-interaction design run with Stata’s own syntax. See the package tests and the validation battery for details.</p>
 </div>
 <div class="section level2">
 <h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>

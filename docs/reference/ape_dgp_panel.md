@@ -170,7 +170,7 @@ d <- ape_dgp_panel(
 d <- set_ape(d, target = 0.08)
 ape_power(d, n = 150, claim = "detect", nsim = 300, seed = 1)  # n = units
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 150 units x 4 periods (600 obs), assumed true APE +0.0800, 95% CI, nsim = 300
+#>   probit, n = 150 units x 4 periods (600 obs), assumed true APE +0.0800, 95% CI (alpha = 0.05), nsim = 300
 #>   power = 0.490 (MCSE 0.029)
 #>   outcomes: detect 0.490 | inconclusive 0.510 | failed 0.000 
 # }

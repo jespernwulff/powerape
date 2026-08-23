@@ -60,7 +60,7 @@ directly:
 
 ape_power(d, n = 3000, claim = "detect", nsim = 500, seed = 1)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 3000, assumed true AIE +0.0800, 95% CI, nsim = 500
+#>   probit, n = 3000, assumed true AIE +0.0800, 95% CI (alpha = 0.05), nsim = 500
 #>   power = 0.662 (MCSE 0.021)
 #>   outcomes: detect 0.662 | inconclusive 0.338 | failed 0.000
 ```
@@ -76,7 +76,7 @@ d_main <- ape_dgp(model = "probit",
 d_main <- set_ape(d_main, target = 0.08)
 ape_power(d_main, n = 3000, claim = "detect", nsim = 500, seed = 2)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 3000, assumed true APE +0.0800, 95% CI, nsim = 500
+#>   probit, n = 3000, assumed true APE +0.0800, 95% CI (alpha = 0.05), nsim = 500
 #>   power = 0.996 (MCSE 0.003)
 #>   outcomes: detect 0.996 | inconclusive 0.004 | failed 0.000
 ```

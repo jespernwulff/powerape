@@ -66,13 +66,14 @@ rebuild_dgp <- function(dgp, spec) {
 #' }
 #' @export
 ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
-                       sesoi = NULL, conf = 0.95, nsim = 800, seed = NULL,
-                       vary, pin = c("ape", "coefficients"),
+                       sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 800,
+                       seed = NULL, vary, pin = c("ape", "coefficients"),
                        mode = c("power", "mde"), power = 0.80,
                        grid_points = 3, nmax = TRUE, nmax_power = 0.90) {
   claim <- match.arg(claim)
   pin <- match.arg(pin)
   mode <- match.arg(mode)
+  conf <- claim_levels(claim, alpha, conf)$conf_claim
   if (mode == "mde" && claim == "equivalence")
     stop(paste("MDE mode searches the effect for detect/minimum claims; for",
                "the equivalence analog run ape_mde(claim = \"equivalence\")",

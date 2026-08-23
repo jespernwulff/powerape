@@ -141,7 +141,7 @@ d <- ape_dgp_iv(
 d <- set_ape(d, target = 0.10)
 ape_power(d, n = 1500, claim = "detect", nsim = 300, seed = 1)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 1500, assumed true APE +0.1000, 95% CI, nsim = 300, stacked robust SEs
+#>   probit, n = 1500, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 300, stacked robust SEs
 #>   power = 0.220 (MCSE 0.024)
 #>   outcomes: detect 0.220 | inconclusive 0.780 | failed 0.000 
 # }

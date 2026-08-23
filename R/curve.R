@@ -21,10 +21,11 @@
 #' }
 #' @export
 ape_curve <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
-                      sesoi = NULL, conf = 0.95, nsim = 1000, seed = NULL,
-                      se = c("model", "robust")) {
+                      sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 1000,
+                      seed = NULL, se = c("model", "robust")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
+  conf <- claim_levels(claim, alpha, conf)$conf_claim
   n <- sort(unique(as.integer(n)))
   stopifnot(length(n) >= 2L, all(n >= 20))
   check_coherence(dgp, claim, sesoi, conf)
@@ -118,12 +119,13 @@ plot.powerape_curve <- function(x, target_power = NULL, ...) {
 #' }
 #' @export
 ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence"),
-                  sesoi = NULL, conf = 0.95, nsim = 1500, seed = NULL,
-                  n_range = c(30, 2e6), max_iter = 5,
+                  sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 1500,
+                  seed = NULL, n_range = c(30, 2e6), max_iter = 5,
                   confirm = TRUE, nsim_confirm = 4 * nsim,
                   se = c("model", "robust")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
+  conf <- claim_levels(claim, alpha, conf)$conf_claim
   stopifnot(is.numeric(power), length(power) == 1L, power > 0.5, power < 0.999)
   check_coherence(dgp, claim, sesoi, conf)
   t_abs <- abs(dgp$target_est)

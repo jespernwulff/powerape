@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,12 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.8.0" id="powerape-180">powerape 1.8.0<a class="anchor" aria-label="anchor" href="#powerape-180"></a></h2>
+<ul><li>
+<strong>Breaking: error-rate convention.</strong> Every claim is now tested at <code>alpha</code> (new argument, default 0.05) in its conventional form. Detection stays the two-sided 5% test (95% interval, directional counting); the minimum-effect claim is a one-sided test at 5% and equivalence a TOST at 5%, both read off the <strong>90%</strong> interval – the convention of Lakens (2017), Lakens et al. (2018), TOSTER, and Riesthuis (2024) for equivalence. Before 1.8.0 all three claims read the 95% interval, which made the SESOI claims one-sided tests at 2.5% (a TOST at 2.5%): internally consistent but stricter than the field’s convention without a stated reason. Consequences: minimum-effect and equivalence power rise and required n falls (Design A’s minimum-claim requirement moves from ~2,600 to ~2,100); detection results are unchanged. <code>conf</code> remains as an explicit override of the claim’s own interval level (<code>conf = 0.95</code> on a SESOI claim reproduces the old numbers). The outcome distribution uses both intervals accordingly. <code><a href="../reference/power_statement.html">power_statement()</a></code> now names the claim’s error rate.</li>
+<li>Verification: the TOSTER concordance test and battery V7 now audit the DEFAULT convention (powerape’s default must match TOSTER at TOSTER’s default alpha with no remapping), and a new battery check V19 measures size at the claim boundaries (.05 for the SESOI claims, .025 for directional detection). Why the old battery did not flag the issue: V1/V7/V13 verified that the engine implements its stated rule exactly – V7 even matched TOSTER at a remapped alpha = .025 and guarded that .05 “did not match” – so a convention choice could not be caught by a convention-matched check. The new checks pin the default to the field’s default.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.7.0" id="powerape-170">powerape 1.7.0<a class="anchor" aria-label="anchor" href="#powerape-170"></a></h2>
 <ul><li>

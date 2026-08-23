@@ -35,19 +35,19 @@ pw <- ape_power(d, n = 800, claim = "minimum", sesoi = 0.03,
                 nsim = 500, seed = 1)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.7.0), following the
+#> (APE) of treat using the powerape package (version 1.8.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); no additional covariates; baseline outcome rate 0.300 with the focal
 #> at reference; nuisance covariates contribute a latent pseudo-R-squared of
 #> 0.00. The assumed true APE was 0.100 (10.0 percentage points). At a sample
-#> size of n = 800, simulated power for the minimum-effect claim (the 95%
+#> size of n = 800, simulated power for the minimum-effect claim (the 90%
 #> confidence interval's lower bound exceeding the smallest effect size of
-#> interest, 0.030) was 0.554 (Monte Carlo SE 0.022; 500 replications). Across
-#> replications, the probability of concluding a meaningful effect was 0.554, of
-#> detection without meaningfulness 0.300, of an inconclusive result 0.146, and
-#> of equivalence 0.000. Estimation used maximum likelihood with delta-method
-#> Wald confidence intervals; replications that failed to converge (0.0%)
-#> counted against the claim.
+#> interest, 0.030; a one-sided test at alpha = 5%) was 0.678 (Monte Carlo SE
+#> 0.021; 500 replications). Across replications, the probability of concluding
+#> a meaningful effect was 0.678, of detection without meaningfulness 0.176, of
+#> an inconclusive result 0.146, and of equivalence 0.000. Estimation used
+#> maximum likelihood with delta-method Wald confidence intervals; replications
+#> that failed to converge (0.0%) counted against the claim.
 # }
 ```

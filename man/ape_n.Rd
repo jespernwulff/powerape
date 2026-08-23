@@ -9,7 +9,8 @@ ape_n(
   power = 0.9,
   claim = c("minimum", "detect", "equivalence"),
   sesoi = NULL,
-  conf = 0.95,
+  alpha = 0.05,
+  conf = NULL,
   nsim = 1500,
   seed = NULL,
   n_range = c(30, 2e+06),
@@ -30,7 +31,13 @@ ape_n(
 \code{"minimum"} and \code{"equivalence"}; optional for \code{"detect"} (if supplied,
 the outcome table is still broken out against it).}
 
-\item{conf}{CI level (default 0.95).}
+\item{alpha}{The claim's error rate (default 0.05): two-sided for
+\code{"detect"}, one-sided for \code{"minimum"}, TOST for \code{"equivalence"}.}
+
+\item{conf}{Optional override: the interval level used for the claim
+itself (\code{1 - alpha} for detection, \verb{1 - 2 alpha} otherwise). Supplying
+\code{conf = 0.95} for a minimum-effect or equivalence claim reproduces the
+pre-1.8.0 behavior (one-sided error rate 2.5\%).}
 
 \item{nsim}{Replications per search step.}
 

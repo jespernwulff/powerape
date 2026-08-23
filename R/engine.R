@@ -1,9 +1,30 @@
 # Simulation engine and power computation -------------------------------------
 
-# Core loop: nsim replications at design size n; returns CI bounds for the
-# APE/AIE, the delta-method SE, and a convergence flag per replication.
-# Replications that fail (non-convergence, separation, degenerate y) get
-# ok = FALSE and count against every claim downstream (conservative).
+# Error-rate convention (v1.8.0; DESIGN.md section 14). `alpha` is the
+# claim's error rate, each claim in its conventional form: detection is the
+# two-sided test at alpha (1 - alpha interval, directional counting);
+# the minimum-effect claim is a one-sided test at alpha and equivalence a
+# TOST at alpha (both read off the 1 - 2 alpha interval). A user-supplied
+# `conf` overrides by naming the claim's own interval level directly.
+claim_levels <- function(claim, alpha = NULL, conf = NULL) {
+  if (!is.null(conf)) {
+    stopifnot(is.numeric(conf), length(conf) == 1L, conf > 0.5, conf < 1)
+    alpha <- if (identical(claim, "detect")) 1 - conf else (1 - conf) / 2
+  } else {
+    if (is.null(alpha)) alpha <- 0.05
+    stopifnot(is.numeric(alpha), length(alpha) == 1L, alpha > 0, alpha < 0.5)
+  }
+  list(alpha = alpha,
+       conf_det = 1 - alpha,
+       conf_one = 1 - 2 * alpha,
+       conf_claim = if (identical(claim, "detect")) 1 - alpha else 1 - 2 * alpha)
+}
+
+# Core loop: nsim replications at design size n; returns the point estimate
+# and delta-method SE of the APE/AIE per replication (plus CI bounds at
+# `conf` for callers that want them) and a convergence flag. Replications
+# that fail (non-convergence, separation, degenerate y) get ok = FALSE and
+# count against every claim downstream (conservative).
 sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model") {
   z <- zcrit(conf)
   is_aie <- identical(dgp$estimand, "aie")
@@ -11,7 +32,7 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model") {
   is_iv <- identical(dgp$route, "iv")
   bt <- if (is_panel || is_iv) NULL else beta_true(dgp)
   with_seed(seed, {
-    l <- u <- se <- rep(NA_real_, nsim)
+    l <- u <- se <- pt <- rep(NA_real_, nsim)
     ok <- logical(nsim)
     for (r in seq_len(nsim)) {
       xx <- draw_x(dgp, n)
@@ -55,10 +76,11 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model") {
       if (!is.finite(s_) || s_ <= 0) next
       ok[r] <- TRUE
       se[r] <- s_
+      pt[r] <- est$ape
       l[r] <- est$ape - z * s_
       u[r] <- est$ape + z * s_
     }
-    list(l = l, u = u, se = se, ok = ok)
+    list(est = pt, l = l, u = u, se = se, ok = ok)
   })
 }
 
@@ -94,16 +116,20 @@ check_coherence <- function(dgp, claim, sesoi, conf) {
 
 # Turn simulated CIs into claim power and the outcome distribution.
 # Negative targets are mirrored so claims read in the effect's direction.
-summarize_sim <- function(sim, target, claim, sesoi, nsim) {
-  l <- sim$l
-  u <- sim$u
-  if (target < 0) {
-    tmp <- l
-    l <- -u
-    u <- -tmp
-  }
+summarize_sim <- function(sim, target, claim, sesoi, nsim, alpha = 0.05) {
+  ## two interval widths from one estimate and SE (DESIGN.md section 14):
+  ## detection reads the two-sided 1 - alpha interval, the one-sided SESOI
+  ## claims read the 1 - 2 alpha interval (minimum: one-sided test at alpha;
+  ## equivalence: TOST at alpha). Sign is flipped for negative targets so
+  ## the hypothesized direction is "positive".
+  est <- if (target < 0) -sim$est else sim$est
+  se <- sim$se
+  l_det <- est - qnorm(1 - alpha / 2) * se
+  z1 <- qnorm(1 - alpha)
+  l <- est - z1 * se
+  u <- est + z1 * se
   ok <- sim$ok
-  det <- ok & (l > 0)
+  det <- ok & (l_det > 0)
   if (!is.null(sesoi)) {
     mn <- ok & (l > sesoi)
     eq <- ok & (l > -sesoi) & (u < sesoi)
@@ -130,12 +156,13 @@ summarize_sim <- function(sim, target, claim, sesoi, nsim) {
 # Shared power computation. `enforce = FALSE` skips the coherence guards --
 # used by ape_robust(), where scenario drift can legitimately push the
 # implied effect across a claim boundary and the point is to SHOW that.
-power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE,
-                       se = "model") {
+power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
+                       enforce = TRUE, se = "model", alpha = NULL) {
   stopifnot(is.numeric(n), length(n) == 1L, n >= 20)
   if (identical(dgp$route, "panel") && n < 30)
     warning("Fewer than 30 units (clusters): cluster-robust inference is unreliable at this size.")
-  stopifnot(is.numeric(conf), length(conf) == 1L, conf > 0.5, conf < 1)
+  lv <- claim_levels(claim, alpha, conf)
+  conf <- lv$conf_claim
   stopifnot(is.numeric(nsim), length(nsim) == 1L, nsim >= 20)
   if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
     warning(sprintf(paste("`se` is fixed by the route: panel designs use",
@@ -145,9 +172,10 @@ power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE,
   }
   if (enforce) check_coherence(dgp, claim, sesoi, conf)
   sim <- sim_ci(dgp, n, nsim, conf, seed, se_type = se)
-  res <- summarize_sim(sim, dgp$target_est, claim, sesoi, nsim)
+  res <- summarize_sim(sim, dgp$target_est, claim, sesoi, nsim, lv$alpha)
   structure(
-    c(res, list(claim = claim, sesoi = sesoi, conf = conf, n = as.integer(n),
+    c(res, list(claim = claim, sesoi = sesoi, conf = conf, alpha = lv$alpha,
+                n = as.integer(n),
                 nsim = as.integer(nsim), target = dgp$target_est,
                 estimand = dgp$estimand %||% "ape",
                 se = se, model = dgp$model, dgp = dgp)),
@@ -165,13 +193,30 @@ power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE,
 #' directional), or `"equivalence"` (CI within +/- SESOI). Also reports the
 #' full outcome distribution.
 #'
+#' **Error-rate convention.** Every claim is tested at `alpha` (default
+#' 0.05) in its conventional form. Detection is the two-sided test at
+#' `alpha`, read off the `1 - alpha` (95%) interval (only correctly signed
+#' rejections count, which costs no power). The minimum-effect claim is a
+#' one-sided test at `alpha` and equivalence a two-one-sided-tests (TOST)
+#' procedure at `alpha`; both read off the `1 - 2 alpha` (90%) interval,
+#' the convention of Lakens (2017), Lakens et al. (2018), TOSTER, and
+#' Riesthuis (2024) for equivalence. The outcome distribution uses both
+#' intervals accordingly. To reproduce the more conservative choice of a
+#' 95% interval for the minimum-effect test (Riesthuis, 2024) pass
+#' `conf = 0.95`, which sets that claim's one-sided error rate to 2.5%.
+#'
 #' @param dgp A `powerape_dgp` after [set_ape()] or [set_aie()].
 #' @param n Total sample size of the simulated study.
 #' @param claim `"minimum"` (default), `"detect"`, or `"equivalence"`.
 #' @param sesoi Smallest effect size of interest, in APE units. Required for
 #'   `"minimum"` and `"equivalence"`; optional for `"detect"` (if supplied,
 #'   the outcome table is still broken out against it).
-#' @param conf CI level (default 0.95).
+#' @param alpha The claim's error rate (default 0.05): two-sided for
+#'   `"detect"`, one-sided for `"minimum"`, TOST for `"equivalence"`.
+#' @param conf Optional override: the interval level used for the claim
+#'   itself (`1 - alpha` for detection, `1 - 2 alpha` otherwise). Supplying
+#'   `conf = 0.95` for a minimum-effect or equivalence claim reproduces the
+#'   pre-1.8.0 behavior (one-sided error rate 2.5%).
 #' @param nsim Number of simulation replications.
 #' @param seed Optional seed (the caller's RNG state is preserved).
 #' @param se Standard errors for the exogenous cross-sectional routes:
@@ -192,9 +237,10 @@ power_once <- function(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE,
 #' }
 #' @export
 ape_power <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
-                      sesoi = NULL, conf = 0.95, nsim = 1000, seed = NULL,
-                      se = c("model", "robust")) {
+                      sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 1000,
+                      seed = NULL, se = c("model", "robust")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
-  power_once(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE, se = se)
+  power_once(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE, se = se,
+             alpha = alpha)
 }

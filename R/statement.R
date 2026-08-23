@@ -61,12 +61,22 @@ describe_dgp <- function(d) {
 
 claim_text <- function(claim, sesoi, conf) {
   cl <- sprintf("%.0f%%", 100 * conf)
+  ## the claim's own error rate follows from its interval: two-sided for
+  ## detection, one-sided (and TOST) for the SESOI claims
+  al <- if (identical(claim, "detect")) 1 - conf else (1 - conf) / 2
+  al_txt <- sprintf("%g%%", round(100 * al, 2))
   switch(claim,
     minimum = sprintf(paste0("the minimum-effect claim (the %s confidence ",
                              "interval's lower bound exceeding the smallest ",
-                             "effect size of interest, %.3f)"), cl, sesoi),
-    detect = sprintf("the detection claim (the %s confidence interval excluding zero, directional)", cl),
-    equivalence = sprintf("the equivalence claim (the %s confidence interval lying within +/-%.3f)", cl, sesoi))
+                             "effect size of interest, %.3f; a one-sided ",
+                             "test at alpha = %s)"), cl, sesoi, al_txt),
+    detect = sprintf(paste0("the detection claim (the %s confidence interval ",
+                            "excluding zero in the hypothesized direction; a ",
+                            "two-sided test at alpha = %s)"), cl, al_txt),
+    equivalence = sprintf(paste0("the equivalence claim (the %s confidence ",
+                                 "interval lying within +/-%.3f; two ",
+                                 "one-sided tests at alpha = %s)"),
+                          cl, sesoi, al_txt))
 }
 
 #' Render a power analysis as a citable methods paragraph

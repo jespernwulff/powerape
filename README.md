@@ -19,6 +19,11 @@ units**, built around the confidence-interval claims of Riesthuis (2024):
 | `detect` | CI excludes 0 | the effect exists (directional) |
 | `equivalence` | CI inside ±SESOI | the effect is too small to matter |
 
+Every claim is tested at `alpha = .05` in its conventional form: detection
+is the two-sided test (95% interval); the minimum-effect claim is a
+one-sided test and equivalence a TOST, both read off the 90% interval
+(Lakens, 2017; Riesthuis, 2024).
+
 ## Installation
 
 ```r
@@ -114,8 +119,8 @@ two-proportion case reproduces `power.prop.test()` and Stata
 `power twoproportions`; APE estimates and delta-method SEs match
 `marginaleffects` and Stata `margins, dydx()` to ~1e-6 on fixed datasets;
 the AIE matches `ginteff` exactly; simulated power matches exact
-finite-sample enumeration in the saturated case and TOSTER under matched
-conventions. Panel designs match Stata's clustered `margins` (APE and AIE
+finite-sample enumeration in the saturated case and TOSTER at its own default
+alpha (every claim runs at alpha = .05 in its conventional form). Panel designs match Stata's clustered `margins` (APE and AIE
 double difference) to all printed digits on fixed panels, the clustered
 sandwich matches `sandwich::vcovCL` exactly, and the engine reproduces
 the Donner-Klar cluster design effect. The control-function route

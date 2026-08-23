@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -133,7 +133,7 @@ directly:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">3000</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
-<span><span class="co">#&gt;   probit, n = 3000, assumed true AIE +0.0800, 95% CI, nsim = 500</span></span>
+<span><span class="co">#&gt;   probit, n = 3000, assumed true AIE +0.0800, 95% CI (alpha = 0.05), nsim = 500</span></span>
 <span><span class="co">#&gt;   power = 0.662 (MCSE 0.021)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.662 | inconclusive 0.338 | failed 0.000</span></span></code></pre></div>
 <p>Compare that with how easy an equally sized <em>main effect</em>
@@ -146,7 +146,7 @@ would be:</p>
 <span><span class="va">d_main</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_ape.html">set_ape</a></span><span class="op">(</span><span class="va">d_main</span>, target <span class="op">=</span> <span class="fl">0.08</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d_main</span>, n <span class="op">=</span> <span class="fl">3000</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
-<span><span class="co">#&gt;   probit, n = 3000, assumed true APE +0.0800, 95% CI, nsim = 500</span></span>
+<span><span class="co">#&gt;   probit, n = 3000, assumed true APE +0.0800, 95% CI (alpha = 0.05), nsim = 500</span></span>
 <span><span class="co">#&gt;   power = 0.996 (MCSE 0.003)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.996 | inconclusive 0.004 | failed 0.000</span></span></code></pre></div>
 <p>Same 8-point effect, same n – a fraction of the power. The folk

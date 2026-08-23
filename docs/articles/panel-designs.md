@@ -99,9 +99,9 @@ infeasible.
 ape_power(d, n = 300, claim = "minimum", sesoi = 0.05,
           nsim = 400, seed = 1)
 #> powerape -- minimum-effect claim (CI lower bound > 0.050)
-#>   probit, n = 300 units x 4 periods (1200 obs), assumed true APE +0.1000, 95% CI, nsim = 400
-#>   power = 0.442 (MCSE 0.025)
-#>   outcomes: minimum 0.442 | detect-only 0.505 | inconclusive 0.052 | equivalence 0.000 | failed 0.000
+#>   probit, n = 300 units x 4 periods (1200 obs), assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 400
+#>   power = 0.540 (MCSE 0.025)
+#>   outcomes: minimum 0.540 | detect-only 0.407 | inconclusive 0.052 | equivalence 0.000 | failed 0.000
 ```
 
 `n = 300` means 300 units observed for 4 periods – 1,200 unit-period
@@ -120,7 +120,7 @@ answers it with n still counted in units:
 ape_mde(d, n = 400, claim = "minimum", sesoi = 0.05,
         nsim = 400, seed = 9)
 #> powerape minimum detectable APE -- minimum claim
-#>   MDE = 0.1173 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.791, MCSE 0.010)
+#>   MDE = 0.1097 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.792, MCSE 0.010)
 #>   smallest effect demonstrably above sesoi 0.050
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.
 ```
@@ -146,9 +146,9 @@ cs <- set_ape(cs, target = 0.10)
 ape_power(cs, n = 1200, claim = "minimum", sesoi = 0.05,
           nsim = 400, seed = 2)
 #> powerape -- minimum-effect claim (CI lower bound > 0.050)
-#>   probit, n = 1200, assumed true APE +0.1000, 95% CI, nsim = 400
-#>   power = 0.465 (MCSE 0.025)
-#>   outcomes: minimum 0.465 | detect-only 0.502 | inconclusive 0.032 | equivalence 0.000 | failed 0.000
+#>   probit, n = 1200, assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 400
+#>   power = 0.593 (MCSE 0.025)
+#>   outcomes: minimum 0.593 | detect-only 0.375 | inconclusive 0.032 | equivalence 0.000 | failed 0.000
 ```
 
 How the two compare is a *computable property of the design*, not a rule
@@ -172,14 +172,14 @@ ape_robust(d, n = 300, claim = "minimum", sesoi = 0.05,
            nsim = 300, seed = 3, nmax = FALSE)
 #> powerape robustness sweep -- minimum claim, APE, pin = ape
 #>   n = 300, nsim = 300 per scenario, 3 scenario(s) over: rho
-#>   power range [0.390, 0.477]; worst scenario:
-#>  rho implied_effect power       mcse
-#>  0.5            0.1  0.39 0.02816026
+#>   power range [0.507, 0.630]; worst scenario:
+#>  rho implied_effect     power       mcse
+#>  0.3            0.1 0.5066667 0.02886495
 #>   scenarios:
 #>  rho implied_effect     power       mcse
-#>  0.1            0.1 0.4766667 0.02883606
-#>  0.3            0.1 0.4300000 0.02858321
-#>  0.5            0.1 0.3900000 0.02816026
+#>  0.1            0.1 0.6300000 0.02787472
+#>  0.3            0.1 0.5066667 0.02886495
+#>  0.5            0.1 0.5366667 0.02878979
 ```
 
 ## Unbalanced panels and attrition (Wooldridge, 2019)
@@ -226,14 +226,14 @@ ape_robust(da, n = 300, claim = "minimum", sesoi = 0.05,
            nsim = 300, seed = 5, nmax = FALSE)
 #> powerape robustness sweep -- minimum claim, APE, pin = ape
 #>   n = 300, nsim = 300 per scenario, 3 scenario(s) over: retention
-#>   power range [0.350, 0.493]; worst scenario:
-#>  retention implied_effect power       mcse
-#>        0.7            0.1  0.35 0.02753785
+#>   power range [0.437, 0.617]; worst scenario:
+#>  retention implied_effect     power     mcse
+#>        0.7            0.1 0.4366667 0.028635
 #>   scenarios:
 #>  retention implied_effect     power       mcse
-#>       0.70            0.1 0.3500000 0.02753785
-#>       0.85            0.1 0.3900000 0.02816026
-#>       1.00            0.1 0.4933333 0.02886495
+#>       0.70            0.1 0.4366667 0.02863500
+#>       0.85            0.1 0.5233333 0.02883606
+#>       1.00            0.1 0.6166667 0.02807068
 ```
 
 Two facts from the validation battery are worth knowing at the design
@@ -292,7 +292,7 @@ interaction tax and the clustering penalty compound:
 
 ape_power(di, n = 400, claim = "detect", nsim = 250, seed = 4)
 #> powerape -- detection claim (CI excludes 0, directional)
-#>   probit, n = 400 units x 4 periods (1600 obs), assumed true AIE +0.0600, 95% CI, nsim = 250
+#>   probit, n = 400 units x 4 periods (1600 obs), assumed true AIE +0.0600, 95% CI (alpha = 0.05), nsim = 250
 #>   power = 0.112 (MCSE 0.020)
 #>   outcomes: detect 0.112 | inconclusive 0.888 | failed 0.000
 ```

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -149,9 +149,9 @@ at a baseline rate of 0.85).</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">1500</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>          nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- minimum-effect claim (CI lower bound &gt; 0.050)</span></span>
-<span><span class="co">#&gt;   probit, n = 1500, assumed true APE +0.1000, 95% CI, nsim = 500</span></span>
-<span><span class="co">#&gt;   power = 0.562 (MCSE 0.022)</span></span>
-<span><span class="co">#&gt;   outcomes: minimum 0.562 | detect-only 0.430 | inconclusive 0.008 | equivalence 0.000 | failed 0.000</span></span></code></pre></div>
+<span><span class="co">#&gt;   probit, n = 1500, assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 500</span></span>
+<span><span class="co">#&gt;   power = 0.656 (MCSE 0.021)</span></span>
+<span><span class="co">#&gt;   outcomes: minimum 0.656 | detect-only 0.336 | inconclusive 0.008 | equivalence 0.000 | failed 0.000</span></span></code></pre></div>
 <p>Read the <strong>outcome distribution</strong>, not just the power
 number: some studies would reject zero yet remain unable to claim the
 effect clears the SESOI (“detect-only”) – exactly the inconclusiveness
@@ -164,8 +164,8 @@ Riesthuis (2024) warns about.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_n.html">ape_n</a></span><span class="op">(</span><span class="va">d</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>      nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape required sample size -- minimum claim</span></span>
-<span><span class="co">#&gt;   n = 2673 for 80% target power (confirmed 0.799, MCSE 0.009)</span></span>
-<span><span class="co">#&gt;   assumed true APE +0.1000, sesoi 0.050, 95% CI, probit</span></span>
+<span><span class="co">#&gt;   n = 2106 for 80% target power (confirmed 0.806, MCSE 0.009)</span></span>
+<span><span class="co">#&gt;   assumed true APE +0.1000, sesoi 0.050, 90% CI, probit</span></span>
 <span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_curve.html">ape_curve</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">3000</span>, by <span class="op">=</span> <span class="fl">500</span><span class="op">)</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>,</span>
@@ -187,7 +187,7 @@ when the high-precision run falls short):</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_mde.html">ape_mde</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">1500</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>        nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape minimum detectable APE -- minimum claim</span></span>
-<span><span class="co">#&gt;   MDE = 0.1167 at n = 1500 for 80% target power (confirmed 0.807, MCSE 0.009)</span></span>
+<span><span class="co">#&gt;   MDE = 0.1092 at n = 1500 for 80% target power (confirmed 0.805, MCSE 0.009)</span></span>
 <span><span class="co">#&gt;   smallest effect demonstrably above sesoi 0.050</span></span>
 <span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.</span></span></code></pre></div>
 <p>If the answer is larger than any effect you would defend as
@@ -212,14 +212,14 @@ target power in the worst scenario.</p>
 <span>           nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">4</span>, nmax <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape robustness sweep -- minimum claim, APE, pin = ape</span></span>
 <span><span class="co">#&gt;   n = 2200, nsim = 300 per scenario, 3 scenario(s) over: baseline</span></span>
-<span><span class="co">#&gt;   power range [0.687, 0.773]; worst scenario:</span></span>
-<span><span class="co">#&gt;  baseline implied_effect     power       mcse</span></span>
-<span><span class="co">#&gt;       0.4            0.1 0.6866667 0.02678031</span></span>
+<span><span class="co">#&gt;   power range [0.797, 0.847]; worst scenario:</span></span>
+<span><span class="co">#&gt;  baseline implied_effect     power      mcse</span></span>
+<span><span class="co">#&gt;       0.4            0.1 0.7966667 0.0232371</span></span>
 <span><span class="co">#&gt;   scenarios:</span></span>
 <span><span class="co">#&gt;  baseline implied_effect     power       mcse</span></span>
-<span><span class="co">#&gt;       0.2            0.1 0.7733333 0.02417222</span></span>
-<span><span class="co">#&gt;       0.3            0.1 0.7333333 0.02553139</span></span>
-<span><span class="co">#&gt;       0.4            0.1 0.6866667 0.02678031</span></span></code></pre></div>
+<span><span class="co">#&gt;       0.2            0.1 0.8466667 0.02080242</span></span>
+<span><span class="co">#&gt;       0.3            0.1 0.8466667 0.02080242</span></span>
+<span><span class="co">#&gt;       0.4            0.1 0.7966667 0.02323710</span></span></code></pre></div>
 <p>By default the APE is <strong>re-pinned in every scenario</strong>
 (<code>pin = "ape"</code>), so only the precision channel varies;
 <code>pin = "coefficients"</code> instead holds the coefficients and
@@ -233,20 +233,21 @@ lets the implied effect drift.</p>
 <span>                nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.7.0), following the</span></span>
+<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.8.0), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable treat (binary, prevalence</span></span>
 <span><span class="co">#&gt; 0.50); parametric covariates (age, female; Gaussian-copula dependence);</span></span>
 <span><span class="co">#&gt; baseline outcome rate 0.300 with the focal at reference; nuisance covariates</span></span>
 <span><span class="co">#&gt; contribute a latent pseudo-R-squared of 0.15. The assumed true APE was 0.100</span></span>
 <span><span class="co">#&gt; (10.0 percentage points). At a sample size of n = 2200, simulated power for</span></span>
-<span><span class="co">#&gt; the minimum-effect claim (the 95% confidence interval's lower bound exceeding</span></span>
-<span><span class="co">#&gt; the smallest effect size of interest, 0.050) was 0.710 (Monte Carlo SE 0.020;</span></span>
-<span><span class="co">#&gt; 500 replications). Across replications, the probability of concluding a</span></span>
-<span><span class="co">#&gt; meaningful effect was 0.710, of detection without meaningfulness 0.290, of an</span></span>
-<span><span class="co">#&gt; inconclusive result 0.000, and of equivalence 0.000. Estimation used maximum</span></span>
-<span><span class="co">#&gt; likelihood with delta-method Wald confidence intervals; replications that</span></span>
-<span><span class="co">#&gt; failed to converge (0.0%) counted against the claim.</span></span></code></pre></div>
+<span><span class="co">#&gt; the minimum-effect claim (the 90% confidence interval's lower bound exceeding</span></span>
+<span><span class="co">#&gt; the smallest effect size of interest, 0.050; a one-sided test at alpha = 5%)</span></span>
+<span><span class="co">#&gt; was 0.808 (Monte Carlo SE 0.018; 500 replications). Across replications, the</span></span>
+<span><span class="co">#&gt; probability of concluding a meaningful effect was 0.808, of detection without</span></span>
+<span><span class="co">#&gt; meaningfulness 0.192, of an inconclusive result 0.000, and of equivalence</span></span>
+<span><span class="co">#&gt; 0.000. Estimation used maximum likelihood with delta-method Wald confidence</span></span>
+<span><span class="co">#&gt; intervals; replications that failed to converge (0.0%) counted against the</span></span>
+<span><span class="co">#&gt; claim.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

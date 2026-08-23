@@ -21,7 +21,10 @@ test_that("simulated power equals the exact enumerated power (saturated case)", 
     list(dgp = d00, claim = "equivalence", sesoi = 0.07, p1 = 0.30, seed = 3)
   )
   for (cs in cases) {
-    ex <- exact_power_sat(n, 0.5, 0.30, cs$p1, 0.95, cs$claim,
+    ## the claim's own interval level under the default alpha = .05:
+    ## 95% for detection, 90% for the one-sided SESOI claims (1.8.0)
+    cl <- powerape:::claim_levels(cs$claim)$conf_claim
+    ex <- exact_power_sat(n, 0.5, 0.30, cs$p1, cl, cs$claim,
                           if (is.null(cs$sesoi)) NA else cs$sesoi)
     pw <- ape_power(cs$dgp, n = n, claim = cs$claim, sesoi = cs$sesoi,
                     nsim = nsim, seed = cs$seed)
