@@ -1,5 +1,10 @@
 # powerape <img src="man/figures/logo.png" align="right" height="139" alt="powerape hex sticker: an ape above a rising power curve" />
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/jespernwulff/powerape/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jespernwulff/powerape/actions/workflows/R-CMD-check.yaml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jespernwulff/powerape/blob/main/LICENSE.md)
+<!-- badges: end -->
+
 **Power analysis for average partial effects (APEs) and average interaction
 effects (AIEs) from probit and logit models.**
 
