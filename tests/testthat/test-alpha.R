@@ -178,5 +178,7 @@ test_that("the realized size at the boundary tracks the chosen alpha", {
   jd <- ape_alpha(pd, size = TRUE, nsim_size = 300, seed = 13)
   expect_equal(jd$size$truth, 0)
   expect_lt(jd$size$size, 0.10)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
   expect_silent(plot(ja))
 })
