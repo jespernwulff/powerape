@@ -1,5 +1,58 @@
 # Changelog
 
+## powerape 1.9.0
+
+- **Justified error rates**
+  ([`vignette("justified-alpha")`](https://jespernwulff.github.io/powerape/articles/justified-alpha.md);
+  DESIGN.md section 15). Two routes to an alpha that is chosen rather
+  than inherited, both opt-in; the default stays `alpha = 0.05` per
+  claim.
+  - **Sample-size rules.** `alpha` may be a function of `n` in every
+    power function, for example
+    `alpha = function(n) alphaN::alphaN(n, BF = 3)`, the Bayes-factor
+    calibration of Wulff and Taylor (2024) that lowers alpha as `n`
+    grows. The rule is evaluated at each candidate `n`, so
+    [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+    designs jointly over the pair (alpha(n), n), and
+    [`ape_curve()`](https://jespernwulff.github.io/powerape/reference/ape_curve.md),
+    [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md),
+    and
+    [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
+    use the level that belongs to their `n`. Results store the rule and
+    the level it produced (`alpha`, `alpha_rule`; curves and search
+    histories gain an `alpha` column), print methods say “by sample-size
+    rule”, and
+    [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+    states it.
+  - **Error-cost optimization.**
+    [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md)
+    now keeps the estimate and standard error of every replication
+    (`keep_draws = TRUE`), so power at any alpha is a re-threshold of
+    one simulation, exact on those draws.
+    [`power_at()`](https://jespernwulff.github.io/powerape/reference/power_at.md)
+    exposes that curve.
+    [`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+    minimizes or balances the weighted combined Type I and Type II error
+    rate of Mudge et al. (2012) and Maier and Lakens (2022) for given
+    error costs and prior odds; it reports the flat range of levels
+    indistinguishable from the optimum at the run’s precision, confines
+    the search to `cap = 0.05` (raising alpha needs a justification of
+    its own) while stating when the unconstrained optimum lies above the
+    cap, and with `size = TRUE` simulates the claim-boundary world to
+    report the REALIZED error rate at the chosen level, which analytic
+    compromise-power tools cannot. `print`, `plot`, and
+    [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+    methods; a preregistration paragraph.
+- Verification: new unit tests (`test-alpha.R`: constant rules reproduce
+  scalar runs bit for bit,
+  [`power_at()`](https://jespernwulff.github.io/powerape/reference/power_at.md)
+  exactness, a closed-form twin of the optimizer on synthetic draws,
+  Cohen’s 4:1 balance returning .05/.20 at 80% power, JustifyAlpha
+  concordance on the same draws, the realized boundary size) and battery
+  check V20.
+- `alphaN` and `JustifyAlpha` join Suggests (examples and concordance
+  tests only).
+
 ## powerape 1.8.0
 
 - **Breaking: error-rate convention.** Every claim is now tested at

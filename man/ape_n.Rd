@@ -32,7 +32,14 @@ ape_n(
 the outcome table is still broken out against it).}
 
 \item{alpha}{The claim's error rate (default 0.05): two-sided for
-\code{"detect"}, one-sided for \code{"minimum"}, TOST for \code{"equivalence"}.}
+\code{"detect"}, one-sided for \code{"minimum"}, TOST for \code{"equivalence"}.
+May also be a \strong{sample-size rule}: a function of \code{n} returning the
+error rate to use at that \code{n}, for example
+\code{function(n) alphaN::alphaN(n, BF = 3)}, the Bayes-factor
+calibration of Wulff and Taylor (2024) that lowers alpha as \code{n}
+grows. The searching functions evaluate the rule at every candidate
+\code{n}, so \code{\link[=ape_n]{ape_n()}} designs jointly over the pair (alpha(n), n); results
+store the rule and the level it produced.}
 
 \item{conf}{Optional override: the interval level used for the claim
 itself (\code{1 - alpha} for detection, \verb{1 - 2 alpha} otherwise). Supplying

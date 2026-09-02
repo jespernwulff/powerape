@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/minimum-effect.html">Powering the minimum-effect claim</a></li>
@@ -44,6 +44,7 @@
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
+    <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justifying the error rate: alpha by sample size, or by error costs</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -165,7 +166,7 @@ Riesthuis (2024) warns about.</p>
 <span>      nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape required sample size -- minimum claim</span></span>
 <span><span class="co">#&gt;   n = 2106 for 80% target power (confirmed 0.806, MCSE 0.009)</span></span>
-<span><span class="co">#&gt;   assumed true APE +0.1000, sesoi 0.050, 90% CI, probit</span></span>
+<span><span class="co">#&gt;   assumed true APE +0.1000, sesoi 0.050, 90% CI (alpha = 0.05), probit</span></span>
 <span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_curve.html">ape_curve</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">3000</span>, by <span class="op">=</span> <span class="fl">500</span><span class="op">)</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>,</span>
@@ -233,7 +234,7 @@ lets the implied effect drift.</p>
 <span>                nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.8.0), following the</span></span>
+<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.9.0), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable treat (binary, prevalence</span></span>
 <span><span class="co">#&gt; 0.50); parametric covariates (age, female; Gaussian-copula dependence);</span></span>

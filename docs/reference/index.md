@@ -44,6 +44,17 @@ Simulated power, curves, required sample sizes, detectable effects.
 - [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
   : Minimum detectable APE/AIE at a given sample size
 
+## Justified error rates
+
+Alpha by sample-size rule or by error costs, from one stored simulation.
+
+- [`power_at()`](https://jespernwulff.github.io/powerape/reference/power_at.md)
+  : Power at other error rates from one stored simulation
+- [`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+  [`plot(`*`<powerape_alpha>`*`)`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+  : Justify the error rate: minimize or balance weighted Type I and Type
+  II errors
+
 ## Robustness and reporting
 
 - [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)

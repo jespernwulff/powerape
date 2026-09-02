@@ -7,17 +7,23 @@
 power_statement(x)
 }
 \arguments{
-\item{x}{A \code{powerape_power} or \code{powerape_n} object.}
+\item{x}{A \code{powerape_power}, \code{powerape_n}, \code{powerape_mde}, or
+\code{powerape_alpha} object.}
 }
 \value{
 A character string of class \code{powerape_statement} (printed
 wrapped).
 }
 \description{
-Turns a \code{\link[=ape_power]{ape_power()}} or \code{\link[=ape_n]{ape_n()}} result into a self-contained methods
-paragraph stating the estimand, the full data-generating assumptions,
-the claim and CI convention, and the Monte Carlo precision -- the
-transparency artifact for grant applications and preregistrations.
+Turns a \code{\link[=ape_power]{ape_power()}}, \code{\link[=ape_n]{ape_n()}}, or \code{\link[=ape_mde]{ape_mde()}} result into a
+self-contained methods paragraph stating the estimand, the full
+data-generating assumptions, the claim and CI convention (including a
+sample-size rule for \code{alpha} when one was used), and the Monte Carlo
+precision -- the transparency artifact for grant applications and
+preregistrations. For an \code{\link[=ape_alpha]{ape_alpha()}} result the paragraph states the
+justification of the error rate instead: the objective and its
+weights, the chosen level and its flat range, the cap, and the
+realized-size verification when it was run.
 }
 \examples{
 \donttest{

@@ -20,7 +20,8 @@ ape_power(
   conf = NULL,
   nsim = 1000,
   seed = NULL,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  keep_draws = TRUE
 )
 ```
 
@@ -50,7 +51,15 @@ ape_power(
 - alpha:
 
   The claim's error rate (default 0.05): two-sided for `"detect"`,
-  one-sided for `"minimum"`, TOST for `"equivalence"`.
+  one-sided for `"minimum"`, TOST for `"equivalence"`. May also be a
+  **sample-size rule**: a function of `n` returning the error rate to
+  use at that `n`, for example `function(n) alphaN::alphaN(n, BF = 3)`,
+  the Bayes-factor calibration of Wulff and Taylor (2024) that lowers
+  alpha as `n` grows. The searching functions evaluate the rule at every
+  candidate `n`, so
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+  designs jointly over the pair (alpha(n), n); results store the rule
+  and the level it produced.
 
 - conf:
 
@@ -75,11 +84,22 @@ ape_power(
   Panel designs always use unit-clustered SEs and IV designs the stacked
   method-of-moments robust sandwich; `se` is ignored there.
 
+- keep_draws:
+
+  Keep the per-replication estimates, standard errors, and convergence
+  flags in the result (default TRUE; a few kilobytes). They let
+  [`power_at()`](https://jespernwulff.github.io/powerape/reference/power_at.md)
+  and
+  [`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+  re-evaluate the claim at any error rate without simulating again.
+
 ## Value
 
 A `powerape_power` object: power, Monte Carlo standard error, outcome
 distribution, the failed-fit count (failures count against power,
-conservatively), and the embedded DGP spec for reproducibility and
+conservatively), the error rate used (`alpha`, and `alpha_rule` when it
+came from a sample-size rule), the stored draws, and the embedded DGP
+spec for reproducibility and
 [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md).
 
 ## Details
@@ -94,7 +114,14 @@ the convention of Lakens (2017), Lakens et al. (2018), TOSTER, and
 Riesthuis (2024) for equivalence. The outcome distribution uses both
 intervals accordingly. To reproduce the more conservative choice of a
 95% interval for the minimum-effect test (Riesthuis, 2024) pass
-`conf = 0.95`, which sets that claim's one-sided error rate to 2.5%.
+`conf = 0.95`, which sets that claim's one-sided error rate to 2.5%. Two
+routes to an error rate that is chosen rather than inherited are
+described in
+[`vignette("justified-alpha")`](https://jespernwulff.github.io/powerape/articles/justified-alpha.md):
+a sample-size rule passed as `alpha`, and
+[`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+for the error-cost optimum of Maier and Lakens (2022), computed from
+this function's stored draws.
 
 ## Examples
 

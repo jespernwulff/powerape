@@ -64,11 +64,14 @@ ape_mde <- function(dgp, n, power = 0.80,
                     se = c("model", "robust")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
-  conf <- claim_levels(claim, alpha, conf)$conf_claim
   stopifnot(inherits(dgp, "powerape_dgp"),
             is.numeric(n), length(n) == 1L, n >= 20,
             is.numeric(power), length(power) == 1L, power > 0.5, power < 0.999,
             is.numeric(nsim), length(nsim) == 1L, nsim >= 20)
+  ## n is fixed here, so a sample-size rule resolves once
+  lv <- claim_levels(claim, alpha, conf, n)
+  conf <- lv$conf_claim
+  alpha_rule <- if (is.function(alpha)) alpha else NULL
   if (claim == "minimum" &&
       (is.null(sesoi) || !is.numeric(sesoi) || length(sesoi) != 1L || sesoi <= 0))
     stop("claim = \"minimum\" needs a single positive `sesoi` (in APE units).",
@@ -117,7 +120,8 @@ ape_mde <- function(dgp, n, power = 0.80,
     }
     res <- finish_mde(dgp, n, best, hist, power, "equivalence", best$value,
                       conf, nsim, seed, confirm, nsim_confirm, se,
-                      mf, mm, is_margin = TRUE, t_abs = t_abs)
+                      mf, mm, is_margin = TRUE, t_abs = t_abs,
+                      alpha_val = lv$alpha, alpha_rule = alpha_rule)
     return(res)
   }
 
@@ -189,7 +193,8 @@ ape_mde <- function(dgp, n, power = 0.80,
 
   finish_mde(dgp, n, best, hist, power, claim, sesoi, conf, nsim, seed,
              confirm, nsim_confirm, se, mf, mm,
-             is_margin = FALSE, delta0 = delta0)
+             is_margin = FALSE, delta0 = delta0,
+             alpha_val = lv$alpha, alpha_rule = alpha_rule)
 }
 
 # Confirmation stage + object assembly, shared by both branches. Accepts
@@ -197,7 +202,8 @@ ape_mde <- function(dgp, n, power = 0.80,
 # pushes the effect (or margin) UP -- the conservative direction.
 finish_mde <- function(dgp, n, best, hist, power, claim, sesoi, conf, nsim,
                        seed, confirm, nsim_confirm, se, mf, mm,
-                       is_margin = FALSE, delta0 = 0, t_abs = 0) {
+                       is_margin = FALSE, delta0 = 0, t_abs = 0,
+                       alpha_val = NULL, alpha_rule = NULL) {
   z <- zcrit(conf)
   zg <- qnorm(power)
   anchor <- if (is_margin) t_abs else delta0
@@ -235,7 +241,8 @@ finish_mde <- function(dgp, n, best, hist, power, claim, sesoi, conf, nsim,
   structure(list(
     mde = best$value, power = best$power, mcse = best$mcse,
     goal = power, claim = claim, sesoi = if (is_margin) best$value else sesoi,
-    conf = conf, n = as.integer(n), nsim = as.integer(nsim),
+    conf = conf, alpha = alpha_val, alpha_rule = alpha_rule,
+    n = as.integer(n), nsim = as.integer(nsim),
     nsim_confirm = as.integer(nsim_confirm),
     confirmed = confirmed, confirm_requested = isTRUE(confirm),
     is_margin = is_margin, se = se,
@@ -268,6 +275,9 @@ print.powerape_mde <- function(x, ...) {
     if (x$claim == "minimum")
       cat(sprintf("  smallest effect demonstrably above sesoi %.3f\n", x$sesoi))
   }
+  if (!is.null(x$alpha_rule))
+    cat(sprintf("  alpha = %.4g by sample-size rule (%.4g%% CI)\n",
+                x$alpha, 100 * x$conf))
   n_search <- sum(x$history$stage == "search")
   n_conf <- sum(x$history$stage == "confirm")
   if (isTRUE(x$confirm_requested)) {

@@ -11,7 +11,8 @@
 #' @param seed Optional; grid point i uses `seed + i - 1`.
 #'
 #' @return A `powerape_curve` object with a `results` data frame
-#'   (`n`, `power`, `mcse`, `failed`).
+#'   (`n`, `alpha`, `power`, `mcse`, `failed`); `alpha` varies along the
+#'   grid when it is a sample-size rule.
 #' @examples
 #' \donttest{
 #' d <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5), baseline = 0.30)
@@ -25,20 +26,23 @@ ape_curve <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                       seed = NULL, se = c("model", "robust")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
-  conf <- claim_levels(claim, alpha, conf)$conf_claim
   n <- sort(unique(as.integer(n)))
   stopifnot(length(n) >= 2L, all(n >= 20))
-  check_coherence(dgp, claim, sesoi, conf)
+  lv1 <- claim_levels(claim, alpha, conf, n[1L])
+  check_coherence(dgp, claim, sesoi, lv1$conf_claim)
   rows <- vector("list", length(n))
   for (i in seq_along(n)) {
     si <- if (is.null(seed)) NULL else seed + i - 1L
     p <- power_once(dgp, n[i], claim, sesoi, conf, nsim, si, enforce = FALSE,
-                    se = se)
-    rows[[i]] <- data.frame(n = n[i], power = p$power, mcse = p$mcse,
-                            failed = p$outcomes[["failed"]])
+                    se = se, alpha = alpha)
+    rows[[i]] <- data.frame(n = n[i], alpha = p$alpha, power = p$power,
+                            mcse = p$mcse, failed = p$outcomes[["failed"]])
   }
+  rule <- is.function(alpha)
   structure(list(results = do.call(rbind, rows), claim = claim, sesoi = sesoi,
-                 conf = conf, nsim = nsim, target = dgp$target_est,
+                 conf = if (rule) NA_real_ else lv1$conf_claim,
+                 alpha = if (rule) NA_real_ else lv1$alpha,
+                 alpha_rule = rule, nsim = nsim, target = dgp$target_est,
                  estimand = dgp$estimand %||% "ape", model = dgp$model),
             class = "powerape_curve")
 }
@@ -125,9 +129,11 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
                   se = c("model", "robust")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
-  conf <- claim_levels(claim, alpha, conf)$conf_claim
+  rule <- is.function(alpha)
+  n_pilot <- 2000L
+  lv_p <- claim_levels(claim, alpha, conf, n_pilot)
   stopifnot(is.numeric(power), length(power) == 1L, power > 0.5, power < 0.999)
-  check_coherence(dgp, claim, sesoi, conf)
+  check_coherence(dgp, claim, sesoi, lv_p$conf_claim)
   t_abs <- abs(dgp$target_est)
   dist <- switch(claim,
                  detect = t_abs,
@@ -136,16 +142,26 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   if (dist <= 0)
     stop("No solvable sample size: the assumed truth sits on the claim boundary.",
          call. = FALSE)
-  z <- zcrit(conf)
+  ## the critical value belongs to the n it is evaluated at when `alpha` is
+  ## a sample-size rule; otherwise it is the same at every n
+  z_at <- function(n_eval) zcrit(claim_levels(claim, alpha, conf, n_eval)$conf_claim)
   zg <- qnorm(power)
   newton_n <- function(n_from, p_hat) {
     p_cl <- min(max(p_hat, 0.02), 0.998)
-    denom <- max(z + qnorm(p_cl), 0.1)
-    ceiling(n_from * ((z + zg) / denom)^2)
+    denom <- max(z_at(n_from) + qnorm(p_cl), 0.1)
+    n_new <- ceiling(n_from * ((z_at(n_from) + zg) / denom)^2)
+    if (rule) {
+      ## fixed-point pass: the proposal's own alpha(n) sets its critical value
+      for (k in seq_len(8L)) {
+        n_fp <- ceiling(n_from * ((z_at(max(n_new, 20L)) + zg) / denom)^2)
+        if (n_fp == n_new) break
+        n_new <- n_fp
+      }
+    }
+    n_new
   }
 
-  n_pilot <- 2000L
-  ps <- sim_ci(dgp, n_pilot, 300L, conf,
+  ps <- sim_ci(dgp, n_pilot, 300L, lv_p$conf_claim,
                seed = if (is.null(seed)) NULL else seed - 1L,
                se_type = if (dgp$route %in% c("panel", "iv")) "model" else se)
   if (mean(ps$ok) < 0.5)
@@ -153,16 +169,24 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
          call. = FALSE)
   c_hat <- mean(ps$se[ps$ok]) * sqrt(n_pilot)
 
-  n_i <- ceiling((c_hat * (z + zg) / dist)^2)
+  n_i <- ceiling((c_hat * (z_at(n_pilot) + zg) / dist)^2)
+  if (rule) {
+    for (k in seq_len(10L)) {
+      n_fp <- ceiling((c_hat * (z_at(max(n_i, 20L)) + zg) / dist)^2)
+      if (n_fp == n_i) break
+      n_i <- n_fp
+    }
+  }
   hist <- data.frame(stage = character(), iter = integer(), n = integer(),
-                     power = numeric(), mcse = numeric())
+                     alpha = numeric(), power = numeric(), mcse = numeric())
   best <- NULL
   for (it in seq_len(max_iter)) {
     n_i <- as.integer(max(n_range[1], min(n_range[2], n_i)))
     si <- if (is.null(seed)) NULL else seed + it
     pw <- power_once(dgp, n_i, claim, sesoi, conf, nsim, si, enforce = FALSE,
-                     se = se)
+                     se = se, alpha = alpha)
     hist <- rbind(hist, data.frame(stage = "search", iter = it, n = n_i,
+                                   alpha = pw$alpha,
                                    power = pw$power, mcse = pw$mcse))
     if (is.null(best) || abs(pw$power - power) < abs(best$power - power))
       best <- list(n = n_i, power = pw$power, mcse = pw$mcse)
@@ -179,8 +203,9 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
     for (cr in seq_len(3L)) {
       sc <- if (is.null(seed)) NULL else seed + 100L + cr
       pwc <- power_once(dgp, n_c, claim, sesoi, conf, nsim_confirm, sc,
-                        enforce = FALSE, se = se)
+                        enforce = FALSE, se = se, alpha = alpha)
       hist <- rbind(hist, data.frame(stage = "confirm", iter = cr, n = n_c,
+                                     alpha = pwc$alpha,
                                      power = pwc$power, mcse = pwc$mcse))
       best <- list(n = n_c, power = pwc$power, mcse = pwc$mcse)
       if (pwc$power >= power - max(0.005, 1.5 * pwc$mcse)) {
@@ -201,8 +226,11 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   }
   if (best$n >= n_range[2])
     warning("Required n reached the n_range ceiling; treat the result as a lower bound.")
+  lv_b <- claim_levels(claim, alpha, conf, best$n)
   structure(list(n = best$n, power = best$power, mcse = best$mcse,
-                 goal = power, claim = claim, sesoi = sesoi, conf = conf,
+                 goal = power, claim = claim, sesoi = sesoi,
+                 conf = lv_b$conf_claim, alpha = lv_b$alpha,
+                 alpha_rule = if (rule) alpha else NULL,
                  nsim = as.integer(nsim),
                  nsim_confirm = if (confirm) as.integer(nsim_confirm) else NA_integer_,
                  confirm_requested = isTRUE(confirm),

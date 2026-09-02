@@ -5,12 +5,15 @@
 <url><loc>https://jespernwulff.github.io/powerape/articles/index.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/articles/interaction-effects.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/articles/iv-designs.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/articles/justified-alpha.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/articles/minimum-effect.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/articles/panel-designs.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/authors.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/index.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/LICENSE-text.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/LICENSE.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/news/index.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/ape_alpha.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_curve.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_dgp.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_dgp_empirical.html</loc></url>
@@ -24,6 +27,7 @@
 <url><loc>https://jespernwulff.github.io/powerape/reference/index.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/pa_var.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/powerape-package.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/power_at.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/power_statement.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/set_aie.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/set_ape.html</loc></url>

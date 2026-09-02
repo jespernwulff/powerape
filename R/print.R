@@ -82,10 +82,15 @@ print.powerape_power <- function(x, ...) {
   se_lab <- if (identical(x$dgp$route, "iv")) ", stacked robust SEs"
             else if (identical(x$se, "robust")) ", robust SEs"
             else ""
-  al <- if (identical(x$claim, "detect")) 1 - x$conf else (1 - x$conf) / 2
-  cat(sprintf("  %s, %s, assumed true %s %+.4f, %.0f%% CI (alpha = %g), nsim = %d%s\n",
-              x$model, n_lab, toupper(x$estimand), x$target, 100 * x$conf, al,
-              x$nsim, se_lab))
+  al <- x$alpha %||% (if (identical(x$claim, "detect")) 1 - x$conf else (1 - x$conf) / 2)
+  al_lab <- if (!is.null(x$alpha_rule)) {
+    sprintf("alpha = %.4g by sample-size rule", al)
+  } else {
+    sprintf("alpha = %g", al)
+  }
+  cat(sprintf("  %s, %s, assumed true %s %+.4f, %.4g%% CI (%s), nsim = %d%s\n",
+              x$model, n_lab, toupper(x$estimand), x$target, 100 * x$conf,
+              al_lab, x$nsim, se_lab))
   cat(sprintf("  power = %.3f (MCSE %.3f)\n", x$power, x$mcse))
   o <- x$outcomes
   cat("  outcomes:", paste(sprintf("%s %.3f", gsub("_", "-", names(o)), o),
@@ -98,8 +103,9 @@ print.powerape_power <- function(x, ...) {
 
 #' @export
 print.powerape_curve <- function(x, ...) {
-  cat(sprintf("powerape power curve -- %s claim, %s (%s), nsim = %d per point\n",
-              x$claim, x$model, toupper(x$estimand), x$nsim))
+  cat(sprintf("powerape power curve -- %s claim, %s (%s), nsim = %d per point%s\n",
+              x$claim, x$model, toupper(x$estimand), x$nsim,
+              if (isTRUE(x$alpha_rule)) "; alpha by sample-size rule (column alpha)" else ""))
   print(x$results, row.names = FALSE)
   invisible(x)
 }
@@ -115,10 +121,13 @@ print.powerape_n <- function(x, ...) {
   }
   cat(sprintf("  %s for %.0f%% target power (%s %.3f, MCSE %.3f)\n",
               unit_lab, 100 * x$goal, lab, x$power, x$mcse))
-  cat(sprintf("  assumed true %s %+.4f, sesoi %s, %.0f%% CI, %s\n",
+  al <- x$alpha %||% (if (identical(x$claim, "detect")) 1 - x$conf else (1 - x$conf) / 2)
+  cat(sprintf("  assumed true %s %+.4f, sesoi %s, %.4g%% CI (alpha = %.4g%s), %s\n",
               toupper(x$estimand), x$target,
               if (is.null(x$sesoi)) "-" else sprintf("%.3f", x$sesoi),
-              100 * x$conf, x$model))
+              100 * x$conf, al,
+              if (!is.null(x$alpha_rule)) " by sample-size rule" else "",
+              x$model))
   n_search <- sum(x$history$stage == "search")
   n_conf <- sum(x$history$stage == "confirm")
   if (isTRUE(x$confirm_requested)) {

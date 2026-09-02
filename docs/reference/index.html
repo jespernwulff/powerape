@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
+    <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justifying the error rate: alpha by sample size, or by error costs</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -164,6 +165,29 @@
 
         </dt>
         <dd>Minimum detectable APE/AIE at a given sample size</dd>
+      </dl></div><div class="section level2">
+      <h2 id="justified-error-rates">Justified error rates<a class="anchor" aria-label="anchor" href="#justified-error-rates"></a></h2>
+
+      <div class="section-desc"><p>Alpha by sample-size rule or by error costs, from one stored simulation.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="power_at.html">power_at()</a></code>
+
+        </dt>
+        <dd>Power at other error rates from one stored simulation</dd>
+
+        <dt>
+
+          <code><a href="ape_alpha.html">ape_alpha()</a></code> <code><a href="ape_alpha.html">plot(<i>&lt;powerape_alpha&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Justify the error rate: minimize or balance weighted Type I and Type II errors</dd>
       </dl></div><div class="section level2">
       <h2 id="robustness-and-reporting">Robustness and reporting<a class="anchor" aria-label="anchor" href="#robustness-and-reporting"></a></h2>
 

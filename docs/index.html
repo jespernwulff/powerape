@@ -16,8 +16,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Power Analysis for Average Partial Effects">
-<meta name="description" content="Simulation-based power analysis in which the effect size of interest is the average partial effect (APE) or the average interaction effect (AIE) from a nonlinear model such as probit or logit. Researchers specify targets in APE units (probability points); the package calibrates the data-generating process, checks feasibility, and computes power for detection, minimum-effect, and equivalence claims via confidence-interval criteria (Riesthuis, 2024, &lt;doi:10.1177/25152459241240722&gt;), including power curves, required sample sizes for the smallest effect size of interest (SESOI), robustness sweeps over contextual assumptions (Hancock and Feng, 2025, &lt;doi:10.1037/met0000776&gt;), and citable power statements. Supports binary and continuous focal variables, interaction designs, parametric (Gaussian-copula) covariates, and covariates resampled from pilot data.">
-<meta property="og:description" content="Simulation-based power analysis in which the effect size of interest is the average partial effect (APE) or the average interaction effect (AIE) from a nonlinear model such as probit or logit. Researchers specify targets in APE units (probability points); the package calibrates the data-generating process, checks feasibility, and computes power for detection, minimum-effect, and equivalence claims via confidence-interval criteria (Riesthuis, 2024, &lt;doi:10.1177/25152459241240722&gt;), including power curves, required sample sizes for the smallest effect size of interest (SESOI), robustness sweeps over contextual assumptions (Hancock and Feng, 2025, &lt;doi:10.1037/met0000776&gt;), and citable power statements. Supports binary and continuous focal variables, interaction designs, parametric (Gaussian-copula) covariates, and covariates resampled from pilot data.">
+<meta name="description" content="Simulation-based power analysis in which the effect size of interest is the average partial effect (APE) or the average interaction effect (AIE) from a nonlinear model such as probit or logit. Researchers specify targets in APE units (probability points); the package calibrates the data-generating process, checks feasibility, and computes power for detection, minimum-effect, and equivalence claims via confidence-interval criteria (Riesthuis, 2024, &lt;doi:10.1177/25152459241240722&gt;), including power curves, required sample sizes for the smallest effect size of interest (SESOI), robustness sweeps over contextual assumptions (Hancock and Feng, 2025, &lt;doi:10.1037/met0000776&gt;), citable power statements, and justified error rates: alpha as a sample-size rule or as the error-cost optimum of Maier and Lakens (2022, &lt;doi:10.1177/25152459221080396&gt;) computed from one stored simulation. Supports binary and continuous focal variables, interaction designs, parametric (Gaussian-copula) covariates, and covariates resampled from pilot data.">
+<meta property="og:description" content="Simulation-based power analysis in which the effect size of interest is the average partial effect (APE) or the average interaction effect (AIE) from a nonlinear model such as probit or logit. Researchers specify targets in APE units (probability points); the package calibrates the data-generating process, checks feasibility, and computes power for detection, minimum-effect, and equivalence claims via confidence-interval criteria (Riesthuis, 2024, &lt;doi:10.1177/25152459241240722&gt;), including power curves, required sample sizes for the smallest effect size of interest (SESOI), robustness sweeps over contextual assumptions (Hancock and Feng, 2025, &lt;doi:10.1037/met0000776&gt;), citable power statements, and justified error rates: alpha as a sample-size rule or as the error-cost optimum of Maier and Lakens (2022, &lt;doi:10.1177/25152459221080396&gt;) computed from one stored simulation. Supports binary and continuous focal variables, interaction designs, parametric (Gaussian-copula) covariates, and covariates resampled from pilot data.">
 <meta property="og:image" content="https://jespernwulff.github.io/powerape/logo.svg">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,7 @@
     <li><a class="dropdown-item" href="articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
     <li><a class="dropdown-item" href="articles/panel-designs.html">Panel designs: correlated random effects</a></li>
     <li><a class="dropdown-item" href="articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
+    <li><a class="dropdown-item" href="articles/justified-alpha.html">Justifying the error rate: alpha by sample size, or by error costs</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -68,6 +69,8 @@
 <img src="logo.svg" class="logo" alt=""><h1 id="powerape-">powerape <a class="anchor" aria-label="anchor" href="#powerape-"></a>
 </h1>
 </div>
+<!-- badges: start -->
+
 <p><strong>Power analysis for average partial effects (APEs) and average interaction effects (AIEs) from probit and logit models.</strong></p>
 <p>In nonlinear models the coefficient is not the quantity anyone interprets — conclusions are stated in probability points, i.e. the APE. But the APE depends on <em>all</em> coefficients and the covariate distribution, so coefficient- or Cohen’s-d-based power tools cannot answer the question practitioners actually have: <em>“How many observations do I need to detect a treatment effect of 5 percentage points?”</em></p>
 <p><code>powerape</code> answers it by simulation, with targets specified <strong>in APE units</strong>, built around the confidence-interval claims of Riesthuis (2024):</p>
@@ -101,7 +104,7 @@
 </tr>
 </tbody>
 </table>
-<p>Every claim is tested at <code>alpha = .05</code> in its conventional form: detection is the two-sided test (95% interval); the minimum-effect claim is a one-sided test and equivalence a TOST, both read off the 90% interval (Lakens, 2017; Riesthuis, 2024).</p>
+<p>Every claim is tested at <code>alpha = .05</code> in its conventional form: detection is the two-sided test (95% interval); the minimum-effect claim is a one-sided test and equivalence a TOST, both read off the 90% interval (Lakens, 2017; Riesthuis, 2024). The level is an argument everywhere and can be <em>justified</em> rather than inherited: pass a sample-size rule (<code>alpha = function(n) alphaN::alphaN(n, BF = 3)</code>, Wulff &amp; Taylor, 2024) and the searches design jointly over alpha(n) and n, or let <code><a href="reference/ape_alpha.html">ape_alpha()</a></code> find the error-cost optimum of Maier &amp; Lakens (2022) from one stored simulation, capped at .05 (see <code><a href="articles/justified-alpha.html">vignette("justified-alpha")</a></code>).</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -163,7 +166,9 @@
 <li>
 <strong>Robustness sweeps</strong> (<code><a href="reference/ape_robust.html">ape_robust()</a></code>): worst-case power and the insurance-premium sample size n_max over contextual assumptions, in the spirit of Hancock &amp; Feng (2025) — and <code>mode = "mde"</code> for the minimum detectable effect under the least favorable assumptions.</li>
 <li>
-<strong>Citable output</strong>: <code><a href="reference/power_statement.html">power_statement()</a></code> renders any result as a self-contained methods paragraph for grants and preregistrations.</li>
+<strong>Justified error rates</strong>: <code>alpha</code> may be a sample-size rule (a function of n, evaluated at every candidate n by <code><a href="reference/ape_n.html">ape_n()</a></code> and friends), and <code><a href="reference/ape_alpha.html">ape_alpha()</a></code> minimizes or balances the weighted combined Type I and Type II error rate for stated error costs and prior odds, re-thresholding one stored simulation (<code><a href="reference/power_at.html">power_at()</a></code>), reporting the flat range of indistinguishable levels, capping the search at .05, and measuring the realized size at the claim boundary on request.</li>
+<li>
+<strong>Citable output</strong>: <code><a href="reference/power_statement.html">power_statement()</a></code> renders any result as a self-contained methods paragraph for grants and preregistrations, including the justification paragraph for an <code><a href="reference/ape_alpha.html">ape_alpha()</a></code> result.</li>
 <li>
 <strong>Monte Carlo honesty</strong>: every power estimate carries its MCSE; failed fits count against the claim, never silently dropped.</li>
 </ul>
@@ -176,7 +181,7 @@
 <div class="section level2">
 <h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
-<p>Six vignettes cover the workflows: <code><a href="articles/minimum-effect.html">vignette("minimum-effect")</a></code>, <code><a href="articles/classic-sesoi-detection.html">vignette("classic-sesoi-detection")</a></code>, <code><a href="articles/equivalence.html">vignette("equivalence")</a></code>, <code><a href="articles/interaction-effects.html">vignette("interaction-effects")</a></code>, <code><a href="articles/panel-designs.html">vignette("panel-designs")</a></code>, and <code><a href="articles/iv-designs.html">vignette("iv-designs")</a></code>.</p>
+<p>Seven vignettes cover the workflows: <code><a href="articles/minimum-effect.html">vignette("minimum-effect")</a></code>, <code><a href="articles/classic-sesoi-detection.html">vignette("classic-sesoi-detection")</a></code>, <code><a href="articles/equivalence.html">vignette("equivalence")</a></code>, <code><a href="articles/interaction-effects.html">vignette("interaction-effects")</a></code>, <code><a href="articles/panel-designs.html">vignette("panel-designs")</a></code>, <code><a href="articles/iv-designs.html">vignette("iv-designs")</a></code>, and <code><a href="articles/justified-alpha.html">vignette("justified-alpha")</a></code>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -190,9 +195,8 @@
 <div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li>
-<a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
-</li>
+<li><a href="LICENSE.html">Full license</a></li>
+<li><small><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
 
@@ -211,7 +215,13 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/jespernwulff/powerape/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/jespernwulff/powerape/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/jespernwulff/powerape/blob/main/LICENSE.md" class="external-link"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

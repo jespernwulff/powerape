@@ -40,7 +40,7 @@ ape_n(d, power = 0.80, claim = "equivalence", sesoi = 0.05,
       nsim = 500, seed = 2)
 #> powerape required sample size -- equivalence claim
 #>   n = 2669 for 80% target power (confirmed 0.799, MCSE 0.009)
-#>   assumed true APE +0.0000, sesoi 0.050, 90% CI, probit
+#>   assumed true APE +0.0000, sesoi 0.050, 90% CI (alpha = 0.05), probit
 #>   search: 3 step(s); confirmed in 1 round(s) at nsim = 2000.
 ```
 
@@ -96,7 +96,7 @@ pw <- ape_power(d, n = 2600, claim = "equivalence", sesoi = 0.05,
                 nsim = 500, seed = 5)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.8.0), following the
+#> (APE) of treat using the powerape package (version 1.9.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); parametric covariates (age; Gaussian-copula dependence); baseline

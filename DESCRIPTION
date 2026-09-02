@@ -1,6 +1,6 @@
 Package: powerape
 Title: Power Analysis for Average Partial Effects
-Version: 1.8.0
+Version: 1.9.0
 Authors@R:
     person("Jesper", "Wulff", email = "jwulff@econ.au.dk", role = c("aut", "cre"))
 Description: Simulation-based power analysis in which the effect size of
@@ -13,7 +13,10 @@ Description: Simulation-based power analysis in which the effect size of
     <doi:10.1177/25152459241240722>), including power curves, required
     sample sizes for the smallest effect size of interest (SESOI),
     robustness sweeps over contextual assumptions (Hancock and Feng,
-    2025, <doi:10.1037/met0000776>), and citable power statements.
+    2025, <doi:10.1037/met0000776>), citable power statements, and
+    justified error rates: alpha as a sample-size rule or as the
+    error-cost optimum of Maier and Lakens (2022,
+    <doi:10.1177/25152459221080396>) computed from one stored simulation.
     Supports binary and continuous focal variables, interaction designs,
     parametric (Gaussian-copula) covariates, and covariates resampled
     from pilot data.
@@ -26,7 +29,9 @@ Imports:
     stats,
     utils
 Suggests:
+    alphaN,
     ginteff,
+    JustifyAlpha,
     knitr,
     marginaleffects,
     rmarkdown,

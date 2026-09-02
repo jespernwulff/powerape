@@ -26,6 +26,11 @@ reference:
   - ape_curve
   - ape_n
   - ape_mde
+- title: Justified error rates
+  desc: Alpha by sample-size rule or by error costs, from one stored simulation.
+  contents:
+  - power_at
+  - ape_alpha
 - title: Robustness and reporting
   contents:
   - ape_robust
@@ -41,3 +46,4 @@ articles:
   - interaction-effects
   - panel-designs
   - iv-designs
+  - justified-alpha

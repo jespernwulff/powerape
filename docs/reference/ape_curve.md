@@ -48,7 +48,15 @@ plot(x, target_power = NULL, ...)
 - alpha:
 
   The claim's error rate (default 0.05): two-sided for `"detect"`,
-  one-sided for `"minimum"`, TOST for `"equivalence"`.
+  one-sided for `"minimum"`, TOST for `"equivalence"`. May also be a
+  **sample-size rule**: a function of `n` returning the error rate to
+  use at that `n`, for example `function(n) alphaN::alphaN(n, BF = 3)`,
+  the Bayes-factor calibration of Wulff and Taylor (2024) that lowers
+  alpha as `n` grows. The searching functions evaluate the rule at every
+  candidate `n`, so
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+  designs jointly over the pair (alpha(n), n); results store the rule
+  and the level it produced.
 
 - conf:
 
@@ -88,8 +96,9 @@ plot(x, target_power = NULL, ...)
 
 ## Value
 
-A `powerape_curve` object with a `results` data frame (`n`, `power`,
-`mcse`, `failed`).
+A `powerape_curve` object with a `results` data frame (`n`, `alpha`,
+`power`, `mcse`, `failed`); `alpha` varies along the grid when it is a
+sample-size rule.
 
 ## Examples
 

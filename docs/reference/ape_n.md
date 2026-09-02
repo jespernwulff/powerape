@@ -58,7 +58,13 @@ ape_n(
 - alpha:
 
   The claim's error rate (default 0.05): two-sided for `"detect"`,
-  one-sided for `"minimum"`, TOST for `"equivalence"`.
+  one-sided for `"minimum"`, TOST for `"equivalence"`. May also be a
+  **sample-size rule**: a function of `n` returning the error rate to
+  use at that `n`, for example `function(n) alphaN::alphaN(n, BF = 3)`,
+  the Bayes-factor calibration of Wulff and Taylor (2024) that lowers
+  alpha as `n` grows. The searching functions evaluate the rule at every
+  candidate `n`, so `ape_n()` designs jointly over the pair (alpha(n),
+  n); results store the rule and the level it produced.
 
 - conf:
 
@@ -117,7 +123,7 @@ d <- set_ape(d, target = 0.10)
 ape_n(d, power = 0.8, claim = "detect", nsim = 600, seed = 1)
 #> powerape required sample size -- detect claim
 #>   n = 706 for 80% target power (confirmed 0.805, MCSE 0.008)
-#>   assumed true APE +0.1000, sesoi -, 95% CI, probit
+#>   assumed true APE +0.1000, sesoi -, 95% CI (alpha = 0.05), probit
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2400.
 # }
 ```

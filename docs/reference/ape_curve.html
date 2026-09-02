@@ -9,7 +9,7 @@ results. Works for APE and AIE designs alike."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +26,7 @@ results. Works for APE and AIE designs alike."><meta property="og:image" content
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
+    <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justifying the error rate: alpha by sample size, or by error costs</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -90,7 +91,14 @@ the outcome table is still broken out against it).</p></dd>
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>The claim's error rate (default 0.05): two-sided for
-<code>"detect"</code>, one-sided for <code>"minimum"</code>, TOST for <code>"equivalence"</code>.</p></dd>
+<code>"detect"</code>, one-sided for <code>"minimum"</code>, TOST for <code>"equivalence"</code>.
+May also be a <strong>sample-size rule</strong>: a function of <code>n</code> returning the
+error rate to use at that <code>n</code>, for example
+<code>function(n) alphaN::alphaN(n, BF = 3)</code>, the Bayes-factor
+calibration of Wulff and Taylor (2024) that lowers alpha as <code>n</code>
+grows. The searching functions evaluate the rule at every candidate
+<code>n</code>, so <code><a href="ape_n.html">ape_n()</a></code> designs jointly over the pair (alpha(n), n); results
+store the rule and the level it produced.</p></dd>
 
 
 <dt id="arg-conf">conf<a class="anchor" aria-label="anchor" href="#arg-conf"></a></dt>
@@ -132,7 +140,8 @@ crosses it, the crossing n is marked and annotated.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>powerape_curve</code> object with a <code>results</code> data frame
-(<code>n</code>, <code>power</code>, <code>mcse</code>, <code>failed</code>).</p>
+(<code>n</code>, <code>alpha</code>, <code>power</code>, <code>mcse</code>, <code>failed</code>); <code>alpha</code> varies along the
+grid when it is a sample-size rule.</p>
     </div>
 
     <div class="section level2">

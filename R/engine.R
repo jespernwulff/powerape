@@ -6,7 +6,23 @@
 # the minimum-effect claim is a one-sided test at alpha and equivalence a
 # TOST at alpha (both read off the 1 - 2 alpha interval). A user-supplied
 # `conf` overrides by naming the claim's own interval level directly.
-claim_levels <- function(claim, alpha = NULL, conf = NULL) {
+# Since 1.9.0 `alpha` may also be a sample-size rule (a function of n;
+# DESIGN.md section 15), evaluated at the design's `n`.
+claim_levels <- function(claim, alpha = NULL, conf = NULL, n = NULL) {
+  if (is.function(alpha)) {
+    if (!is.null(conf))
+      stop("Supply either an `alpha` rule or `conf`, not both.", call. = FALSE)
+    if (is.null(n))
+      stop("A sample-size rule for `alpha` needs `n` to be evaluated.",
+           call. = FALSE)
+    a <- alpha(n)
+    if (!is.numeric(a) || length(a) != 1L || !is.finite(a) || a <= 0 || a >= 0.5)
+      stop(sprintf(paste("The `alpha` rule must return a single number in",
+                         "(0, 0.5); at n = %s it returned %s."),
+                   format(n), paste(format(a), collapse = ", ")),
+           call. = FALSE)
+    alpha <- a
+  }
   if (!is.null(conf)) {
     stopifnot(is.numeric(conf), length(conf) == 1L, conf > 0.5, conf < 1)
     alpha <- if (identical(claim, "detect")) 1 - conf else (1 - conf) / 2
@@ -157,11 +173,13 @@ summarize_sim <- function(sim, target, claim, sesoi, nsim, alpha = 0.05) {
 # used by ape_robust(), where scenario drift can legitimately push the
 # implied effect across a claim boundary and the point is to SHOW that.
 power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
-                       enforce = TRUE, se = "model", alpha = NULL) {
+                       enforce = TRUE, se = "model", alpha = NULL,
+                       keep_draws = FALSE) {
   stopifnot(is.numeric(n), length(n) == 1L, n >= 20)
   if (identical(dgp$route, "panel") && n < 30)
     warning("Fewer than 30 units (clusters): cluster-robust inference is unreliable at this size.")
-  lv <- claim_levels(claim, alpha, conf)
+  lv <- claim_levels(claim, alpha, conf, n)
+  rule <- if (is.function(alpha)) alpha else NULL
   conf <- lv$conf_claim
   stopifnot(is.numeric(nsim), length(nsim) == 1L, nsim >= 20)
   if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
@@ -175,10 +193,12 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
   res <- summarize_sim(sim, dgp$target_est, claim, sesoi, nsim, lv$alpha)
   structure(
     c(res, list(claim = claim, sesoi = sesoi, conf = conf, alpha = lv$alpha,
+                alpha_rule = rule,
                 n = as.integer(n),
                 nsim = as.integer(nsim), target = dgp$target_est,
                 estimand = dgp$estimand %||% "ape",
-                se = se, model = dgp$model, dgp = dgp)),
+                se = se, model = dgp$model, dgp = dgp,
+                draws = if (isTRUE(keep_draws)) sim[c("est", "se", "ok")] else NULL)),
     class = "powerape_power"
   )
 }
@@ -204,6 +224,10 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #' intervals accordingly. To reproduce the more conservative choice of a
 #' 95% interval for the minimum-effect test (Riesthuis, 2024) pass
 #' `conf = 0.95`, which sets that claim's one-sided error rate to 2.5%.
+#' Two routes to an error rate that is chosen rather than inherited are
+#' described in `vignette("justified-alpha")`: a sample-size rule passed
+#' as `alpha`, and [ape_alpha()] for the error-cost optimum of Maier and
+#' Lakens (2022), computed from this function's stored draws.
 #'
 #' @param dgp A `powerape_dgp` after [set_ape()] or [set_aie()].
 #' @param n Total sample size of the simulated study.
@@ -213,6 +237,13 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #'   the outcome table is still broken out against it).
 #' @param alpha The claim's error rate (default 0.05): two-sided for
 #'   `"detect"`, one-sided for `"minimum"`, TOST for `"equivalence"`.
+#'   May also be a **sample-size rule**: a function of `n` returning the
+#'   error rate to use at that `n`, for example
+#'   `function(n) alphaN::alphaN(n, BF = 3)`, the Bayes-factor
+#'   calibration of Wulff and Taylor (2024) that lowers alpha as `n`
+#'   grows. The searching functions evaluate the rule at every candidate
+#'   `n`, so [ape_n()] designs jointly over the pair (alpha(n), n); results
+#'   store the rule and the level it produced.
 #' @param conf Optional override: the interval level used for the claim
 #'   itself (`1 - alpha` for detection, `1 - 2 alpha` otherwise). Supplying
 #'   `conf = 0.95` for a minimum-effect or equivalence claim reproduces the
@@ -224,11 +255,17 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #'   (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 #'   Panel designs always use unit-clustered SEs and IV designs the
 #'   stacked method-of-moments robust sandwich; `se` is ignored there.
+#' @param keep_draws Keep the per-replication estimates, standard errors,
+#'   and convergence flags in the result (default TRUE; a few kilobytes).
+#'   They let [power_at()] and [ape_alpha()] re-evaluate the claim at any
+#'   error rate without simulating again.
 #'
 #' @return A `powerape_power` object: power, Monte Carlo standard error,
 #'   outcome distribution, the failed-fit count (failures count against
-#'   power, conservatively), and the embedded DGP spec for reproducibility
-#'   and [power_statement()].
+#'   power, conservatively), the error rate used (`alpha`, and
+#'   `alpha_rule` when it came from a sample-size rule), the stored draws,
+#'   and the embedded DGP spec for reproducibility and
+#'   [power_statement()].
 #' @examples
 #' \donttest{
 #' d <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5), baseline = 0.30)
@@ -238,9 +275,10 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #' @export
 ape_power <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                       sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 1000,
-                      seed = NULL, se = c("model", "robust")) {
+                      seed = NULL, se = c("model", "robust"),
+                      keep_draws = TRUE) {
   claim <- match.arg(claim)
   se <- match.arg(se)
   power_once(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE, se = se,
-             alpha = alpha)
+             alpha = alpha, keep_draws = keep_draws)
 }

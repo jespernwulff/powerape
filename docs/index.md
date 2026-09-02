@@ -23,7 +23,15 @@ units**, built around the confidence-interval claims of Riesthuis
 Every claim is tested at `alpha = .05` in its conventional form:
 detection is the two-sided test (95% interval); the minimum-effect claim
 is a one-sided test and equivalence a TOST, both read off the 90%
-interval (Lakens, 2017; Riesthuis, 2024).
+interval (Lakens, 2017; Riesthuis, 2024). The level is an argument
+everywhere and can be *justified* rather than inherited: pass a
+sample-size rule (`alpha = function(n) alphaN::alphaN(n, BF = 3)`, Wulff
+& Taylor, 2024) and the searches design jointly over alpha(n) and n, or
+let
+[`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+find the error-cost optimum of Maier & Lakens (2022) from one stored
+simulation, capped at .05 (see
+[`vignette("justified-alpha")`](https://jespernwulff.github.io/powerape/articles/justified-alpha.md)).
 
 ## Installation
 
@@ -119,10 +127,24 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   contextual assumptions, in the spirit of Hancock & Feng (2025) — and
   `mode = "mde"` for the minimum detectable effect under the least
   favorable assumptions.
+- **Justified error rates**: `alpha` may be a sample-size rule (a
+  function of n, evaluated at every candidate n by
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+  and friends), and
+  [`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+  minimizes or balances the weighted combined Type I and Type II error
+  rate for stated error costs and prior odds, re-thresholding one stored
+  simulation
+  ([`power_at()`](https://jespernwulff.github.io/powerape/reference/power_at.md)),
+  reporting the flat range of indistinguishable levels, capping the
+  search at .05, and measuring the realized size at the claim boundary
+  on request.
 - **Citable output**:
   [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
   renders any result as a self-contained methods paragraph for grants
-  and preregistrations.
+  and preregistrations, including the justification paragraph for an
+  [`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+  result.
 - **Monte Carlo honesty**: every power estimate carries its MCSE; failed
   fits count against the claim, never silently dropped.
 
@@ -149,11 +171,12 @@ package tests and the validation battery for details.
 
 ## Learn more
 
-Six vignettes cover the workflows:
+Seven vignettes cover the workflows:
 [`vignette("minimum-effect")`](https://jespernwulff.github.io/powerape/articles/minimum-effect.md),
 [`vignette("classic-sesoi-detection")`](https://jespernwulff.github.io/powerape/articles/classic-sesoi-detection.md),
 [`vignette("equivalence")`](https://jespernwulff.github.io/powerape/articles/equivalence.md),
 [`vignette("interaction-effects")`](https://jespernwulff.github.io/powerape/articles/interaction-effects.md),
 [`vignette("panel-designs")`](https://jespernwulff.github.io/powerape/articles/panel-designs.md),
+[`vignette("iv-designs")`](https://jespernwulff.github.io/powerape/articles/iv-designs.md),
 and
-[`vignette("iv-designs")`](https://jespernwulff.github.io/powerape/articles/iv-designs.md).
+[`vignette("justified-alpha")`](https://jespernwulff.github.io/powerape/articles/justified-alpha.md).

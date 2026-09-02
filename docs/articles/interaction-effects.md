@@ -91,7 +91,7 @@ exact, in the units researchers actually interpret, via
 ape_n(d, power = 0.80, claim = "detect", nsim = 500, seed = 3)
 #> powerape required sample size -- detect claim
 #>   n = 4490 for 80% target power (confirmed 0.821, MCSE 0.009)
-#>   assumed true AIE +0.0800, sesoi -, 95% CI, probit
+#>   assumed true AIE +0.0800, sesoi -, 95% CI (alpha = 0.05), probit
 #>   search: 1 step(s); confirmed in 2 round(s) at nsim = 2000.
 ```
 

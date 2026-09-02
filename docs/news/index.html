@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
+    <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justifying the error rate: alpha by sample size, or by error costs</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -40,6 +41,19 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.9.0" id="powerape-190">powerape 1.9.0<a class="anchor" aria-label="anchor" href="#powerape-190"></a></h2>
+<ul><li>
+<strong>Justified error rates</strong> (<code><a href="../articles/justified-alpha.html">vignette("justified-alpha")</a></code>; DESIGN.md section 15). Two routes to an alpha that is chosen rather than inherited, both opt-in; the default stays <code>alpha = 0.05</code> per claim.
+<ul><li>
+<strong>Sample-size rules.</strong> <code>alpha</code> may be a function of <code>n</code> in every power function, for example <code>alpha = function(n) alphaN::alphaN(n, BF = 3)</code>, the Bayes-factor calibration of Wulff and Taylor (2024) that lowers alpha as <code>n</code> grows. The rule is evaluated at each candidate <code>n</code>, so <code><a href="../reference/ape_n.html">ape_n()</a></code> designs jointly over the pair (alpha(n), n), and <code><a href="../reference/ape_curve.html">ape_curve()</a></code>, <code><a href="../reference/ape_mde.html">ape_mde()</a></code>, and <code><a href="../reference/ape_robust.html">ape_robust()</a></code> use the level that belongs to their <code>n</code>. Results store the rule and the level it produced (<code>alpha</code>, <code>alpha_rule</code>; curves and search histories gain an <code>alpha</code> column), print methods say “by sample-size rule”, and <code><a href="../reference/power_statement.html">power_statement()</a></code> states it.</li>
+<li>
+<strong>Error-cost optimization.</strong> <code><a href="../reference/ape_power.html">ape_power()</a></code> now keeps the estimate and standard error of every replication (<code>keep_draws = TRUE</code>), so power at any alpha is a re-threshold of one simulation, exact on those draws. <code><a href="../reference/power_at.html">power_at()</a></code> exposes that curve. <code><a href="../reference/ape_alpha.html">ape_alpha()</a></code> minimizes or balances the weighted combined Type I and Type II error rate of Mudge et al. (2012) and Maier and Lakens (2022) for given error costs and prior odds; it reports the flat range of levels indistinguishable from the optimum at the run’s precision, confines the search to <code>cap = 0.05</code> (raising alpha needs a justification of its own) while stating when the unconstrained optimum lies above the cap, and with <code>size = TRUE</code> simulates the claim-boundary world to report the REALIZED error rate at the chosen level, which analytic compromise-power tools cannot. <code>print</code>, <code>plot</code>, and <code><a href="../reference/power_statement.html">power_statement()</a></code> methods; a preregistration paragraph.</li>
+</ul></li>
+<li>Verification: new unit tests (<code>test-alpha.R</code>: constant rules reproduce scalar runs bit for bit, <code><a href="../reference/power_at.html">power_at()</a></code> exactness, a closed-form twin of the optimizer on synthetic draws, Cohen’s 4:1 balance returning .05/.20 at 80% power, JustifyAlpha concordance on the same draws, the realized boundary size) and battery check V20.</li>
+<li>
+<code>alphaN</code> and <code>JustifyAlpha</code> join Suggests (examples and concordance tests only).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.8.0" id="powerape-180">powerape 1.8.0<a class="anchor" aria-label="anchor" href="#powerape-180"></a></h2>
 <ul><li>

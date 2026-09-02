@@ -1,13 +1,19 @@
 # Render a power analysis as a citable methods paragraph
 
 Turns a
-[`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md)
+[`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md),
+[`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md),
 or
-[`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+[`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
 result into a self-contained methods paragraph stating the estimand, the
-full data-generating assumptions, the claim and CI convention, and the
-Monte Carlo precision – the transparency artifact for grant applications
-and preregistrations.
+full data-generating assumptions, the claim and CI convention (including
+a sample-size rule for `alpha` when one was used), and the Monte Carlo
+precision – the transparency artifact for grant applications and
+preregistrations. For an
+[`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+result the paragraph states the justification of the error rate instead:
+the objective and its weights, the chosen level and its flat range, the
+cap, and the realized-size verification when it was run.
 
 ## Usage
 
@@ -19,7 +25,8 @@ power_statement(x)
 
 - x:
 
-  A `powerape_power` or `powerape_n` object.
+  A `powerape_power`, `powerape_n`, `powerape_mde`, or `powerape_alpha`
+  object.
 
 ## Value
 
@@ -35,7 +42,7 @@ pw <- ape_power(d, n = 800, claim = "minimum", sesoi = 0.03,
                 nsim = 500, seed = 1)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.8.0), following the
+#> (APE) of treat using the powerape package (version 1.9.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); no additional covariates; baseline outcome rate 0.300 with the focal

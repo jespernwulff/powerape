@@ -14,3 +14,5 @@
   effects](https://jespernwulff.github.io/powerape/articles/panel-designs.md):
 - [IV designs: endogenous focal variables via control
   functions](https://jespernwulff.github.io/powerape/articles/iv-designs.md):
+- [Justifying the error rate: alpha by sample size, or by error
+  costs](https://jespernwulff.github.io/powerape/articles/justified-alpha.md):

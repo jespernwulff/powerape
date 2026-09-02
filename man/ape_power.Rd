@@ -13,7 +13,8 @@ ape_power(
   conf = NULL,
   nsim = 1000,
   seed = NULL,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  keep_draws = TRUE
 )
 }
 \arguments{
@@ -28,7 +29,14 @@ ape_power(
 the outcome table is still broken out against it).}
 
 \item{alpha}{The claim's error rate (default 0.05): two-sided for
-\code{"detect"}, one-sided for \code{"minimum"}, TOST for \code{"equivalence"}.}
+\code{"detect"}, one-sided for \code{"minimum"}, TOST for \code{"equivalence"}.
+May also be a \strong{sample-size rule}: a function of \code{n} returning the
+error rate to use at that \code{n}, for example
+\code{function(n) alphaN::alphaN(n, BF = 3)}, the Bayes-factor
+calibration of Wulff and Taylor (2024) that lowers alpha as \code{n}
+grows. The searching functions evaluate the rule at every candidate
+\code{n}, so \code{\link[=ape_n]{ape_n()}} designs jointly over the pair (alpha(n), n); results
+store the rule and the level it produced.}
 
 \item{conf}{Optional override: the interval level used for the claim
 itself (\code{1 - alpha} for detection, \verb{1 - 2 alpha} otherwise). Supplying
@@ -44,12 +52,19 @@ pre-1.8.0 behavior (one-sided error rate 2.5\%).}
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
 stacked method-of-moments robust sandwich; \code{se} is ignored there.}
+
+\item{keep_draws}{Keep the per-replication estimates, standard errors,
+and convergence flags in the result (default TRUE; a few kilobytes).
+They let \code{\link[=power_at]{power_at()}} and \code{\link[=ape_alpha]{ape_alpha()}} re-evaluate the claim at any
+error rate without simulating again.}
 }
 \value{
 A \code{powerape_power} object: power, Monte Carlo standard error,
 outcome distribution, the failed-fit count (failures count against
-power, conservatively), and the embedded DGP spec for reproducibility
-and \code{\link[=power_statement]{power_statement()}}.
+power, conservatively), the error rate used (\code{alpha}, and
+\code{alpha_rule} when it came from a sample-size rule), the stored draws,
+and the embedded DGP spec for reproducibility and
+\code{\link[=power_statement]{power_statement()}}.
 }
 \description{
 Simulates studies from the pinned DGP, fits the index model by maximum
@@ -72,6 +87,10 @@ Riesthuis (2024) for equivalence. The outcome distribution uses both
 intervals accordingly. To reproduce the more conservative choice of a
 95\% interval for the minimum-effect test (Riesthuis, 2024) pass
 \code{conf = 0.95}, which sets that claim's one-sided error rate to 2.5\%.
+Two routes to an error rate that is chosen rather than inherited are
+described in \code{vignette("justified-alpha")}: a sample-size rule passed
+as \code{alpha}, and \code{\link[=ape_alpha]{ape_alpha()}} for the error-cost optimum of Maier and
+Lakens (2022), computed from this function's stored draws.
 }
 \examples{
 \donttest{

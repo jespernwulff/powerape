@@ -60,7 +60,7 @@ The second buys a stronger conclusion and costs more observations:
 ape_n(d, power = 0.80, claim = "detect", nsim = 500, seed = 2)
 #> powerape required sample size -- detect claim
 #>   n = 2742 for 80% target power (confirmed 0.799, MCSE 0.009)
-#>   assumed true APE +0.0500, sesoi -, 95% CI, probit
+#>   assumed true APE +0.0500, sesoi -, 95% CI (alpha = 0.05), probit
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
 
 ## minimum-effect power for truth = 0.08 against SESOI = 0.05
@@ -69,7 +69,7 @@ ape_n(d8, power = 0.80, claim = "minimum", sesoi = 0.05,
       nsim = 500, seed = 3)
 #> powerape required sample size -- minimum claim
 #>   n = 6117 for 80% target power (confirmed 0.788, MCSE 0.009)
-#>   assumed true APE +0.0800, sesoi 0.050, 90% CI, probit
+#>   assumed true APE +0.0800, sesoi 0.050, 90% CI (alpha = 0.05), probit
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
 ```
 

@@ -59,34 +59,41 @@ describe_dgp <- function(d) {
           d$signal_implied)
 }
 
-claim_text <- function(claim, sesoi, conf) {
-  cl <- sprintf("%.0f%%", 100 * conf)
+claim_text <- function(claim, sesoi, conf, rule = FALSE) {
+  cl <- sprintf("%s%%", format(round(100 * conf, 2)))
   ## the claim's own error rate follows from its interval: two-sided for
   ## detection, one-sided (and TOST) for the SESOI claims
   al <- if (identical(claim, "detect")) 1 - conf else (1 - conf) / 2
-  al_txt <- sprintf("%g%%", round(100 * al, 2))
+  al_txt <- sprintf("%g%%", round(100 * al, 3))
+  by_n <- if (isTRUE(rule)) ", set as a function of the sample size" else ""
   switch(claim,
     minimum = sprintf(paste0("the minimum-effect claim (the %s confidence ",
                              "interval's lower bound exceeding the smallest ",
                              "effect size of interest, %.3f; a one-sided ",
-                             "test at alpha = %s)"), cl, sesoi, al_txt),
+                             "test at alpha = %s%s)"), cl, sesoi, al_txt, by_n),
     detect = sprintf(paste0("the detection claim (the %s confidence interval ",
                             "excluding zero in the hypothesized direction; a ",
-                            "two-sided test at alpha = %s)"), cl, al_txt),
+                            "two-sided test at alpha = %s%s)"), cl, al_txt, by_n),
     equivalence = sprintf(paste0("the equivalence claim (the %s confidence ",
                                  "interval lying within +/-%.3f; two ",
-                                 "one-sided tests at alpha = %s)"),
-                          cl, sesoi, al_txt))
+                                 "one-sided tests at alpha = %s%s)"),
+                          cl, sesoi, al_txt, by_n))
 }
 
 #' Render a power analysis as a citable methods paragraph
 #'
-#' Turns a [ape_power()] or [ape_n()] result into a self-contained methods
-#' paragraph stating the estimand, the full data-generating assumptions,
-#' the claim and CI convention, and the Monte Carlo precision -- the
-#' transparency artifact for grant applications and preregistrations.
+#' Turns a [ape_power()], [ape_n()], or [ape_mde()] result into a
+#' self-contained methods paragraph stating the estimand, the full
+#' data-generating assumptions, the claim and CI convention (including a
+#' sample-size rule for `alpha` when one was used), and the Monte Carlo
+#' precision -- the transparency artifact for grant applications and
+#' preregistrations. For an [ape_alpha()] result the paragraph states the
+#' justification of the error rate instead: the objective and its
+#' weights, the chosen level and its flat range, the cap, and the
+#' realized-size verification when it was run.
 #'
-#' @param x A `powerape_power` or `powerape_n` object.
+#' @param x A `powerape_power`, `powerape_n`, `powerape_mde`, or
+#'   `powerape_alpha` object.
 #' @return A character string of class `powerape_statement` (printed
 #'   wrapped).
 #' @examples
@@ -100,7 +107,9 @@ claim_text <- function(claim, sesoi, conf) {
 #' @export
 power_statement <- function(x) {
   stopifnot(inherits(x, "powerape_power") || inherits(x, "powerape_n") ||
-              inherits(x, "powerape_mde"))
+              inherits(x, "powerape_mde") || inherits(x, "powerape_alpha"))
+  if (inherits(x, "powerape_alpha")) return(alpha_statement(x))
+  rule <- !is.null(x$alpha_rule)
   d <- x$dgp
   is_aie <- identical(x$estimand, "aie")
   est_long <- if (is_aie) "average interaction effect (AIE)" else "average partial effect (APE)"
@@ -151,7 +160,7 @@ power_statement <- function(x) {
                      "%.0f%% power for %s was %.3f (%.1f percentage ",
                      "points)%s."),
               n_text, est_short, 100 * x$goal,
-              claim_text(x$claim, x$sesoi, x$conf), x$mde, 100 * x$mde,
+              claim_text(x$claim, x$sesoi, x$conf, rule), x$mde, 100 * x$mde,
               conf_frag)
     }
   } else if (inherits(x, "powerape_n")) {
@@ -161,19 +170,20 @@ power_statement <- function(x) {
                      "was %s, confirmed by a high-precision verification ",
                      "run (simulated power %.3f, Monte Carlo SE %.3f, %d ",
                      "replications)."),
-              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf),
+              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf, rule),
               n_text, x$power, x$mcse, x$nsim_confirm)
     } else {
       sprintf(paste0("The required %s for %.0f%% power for %s ",
                      "was %s (simulated power %.3f, Monte Carlo SE %.3f, ",
                      "%d replications per search step)."),
-              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf),
+              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf, rule),
               n_text, x$power, x$mcse, x$nsim)
     }
   } else {
     sprintf(paste0("At a sample size of %s, simulated power for %s ",
                    "was %.3f (Monte Carlo SE %.3f; %d replications)."),
-            n_text, claim_text(x$claim, x$sesoi, x$conf), x$power, x$mcse, x$nsim)
+            n_text, claim_text(x$claim, x$sesoi, x$conf, rule), x$power, x$mcse,
+            x$nsim)
   }
   s5 <- if (inherits(x, "powerape_power") && !is.null(x$sesoi)) {
     o <- x$outcomes

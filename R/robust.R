@@ -73,7 +73,11 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   claim <- match.arg(claim)
   pin <- match.arg(pin)
   mode <- match.arg(mode)
-  conf <- claim_levels(claim, alpha, conf)$conf_claim
+  stopifnot(is.numeric(n), length(n) == 1L, n >= 20)
+  ## n is fixed across scenarios, so a sample-size rule resolves once
+  lv <- claim_levels(claim, alpha, conf, n)
+  conf <- lv$conf_claim
+  rule <- is.function(alpha)
   if (mode == "mde" && claim == "equivalence")
     stop(paste("MDE mode searches the effect for detect/minimum claims; for",
                "the equivalence analog run ape_mde(claim = \"equivalence\")",
@@ -207,7 +211,8 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   if (nmax && mode == "power") {
     nmax_res <- tryCatch(
       ape_n(dgps[[worst_i]], power = nmax_power, claim = claim, sesoi = sesoi,
-            conf = conf, nsim = nsim,
+            alpha = if (rule) alpha else lv$alpha,
+            conf = if (rule) NULL else conf, nsim = nsim,
             seed = if (is.null(seed)) NULL else seed + nrow(grid) + 1L),
       error = function(e) e)
     if (inherits(nmax_res, "error")) {
@@ -220,7 +225,9 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   structure(list(scenarios = scenarios,
                  worst = scenarios[worst_i, , drop = FALSE],
                  marginals = marginals, n = as.integer(n), claim = claim,
-                 sesoi = sesoi, conf = conf, nsim = as.integer(nsim),
+                 sesoi = sesoi, conf = conf, alpha = lv$alpha,
+                 alpha_rule = if (rule) alpha else NULL,
+                 nsim = as.integer(nsim),
                  pin = pin, mode = mode, goal = power,
                  estimand = if (!is.null(dgp$moderator)) "aie"
                             else dgp$estimand %||% "ape",
