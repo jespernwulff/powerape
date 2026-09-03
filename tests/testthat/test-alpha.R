@@ -181,20 +181,35 @@ test_that("ape_alpha and JustifyAlpha agree to their combined resolution on a sm
   on.exit(rm(".powerape_pf_smooth", envir = globalenv()), add = TRUE)
   cases <- expand.grid(error = c("minimize", "balance"), cost = c(1, 4), prior = c(1, 3),
                        stringsAsFactors = FALSE)
-  d_alpha <- d_w <- d_beta <- numeric(nrow(cases))
+  w_cf <- function(a, cost, prior) (cost * a + prior * (1 - .powerape_pf_smooth(a))) / (cost + prior)
+  d_alpha <- d_w <- d_beta <- gap_ape <- gap_ja <- numeric(nrow(cases))
   for (i in seq_len(nrow(cases))) {
-    aa <- suppressWarnings(ape_alpha(pw, cost = cases$cost[i], prior = cases$prior[i],
+    cost <- cases$cost[i]; prior <- cases$prior[i]
+    aa <- suppressWarnings(ape_alpha(pw, cost = cost, prior = prior,
                                      error = cases$error[i], cap = 0.4999))
     ja <- JustifyAlpha::optimal_alpha(".powerape_pf_smooth(alpha = x)",
-                                      costT1T2 = cases$cost[i], priorH1H0 = cases$prior[i],
+                                      costT1T2 = cost, priorH1H0 = prior,
                                       error = cases$error[i], verbose = FALSE)
     d_alpha[i] <- abs(aa$alpha - ja$alpha)
     d_w[i] <- abs(aa$wcer - ja$errorrate)
     d_beta[i] <- abs(aa$beta - ja$beta)
+    ## excess of the closed-form objective at each optimizer's level over its true minimum
+    w_min <- optimize(function(a) w_cf(a, cost, prior), c(1e-4, 0.4999), tol = 1e-7)$objective
+    gap_ape[i] <- w_cf(aa$alpha, cost, prior) - w_min
+    gap_ja[i] <- w_cf(ja$alpha, cost, prior) - w_min
   }
-  expect_true(all(d_alpha <= 5e-4 + 1e-3 + 1e-6))
-  expect_true(all(d_w < 1e-4))
-  expect_true(all(d_beta < 2e-3))
+  mn <- cases$error == "minimize"
+  ## minimize mode: the objective is flat near its minimum (at equal costs a
+  ## .002 shift in alpha moves it by 1e-5), so the level cannot be pinned
+  ## tighter than that flatness; both optima must sit within 1e-4 of the true
+  ## minimum and agree on the minimized error rate
+  expect_true(all(gap_ape[mn] < 1e-4))
+  expect_true(all(gap_ja[mn] < 1e-4))
+  expect_true(all(d_w[mn] < 1e-4))
+  ## balance mode: the objective is V-shaped, so the level is well determined
+  ## up to grid step + JustifyAlpha's optimize tolerance (.001)
+  expect_true(all(d_alpha[!mn] <= 5e-4 + 1e-3 + 1e-6))
+  expect_true(all(d_beta[!mn] < 2e-3))
 })
 
 test_that("the realized size at the boundary tracks the chosen alpha", {
