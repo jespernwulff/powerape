@@ -162,6 +162,41 @@ test_that("ape_alpha agrees with JustifyAlpha's optimizer on the same draws", {
   expect_lt(abs(ja$alpha - aa$alpha_uncapped), 0.03)
 })
 
+test_that("ape_alpha and JustifyAlpha agree to their combined resolution on a smooth power curve", {
+  skip_if_not_installed("JustifyAlpha")
+  ## both implementations see the SAME smooth curve: ape_alpha gets exact
+  ## normal-quantile draws (empirical power = closed form to within 1/N),
+  ## JustifyAlpha the closed form itself. JustifyAlpha's optimize() runs at
+  ## tol = 0.001, so alpha can agree only to grid step + 0.001; the weighted
+  ## error rate, which is what both minimize, agrees far more tightly.
+  d <- make_world()
+  N <- 20000L
+  se0 <- 0.0201
+  pw <- ape_power(d, 2000, claim = "minimum", sesoi = 0.05, nsim = 40, seed = 20)
+  pw$draws <- list(est = pw$target + se0 * qnorm(ppoints(N)), se = rep(se0, N),
+                   ok = rep(TRUE, N))
+  pw$nsim <- N
+  assign(".powerape_pf_smooth", function(alpha) 1 - pnorm(qnorm(1 - alpha) - 0.05 / se0),
+         envir = globalenv())
+  on.exit(rm(".powerape_pf_smooth", envir = globalenv()), add = TRUE)
+  cases <- expand.grid(error = c("minimize", "balance"), cost = c(1, 4), prior = c(1, 3),
+                       stringsAsFactors = FALSE)
+  d_alpha <- d_w <- d_beta <- numeric(nrow(cases))
+  for (i in seq_len(nrow(cases))) {
+    aa <- suppressWarnings(ape_alpha(pw, cost = cases$cost[i], prior = cases$prior[i],
+                                     error = cases$error[i], cap = 0.4999))
+    ja <- JustifyAlpha::optimal_alpha(".powerape_pf_smooth(alpha = x)",
+                                      costT1T2 = cases$cost[i], priorH1H0 = cases$prior[i],
+                                      error = cases$error[i], verbose = FALSE)
+    d_alpha[i] <- abs(aa$alpha - ja$alpha)
+    d_w[i] <- abs(aa$wcer - ja$errorrate)
+    d_beta[i] <- abs(aa$beta - ja$beta)
+  }
+  expect_true(all(d_alpha <= 5e-4 + 1e-3 + 1e-6))
+  expect_true(all(d_w < 1e-4))
+  expect_true(all(d_beta < 2e-3))
+})
+
 test_that("the realized size at the boundary tracks the chosen alpha", {
   d <- make_world()
   pw <- ape_power(d, 600, claim = "minimum", sesoi = 0.03, nsim = 300, seed = 10)
