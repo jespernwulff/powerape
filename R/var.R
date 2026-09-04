@@ -29,7 +29,13 @@ pa_var <- function(name, type = c("binary", "normal"), p = NULL, mean = 0, sd = 
   if (type == "binary") {
     if (is.null(p) || !is.numeric(p) || length(p) != 1L || p <= 0 || p >= 1)
       stop("A binary pa_var needs `p` strictly between 0 and 1.", call. = FALSE)
+    if (!missing(mean) || !missing(sd))
+      warning(sprintf("`mean`/`sd` are ignored for the binary variable \"%s\".",
+                      name), call. = FALSE)
   } else {
+    if (!is.null(p))
+      warning(sprintf("`p` is ignored for the normal variable \"%s\".", name),
+              call. = FALSE)
     stopifnot(is.numeric(mean), length(mean) == 1L,
               is.numeric(sd), length(sd) == 1L, sd > 0)
   }

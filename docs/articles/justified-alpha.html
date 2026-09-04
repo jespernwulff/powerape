@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -150,7 +150,7 @@ says so.</p>
 <span><span class="co">#&gt;   outcomes: minimum 0.790 | detect-only 0.210 | inconclusive 0.000 | equivalence 0.000 | failed 0.000</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw_rule</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of program using the powerape package (version 1.9.0), following the</span></span>
+<span><span class="co">#&gt; (APE) of program using the powerape package (version 1.10.0), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable program (binary, prevalence</span></span>
 <span><span class="co">#&gt; 0.50); parametric covariates (z; Gaussian-copula dependence); baseline</span></span>
@@ -231,6 +231,35 @@ lowering.</p>
 .05/.20 pair by construction.</p>
 </div>
 <div class="section level2">
+<h2 id="the-frontier-level-one-alpha-for-a-whole-mde-grid">The frontier level: one alpha for a whole MDE grid<a class="anchor" aria-label="anchor" href="#the-frontier-level-one-alpha-for-a-whole-mde-grid"></a>
+</h2>
+<p><code><a href="../reference/ape_alpha.html">ape_alpha()</a></code> needs a pinned effect, because its Type II
+error is one minus power <em>at the planning value</em>. In a
+minimum-detectable-effect analysis the effect is the answer, not an
+input, and re-optimizing the level at every candidate effect chases a
+moving target. The way out is a fixed point: the level that is optimal
+<em>for the effect that is just detectable at the target power</em>.
+Under the normal approximation that first-order condition loses both
+<em>n</em> and the standard error, so one level prices every sample
+size, and <code><a href="../reference/alpha_frontier.html">alpha_frontier()</a></code> returns it in closed form.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/alpha_frontier.html">alpha_frontier</a></span><span class="op">(</span>cost <span class="op">=</span> <span class="fl">4</span>, power <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span>                    <span class="co"># two-sided, 0.0274</span></span>
+<span><span class="co">#&gt; [1] 0.02737173</span></span>
+<span><span class="fu"><a href="../reference/alpha_frontier.html">alpha_frontier</a></span><span class="op">(</span>cost <span class="op">=</span> <span class="fl">1</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"minimum"</span><span class="op">)</span> <span class="co"># exactly 1 - power</span></span>
+<span><span class="co">#&gt; [1] 0.2</span></span></code></pre></div>
+<p>Passing it as <code>alpha</code> re-prices an MDE analysis (or a grid
+of them) under the justified level:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_mde.html">ape_mde</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">3000</span>, claim <span class="op">=</span> <span class="st">"detect"</span>,</span>
+<span>        alpha <span class="op">=</span> <span class="fu"><a href="../reference/alpha_frontier.html">alpha_frontier</a></span><span class="op">(</span>cost <span class="op">=</span> <span class="fl">4</span>, power <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<p>At equal costs the one-sided frontier level is exactly
+<code>1 - power</code> – the frontier is where alpha and beta balance.
+Unlike <code><a href="../reference/ape_alpha.html">ape_alpha()</a></code>, the frontier level is an approximation
+(normal, and pinned to the just-detectable effect) and carries no .05
+cap, so treat levels above the convention with the same caution as an
+uncapped <code><a href="../reference/ape_alpha.html">ape_alpha()</a></code> optimum.</p>
+</div>
+<div class="section level2">
 <h2 id="checking-the-size-and-reporting">Checking the size, and reporting<a class="anchor" aria-label="anchor" href="#checking-the-size-and-reporting"></a>
 </h2>
 <p>Because the Type I error of a SESOI claim is its size at the claim
@@ -240,7 +269,7 @@ chosen level, something analytic compromise-power tools cannot do. On
 the standard routes it matches the nominal level within Monte Carlo
 error; on clustered panels with few units it may not, and then the
 realized number is the one to report.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ja4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_alpha.html">ape_alpha</a></span><span class="op">(</span><span class="va">pw</span>, cost <span class="op">=</span> <span class="fl">4</span>, prior <span class="op">=</span> <span class="fl">1</span>, size <span class="op">=</span> <span class="cn">TRUE</span>, nsim_size <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>                 seed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">ja4</span></span>
@@ -258,7 +287,7 @@ realized number is the one to report.</p>
 <span><span class="co">#&gt; and Type II error rate (Maier &amp; Lakens, 2022; Mudge et al., 2012), weighting</span></span>
 <span><span class="co">#&gt; a Type I error 4 times a Type II error and taking prior odds of 1 for the</span></span>
 <span><span class="co">#&gt; planning value (APE = 0.100) against the claim boundary, using the powerape</span></span>
-<span><span class="co">#&gt; package (version 1.9.0). The assumed data-generating process was a probit</span></span>
+<span><span class="co">#&gt; package (version 1.10.0). The assumed data-generating process was a probit</span></span>
 <span><span class="co">#&gt; model with focal variable program (binary, prevalence 0.50); parametric</span></span>
 <span><span class="co">#&gt; covariates (z; Gaussian-copula dependence); baseline outcome rate 0.300 with</span></span>
 <span><span class="co">#&gt; the focal at reference; nuisance covariates contribute a latent</span></span>

@@ -63,3 +63,41 @@ test_that("n_max runs in the worst scenario", {
   expect_gt(rb$nmax$n, 100)
   expect_lt(abs(rb$nmax$power - 0.80), 0.06)
 })
+
+test_that("ape_robust prices the sweep under the requested SEs", {
+  d <- ape_dgp("probit", focal = pa_var("treat", "binary", p = 0.5),
+               covariates = list(pa_var("z", "normal")),
+               baseline = 0.30, signal = 0.15)
+  d <- set_ape(d, 0.10)
+  rb_r <- ape_robust(d, n = 500, claim = "detect",
+                     vary = list(baseline = c(0.25, 0.35)), grid_points = 2,
+                     nsim = 150, seed = 11, nmax = FALSE, se = "robust")
+  expect_identical(rb_r$se, "robust")
+  ## scenario 1 (baseline .25, seed 11 + 1) must equal its ape_power twin
+  ## under the same robust SEs -- the pass-through is exact, not approximate
+  d25 <- set_ape(ape_dgp("probit", focal = pa_var("treat", "binary", p = 0.5),
+                         covariates = list(pa_var("z", "normal")),
+                         baseline = 0.25, signal = 0.15), 0.10)
+  tw <- ape_power(d25, n = 500, claim = "detect", nsim = 150, seed = 12,
+                  se = "robust")
+  expect_identical(rb_r$scenarios$power[1], tw$power)
+  rb_m <- ape_robust(d, n = 500, claim = "detect",
+                     vary = list(baseline = c(0.25, 0.35)), grid_points = 2,
+                     nsim = 150, seed = 11, nmax = FALSE)
+  expect_identical(rb_m$se, "model")
+  tw_m <- ape_power(d25, n = 500, claim = "detect", nsim = 150, seed = 12)
+  expect_identical(rb_m$scenarios$power[1], tw_m$power)
+})
+
+test_that("ape_robust warns and reverts se on routes with fixed inference", {
+  dp <- ape_dgp_panel(focal = pa_var("treat", "binary", p = 0.5, icc = 1),
+                      n_periods = 2, rho = 0.3, cre_share = 0,
+                      baseline = 0.30, n_int = 2e4)
+  dp <- set_ape(dp, 0.10)
+  expect_warning(
+    rb <- ape_robust(dp, n = 60, claim = "detect",
+                     vary = list(rho = c(0.1, 0.5)), grid_points = 2,
+                     nsim = 30, seed = 3, nmax = FALSE, se = "robust"),
+    "fixed by the route")
+  expect_identical(rb$se, "model")
+})

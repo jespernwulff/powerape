@@ -111,6 +111,12 @@ check_coherence <- function(dgp, claim, sesoi, conf) {
     if (is.null(sesoi) || !is.numeric(sesoi) || length(sesoi) != 1L || sesoi <= 0)
       stop(sprintf("claim = \"%s\" needs a single positive `sesoi` (in APE units).",
                    claim), call. = FALSE)
+  } else if (!is.null(sesoi) &&
+             (!is.numeric(sesoi) || length(sesoi) != 1L || sesoi <= 0)) {
+    ## a sesoi supplied alongside claim = "detect" only breaks out the
+    ## outcome table, but a bad value would corrupt that table silently
+    stop("`sesoi`, when supplied, must be a single positive number (in APE units).",
+         call. = FALSE)
   }
   if (claim == "minimum" && t_abs <= sesoi)
     stop(sprintf(paste(

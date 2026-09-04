@@ -17,7 +17,7 @@ the worst scenario – the insurance-premium n."><meta property="og:image" conte
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,8 @@ the worst scenario – the insurance-premium n.</p>
 <span>  power <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  grid_points <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  nmax <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  nmax_power <span class="op">=</span> <span class="fl">0.9</span></span>
+<span>  nmax_power <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -169,6 +170,14 @@ power mode only).</p></dd>
 
 <dt id="arg-nmax-power">nmax_power<a class="anchor" aria-label="anchor" href="#arg-nmax-power"></a></dt>
 <dd><p>Target power for the n_max search (default 0.90).</p></dd>
+
+
+<dt id="arg-se">se<a class="anchor" aria-label="anchor" href="#arg-se"></a></dt>
+<dd><p>Standard errors for the exogenous cross-sectional routes:
+<code>"model"</code> (default, expected-information ML) or <code>"robust"</code>
+(heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+Panel designs always use unit-clustered SEs and IV designs the
+stacked method-of-moments robust sandwich; <code>se</code> is ignored there.</p></dd>
 
 </dl></div>
     <div class="section level2">

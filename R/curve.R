@@ -59,10 +59,11 @@ plot.powerape_curve <- function(x, target_power = NULL, ...) {
        xlab = "Sample size n",
        ylab = sprintf("Power (%s claim)", x$claim), ...)
   abline(h = seq(0, 1, 0.2), col = "grey92", lwd = 0.8)
-  iso <- isoreg(d$n, d$power)
+  ## under an n-dependent alpha rule power need not be monotone in n, so
+  ## isotonic smoothing only applies to fixed-alpha curves
+  yf <- if (isTRUE(x$alpha_rule)) d$power else isoreg(d$n, d$power)$yf
   if (!is.null(target_power)) {
     abline(h = target_power, lty = 3)
-    yf <- iso$yf
     i <- which(yf >= target_power)[1L]
     if (!is.na(i) && i > 1L) {
       n_cross <- if (yf[i] > yf[i - 1L]) {
@@ -81,7 +82,7 @@ plot.powerape_curve <- function(x, target_power = NULL, ...) {
     arrows(d$n, pmax(0, d$power - half), d$n, pmin(1, d$power + half),
            angle = 90, code = 3, length = 0.03, col = "grey40")
   )
-  lines(d$n, iso$yf, lwd = 1.5)
+  lines(d$n, yf, lwd = 1.5)
   points(d$n, d$power, pch = 19)
   invisible(x)
 }

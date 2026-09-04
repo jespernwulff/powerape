@@ -41,7 +41,7 @@ describe_dgp <- function(d) {
                    "fitted pilot model (%s; %d pilot observations, ",
                    "resampled with replacement)"),
             d$formula_str, d$n_emp)
-  } else if (d$route == "empirical") {
+  } else if (d$route == "empirical" && d$k > 0L) {
     sprintf("covariates resampled with replacement from %d pilot observations (%s)",
             d$n_emp, paste(d$covariates, collapse = ", "))
   } else if (d$k > 0L) {

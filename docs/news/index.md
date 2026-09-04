@@ -1,5 +1,58 @@
 # Changelog
 
+## powerape 1.10.0
+
+- **[`alpha_frontier()`](https://jespernwulff.github.io/powerape/reference/alpha_frontier.md)**:
+  the closed-form justified error rate at the detectability frontier –
+  the level that minimizes the weighted combined Type I and Type II
+  error rate (Mudge et al., 2012; Maier & Lakens, 2022) for the effect
+  that is just detectable at the target power. Under the normal
+  approximation the first-order condition collapses to
+  `phi(z) = prior * phi(qnorm(power)) / (m * cost)` (`m = 2` two-sided
+  detection, `m = 1` one-sided minimum-effect), so the level involves
+  neither `n` nor the standard error: solve it once and price a whole
+  MDE grid under one justified alpha
+  (`ape_mde(..., alpha = alpha_frontier(cost = 4))`). Anchors: 0.0274 at
+  Cohen’s 4:1 weighting and 80% power (two-sided); exactly `1 - power`
+  at equal costs (one-sided), where the frontier balances alpha = beta.
+  Errors when the weighting admits no interior optimum and warns when
+  the level is not below 0.5. Battery check V22 verifies the closed form
+  against
+  [`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)’s
+  simulation optimum on frontier-pinned draws.
+- **[`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
+  gains the `se` argument** of
+  [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md):
+  a design analyzed with heteroskedasticity-robust standard errors now
+  prices its robustness sweep (and the `n_max` search and MDE mode)
+  under the same standard errors instead of silently reverting to
+  model-based ones. Panel and IV routes keep their fixed inference and
+  warn, as in
+  [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md).
+- **Validation battery V21** covers the empirical-covariates and
+  pilot-model routes, which previously had unit tests but no battery
+  item: 95% CI coverage at the nominal rate, estimator consistency, and
+  concordance with the matched parametric world (a large pilot drawn
+  *from* that world must reproduce its power within Monte Carlo error)
+  for both
+  [`ape_dgp_empirical()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_empirical.md)
+  and
+  [`ape_dgp_from_fit()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_from_fit.md).
+- Input-validation hardening: a `sesoi` supplied alongside
+  `claim = "detect"` (it breaks out the outcome table) is now checked
+  for being a single positive number instead of silently corrupting that
+  table;
+  [`pa_var()`](https://jespernwulff.github.io/powerape/reference/pa_var.md)
+  warns when arguments irrelevant to the declared type are supplied (`p`
+  for a normal variable, `mean`/`sd` for a binary one).
+- [`plot.powerape_curve()`](https://jespernwulff.github.io/powerape/reference/ape_curve.md)
+  no longer forces isotonic smoothing when `alpha` is a sample-size rule
+  – under an n-dependent level, power is legitimately non-monotone in
+  `n`, and the smoother would misdraw it.
+- [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+  no longer prints an empty covariate list for an empirical-route DGP
+  whose pilot data supply only the focal column.
+
 ## powerape 1.9.0
 
 - **Justified error rates**

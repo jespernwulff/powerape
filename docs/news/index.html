@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,20 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.10.0" id="powerape-1100">powerape 1.10.0<a class="anchor" aria-label="anchor" href="#powerape-1100"></a></h2>
+<ul><li>
+<strong><code><a href="../reference/alpha_frontier.html">alpha_frontier()</a></code></strong>: the closed-form justified error rate at the detectability frontier – the level that minimizes the weighted combined Type I and Type II error rate (Mudge et al., 2012; Maier &amp; Lakens, 2022) for the effect that is just detectable at the target power. Under the normal approximation the first-order condition collapses to <code>phi(z) = prior * phi(qnorm(power)) / (m * cost)</code> (<code>m = 2</code> two-sided detection, <code>m = 1</code> one-sided minimum-effect), so the level involves neither <code>n</code> nor the standard error: solve it once and price a whole MDE grid under one justified alpha (<code>ape_mde(..., alpha = alpha_frontier(cost = 4))</code>). Anchors: 0.0274 at Cohen’s 4:1 weighting and 80% power (two-sided); exactly <code>1 - power</code> at equal costs (one-sided), where the frontier balances alpha = beta. Errors when the weighting admits no interior optimum and warns when the level is not below 0.5. Battery check V22 verifies the closed form against <code><a href="../reference/ape_alpha.html">ape_alpha()</a></code>’s simulation optimum on frontier-pinned draws.</li>
+<li>
+<strong><code><a href="../reference/ape_robust.html">ape_robust()</a></code> gains the <code>se</code> argument</strong> of <code><a href="../reference/ape_power.html">ape_power()</a></code>: a design analyzed with heteroskedasticity-robust standard errors now prices its robustness sweep (and the <code>n_max</code> search and MDE mode) under the same standard errors instead of silently reverting to model-based ones. Panel and IV routes keep their fixed inference and warn, as in <code><a href="../reference/ape_power.html">ape_power()</a></code>.</li>
+<li>
+<strong>Validation battery V21</strong> covers the empirical-covariates and pilot-model routes, which previously had unit tests but no battery item: 95% CI coverage at the nominal rate, estimator consistency, and concordance with the matched parametric world (a large pilot drawn <em>from</em> that world must reproduce its power within Monte Carlo error) for both <code><a href="../reference/ape_dgp_empirical.html">ape_dgp_empirical()</a></code> and <code><a href="../reference/ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code>.</li>
+<li>Input-validation hardening: a <code>sesoi</code> supplied alongside <code>claim = "detect"</code> (it breaks out the outcome table) is now checked for being a single positive number instead of silently corrupting that table; <code><a href="../reference/pa_var.html">pa_var()</a></code> warns when arguments irrelevant to the declared type are supplied (<code>p</code> for a normal variable, <code>mean</code>/<code>sd</code> for a binary one).</li>
+<li>
+<code><a href="../reference/ape_curve.html">plot.powerape_curve()</a></code> no longer forces isotonic smoothing when <code>alpha</code> is a sample-size rule – under an n-dependent level, power is legitimately non-monotone in <code>n</code>, and the smoother would misdraw it.</li>
+<li>
+<code><a href="../reference/power_statement.html">power_statement()</a></code> no longer prints an empty covariate list for an empirical-route DGP whose pilot data supply only the focal column.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.9.0" id="powerape-190">powerape 1.9.0<a class="anchor" aria-label="anchor" href="#powerape-190"></a></h2>
 <ul><li>

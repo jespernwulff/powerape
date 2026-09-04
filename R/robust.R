@@ -69,10 +69,18 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                        sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 800,
                        seed = NULL, vary, pin = c("ape", "coefficients"),
                        mode = c("power", "mde"), power = 0.80,
-                       grid_points = 3, nmax = TRUE, nmax_power = 0.90) {
+                       grid_points = 3, nmax = TRUE, nmax_power = 0.90,
+                       se = c("model", "robust")) {
   claim <- match.arg(claim)
   pin <- match.arg(pin)
   mode <- match.arg(mode)
+  se <- match.arg(se)
+  if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
+    warning(sprintf(paste("`se` is fixed by the route: panel designs use",
+                          "unit-clustered SEs, IV designs the stacked robust",
+                          "sandwich; `se = \"%s\"` is ignored."), se))
+    se <- "model"
+  }
   stopifnot(is.numeric(n), length(n) == 1L, n >= 20)
   ## n is fixed across scenarios, so a sample-size rule resolves once
   lv <- claim_levels(claim, alpha, conf, n)
@@ -134,7 +142,8 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
         ape_mde(d_i, n, power = power, claim = claim, sesoi = sesoi,
                 conf = conf, nsim = nsim, seed = si,
                 main_focal = dgp$main_focal,
-                main_moderator = dgp$main_moderator, confirm = FALSE),
+                main_moderator = dgp$main_moderator, confirm = FALSE,
+                se = se),
         error = function(e) e)
       if (inherits(m_i, "error")) {
         rows[[i]] <- data.frame(grid[i, , drop = FALSE], mde = NA_real_,
@@ -179,7 +188,8 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
       next
     }
     si <- if (is.null(seed)) NULL else seed + i
-    pw <- power_once(d_i, n, claim, sesoi, conf, nsim, si, enforce = FALSE)
+    pw <- power_once(d_i, n, claim, sesoi, conf, nsim, si, enforce = FALSE,
+                     se = se)
     rows[[i]] <- data.frame(grid[i, , drop = FALSE],
                             implied_effect = d_i$target_est,
                             power = pw$power, mcse = pw$mcse, note = "",
@@ -213,7 +223,8 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
       ape_n(dgps[[worst_i]], power = nmax_power, claim = claim, sesoi = sesoi,
             alpha = if (rule) alpha else lv$alpha,
             conf = if (rule) NULL else conf, nsim = nsim,
-            seed = if (is.null(seed)) NULL else seed + nrow(grid) + 1L),
+            seed = if (is.null(seed)) NULL else seed + nrow(grid) + 1L,
+            se = se),
       error = function(e) e)
     if (inherits(nmax_res, "error")) {
       warning("n_max search failed in the worst scenario: ",
@@ -227,7 +238,7 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                  marginals = marginals, n = as.integer(n), claim = claim,
                  sesoi = sesoi, conf = conf, alpha = lv$alpha,
                  alpha_rule = if (rule) alpha else NULL,
-                 nsim = as.integer(nsim),
+                 nsim = as.integer(nsim), se = se,
                  pin = pin, mode = mode, goal = power,
                  estimand = if (!is.null(dgp$moderator)) "aie"
                             else dgp$estimand %||% "ape",

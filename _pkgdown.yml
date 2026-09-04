@@ -31,6 +31,7 @@ reference:
   contents:
   - power_at
   - ape_alpha
+  - alpha_frontier
 - title: Robustness and reporting
   contents:
   - ape_robust

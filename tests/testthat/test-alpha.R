@@ -212,6 +212,67 @@ test_that("ape_alpha and JustifyAlpha agree to their combined resolution on a sm
   expect_true(all(d_beta[!mn] < 2e-3))
 })
 
+test_that("ape_alpha's boundary-size simulation works for AIE designs", {
+  da <- ape_dgp("probit", focal = pa_var("treat", "binary", p = 0.5),
+                moderator = pa_var("m", "binary", p = 0.5), baseline = 0.30)
+  da <- set_aie(da, 0.10, main_focal = 0.10, main_moderator = 0.05)
+  pw <- ape_power(da, 900, claim = "minimum", sesoi = 0.02, nsim = 80, seed = 14)
+  ja <- ape_alpha(pw, cost = 4, size = TRUE, nsim_size = 60, seed = 15)
+  expect_s3_class(ja, "powerape_alpha")
+  ## the boundary world re-pins the AIE at the SESOI, mains held at the
+  ## design's anchors
+  expect_equal(ja$size$truth, 0.02)
+  expect_true(ja$size$size >= 0 && ja$size$size <= 1)
+})
+
+test_that("alpha_frontier: closed-form identities, monotonicity, and guards", {
+  ## the paper's equation (uniroot twin), Cohen's 4:1 at 80% power
+  g <- function(a) {
+    z <- qnorm(1 - a / 2)
+    4 - dnorm(qnorm(0.80)) / (2 * dnorm(z))
+  }
+  a_ref <- uniroot(g, c(1e-4, 0.4999), tol = 1e-10)$root
+  expect_equal(alpha_frontier(cost = 4, power = 0.80), a_ref, tolerance = 1e-8)
+  expect_equal(round(alpha_frontier(cost = 4, power = 0.80), 4), 0.0274)
+  ## equal costs, one-sided: the frontier balances alpha = beta = 1 - power
+  expect_equal(alpha_frontier(cost = 1, power = 0.80, claim = "minimum"), 0.20,
+               tolerance = 1e-12)
+  expect_equal(alpha_frontier(cost = 1, power = 0.90, claim = "minimum"), 0.10,
+               tolerance = 1e-12)
+  ## monotone: costlier Type I -> lower level; heavier H1 prior -> higher
+  as_ <- vapply(c(1, 2, 4, 8), function(cc) alpha_frontier(cost = cc),
+                numeric(1))
+  expect_true(all(diff(as_) < 0))
+  expect_gt(alpha_frontier(cost = 4, prior = 2), alpha_frontier(cost = 4))
+  ## guards: no interior optimum / level not below .5 / bad inputs
+  expect_error(alpha_frontier(cost = 1, prior = 3), "No interior optimum")
+  expect_warning(alpha_frontier(cost = 1, prior = 2.6), "not below 0.5")
+  expect_error(alpha_frontier(cost = -1))
+  expect_error(alpha_frontier(power = 1))
+})
+
+test_that("alpha_frontier is ape_alpha's optimum on frontier-pinned draws", {
+  ## a design whose margin over the SESOI sits exactly at the frontier for
+  ## cost 4, power .80 (one-sided minimum claim): ape_alpha's simulated
+  ## optimum must be indistinguishable from the closed form, judged -- per
+  ## the V20f lesson -- on the objective, which is flat, not on the level
+  a_f <- alpha_frontier(cost = 4, power = 0.80, claim = "minimum")
+  se0 <- 0.02
+  sesoi <- 0.05
+  target <- sesoi + se0 * (qnorm(1 - a_f) + qnorm(0.80))
+  d <- make_world(target)
+  pw <- ape_power(d, 2000, claim = "minimum", sesoi = sesoi, nsim = 40, seed = 30)
+  syn <- synthetic_draws(pw, se0, nsim = 20000L)
+  aa <- suppressWarnings(ape_alpha(syn, cost = 4, prior = 1, cap = 0.4999))
+  ## a_f minimizes w_cf exactly, so ape_alpha's level must come within a
+  ## whisker of that minimum (and the excess is non-negative by construction)
+  w_cf <- function(a) (4 * a + pnorm(qnorm(1 - a) - (target - sesoi) / se0)) / 5
+  expect_lt(w_cf(aa$alpha) - w_cf(a_f), 2e-4)
+  expect_true(a_f >= aa$range[1] - 5e-4 && a_f <= aa$range[2] + 5e-4)
+  ## the fixed point: power at the frontier level is the target power
+  expect_equal(power_at(syn, a_f)$power, 0.80, tolerance = 0.005)
+})
+
 test_that("the realized size at the boundary tracks the chosen alpha", {
   d <- make_world()
   pw <- ape_power(d, 600, claim = "minimum", sesoi = 0.03, nsim = 300, seed = 10)

@@ -54,6 +54,8 @@ Alpha by sample-size rule or by error costs, from one stored simulation.
   [`plot(`*`<powerape_alpha>`*`)`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
   : Justify the error rate: minimize or balance weighted Type I and Type
   II errors
+- [`alpha_frontier()`](https://jespernwulff.github.io/powerape/reference/alpha_frontier.md)
+  : Closed-form justified alpha at the detectability frontier
 
 ## Robustness and reporting
 

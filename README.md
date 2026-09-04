@@ -32,7 +32,9 @@ can be *justified* rather than inherited: pass a sample-size rule
 (`alpha = function(n) alphaN::alphaN(n, BF = 3)`, Wulff & Taylor, 2024)
 and the searches design jointly over alpha(n) and n, or let
 `ape_alpha()` find the error-cost optimum of Maier & Lakens (2022) from
-one stored simulation, capped at .05 (see `vignette("justified-alpha")`).
+one stored simulation, capped at .05; `alpha_frontier()` gives the
+closed-form optimum at the detectability frontier, one level for a whole
+MDE grid (see `vignette("justified-alpha")`).
 
 ## Installation
 
@@ -124,7 +126,9 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   prior odds, re-thresholding one stored simulation (`power_at()`),
   reporting the flat range of indistinguishable levels, capping the
   search at .05, and measuring the realized size at the claim boundary
-  on request.
+  on request; `alpha_frontier()` is its closed-form companion at the
+  just-detectable effect — the same level at every n, made for pricing
+  MDE grids.
 - **Citable output**: `power_statement()` renders any result as a
   self-contained methods paragraph for grants and preregistrations,
   including the justification paragraph for an `ape_alpha()` result.

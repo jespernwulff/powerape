@@ -86,7 +86,7 @@ pw_rule
 #>   outcomes: minimum 0.790 | detect-only 0.210 | inconclusive 0.000 | equivalence 0.000 | failed 0.000
 power_statement(pw_rule)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of program using the powerape package (version 1.9.0), following the
+#> (APE) of program using the powerape package (version 1.10.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable program (binary, prevalence
 #> 0.50); parametric covariates (z; Gaussian-copula dependence); baseline
@@ -180,6 +180,46 @@ Balancing instead of minimizing asks for `cost * alpha = prior * beta`;
 at a design’s required *n* for 80% power, Cohen’s 4:1 weighting returns
 the familiar .05/.20 pair by construction.
 
+## The frontier level: one alpha for a whole MDE grid
+
+[`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+needs a pinned effect, because its Type II error is one minus power *at
+the planning value*. In a minimum-detectable-effect analysis the effect
+is the answer, not an input, and re-optimizing the level at every
+candidate effect chases a moving target. The way out is a fixed point:
+the level that is optimal *for the effect that is just detectable at the
+target power*. Under the normal approximation that first-order condition
+loses both *n* and the standard error, so one level prices every sample
+size, and
+[`alpha_frontier()`](https://jespernwulff.github.io/powerape/reference/alpha_frontier.md)
+returns it in closed form.
+
+``` r
+
+alpha_frontier(cost = 4, power = 0.80)                    # two-sided, 0.0274
+#> [1] 0.02737173
+alpha_frontier(cost = 1, power = 0.80, claim = "minimum") # exactly 1 - power
+#> [1] 0.2
+```
+
+Passing it as `alpha` re-prices an MDE analysis (or a grid of them)
+under the justified level:
+
+``` r
+
+ape_mde(d, n = 3000, claim = "detect",
+        alpha = alpha_frontier(cost = 4, power = 0.80), seed = 6)
+```
+
+At equal costs the one-sided frontier level is exactly `1 - power` – the
+frontier is where alpha and beta balance. Unlike
+[`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md),
+the frontier level is an approximation (normal, and pinned to the
+just-detectable effect) and carries no .05 cap, so treat levels above
+the convention with the same caution as an uncapped
+[`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
+optimum.
+
 ## Checking the size, and reporting
 
 Because the Type I error of a SESOI claim is its size at the claim
@@ -209,7 +249,7 @@ power_statement(ja4)
 #> and Type II error rate (Maier & Lakens, 2022; Mudge et al., 2012), weighting
 #> a Type I error 4 times a Type II error and taking prior odds of 1 for the
 #> planning value (APE = 0.100) against the claim boundary, using the powerape
-#> package (version 1.9.0). The assumed data-generating process was a probit
+#> package (version 1.10.0). The assumed data-generating process was a probit
 #> model with focal variable program (binary, prevalence 0.50); parametric
 #> covariates (z; Gaussian-copula dependence); baseline outcome rate 0.300 with
 #> the focal at reference; nuisance covariates contribute a latent

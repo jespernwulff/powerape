@@ -19,7 +19,8 @@ ape_robust(
   power = 0.8,
   grid_points = 3,
   nmax = TRUE,
-  nmax_power = 0.9
+  nmax_power = 0.9,
+  se = c("model", "robust")
 )
 }
 \arguments{
@@ -77,6 +78,12 @@ mode).}
 power mode only).}
 
 \item{nmax_power}{Target power for the n_max search (default 0.90).}
+
+\item{se}{Standard errors for the exogenous cross-sectional routes:
+\code{"model"} (default, expected-information ML) or \code{"robust"}
+(heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+Panel designs always use unit-clustered SEs and IV designs the
+stacked method-of-moments robust sandwich; \code{se} is ignored there.}
 }
 \value{
 A \code{powerape_robust} object: \code{scenarios} (inputs, implied effect,

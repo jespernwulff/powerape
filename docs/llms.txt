@@ -30,7 +30,10 @@ sample-size rule (`alpha = function(n) alphaN::alphaN(n, BF = 3)`, Wulff
 let
 [`ape_alpha()`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
 find the error-cost optimum of Maier & Lakens (2022) from one stored
-simulation, capped at .05 (see
+simulation, capped at .05;
+[`alpha_frontier()`](https://jespernwulff.github.io/powerape/reference/alpha_frontier.md)
+gives the closed-form optimum at the detectability frontier, one level
+for a whole MDE grid (see
 [`vignette("justified-alpha")`](https://jespernwulff.github.io/powerape/articles/justified-alpha.md)).
 
 ## Installation
@@ -138,7 +141,10 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   ([`power_at()`](https://jespernwulff.github.io/powerape/reference/power_at.md)),
   reporting the flat range of indistinguishable levels, capping the
   search at .05, and measuring the realized size at the claim boundary
-  on request.
+  on request;
+  [`alpha_frontier()`](https://jespernwulff.github.io/powerape/reference/alpha_frontier.md)
+  is its closed-form companion at the just-detectable effect — the same
+  level at every n, made for pricing MDE grids.
 - **Citable output**:
   [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
   renders any result as a self-contained methods paragraph for grants
@@ -237,6 +243,8 @@ Alpha by sample-size rule or by error costs, from one stored simulation.
   [`plot(`*`<powerape_alpha>`*`)`](https://jespernwulff.github.io/powerape/reference/ape_alpha.md)
   : Justify the error rate: minimize or balance weighted Type I and Type
   II errors
+- [`alpha_frontier()`](https://jespernwulff.github.io/powerape/reference/alpha_frontier.md)
+  : Closed-form justified alpha at the detectability frontier
 
 ## Robustness and reporting
 

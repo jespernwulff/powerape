@@ -154,7 +154,7 @@ power_statement(ja)
 #> and Type II error rate (Maier & Lakens, 2022; Mudge et al., 2012), weighting
 #> a Type I error 4 times a Type II error and taking prior odds of 1 for the
 #> planning value (APE = 0.100) against the claim boundary, using the powerape
-#> package (version 1.9.0). The assumed data-generating process was a probit
+#> package (version 1.10.0). The assumed data-generating process was a probit
 #> model with focal variable treat (binary, prevalence 0.50); parametric
 #> covariates (z; Gaussian-copula dependence); baseline outcome rate 0.300 with
 #> the focal at reference; nuisance covariates contribute a latent

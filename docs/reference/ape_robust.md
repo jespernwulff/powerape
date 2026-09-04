@@ -25,7 +25,8 @@ ape_robust(
   power = 0.8,
   grid_points = 3,
   nmax = TRUE,
-  nmax_power = 0.9
+  nmax_power = 0.9,
+  se = c("model", "robust")
 )
 ```
 
@@ -119,6 +120,14 @@ ape_robust(
 - nmax_power:
 
   Target power for the n_max search (default 0.90).
+
+- se:
+
+  Standard errors for the exogenous cross-sectional routes: `"model"`
+  (default, expected-information ML) or `"robust"`
+  (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
+  Panel designs always use unit-clustered SEs and IV designs the stacked
+  method-of-moments robust sandwich; `se` is ignored there.
 
 ## Value
 

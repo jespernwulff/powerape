@@ -116,6 +116,38 @@ Balancing instead of minimizing asks for `cost * alpha = prior * beta`;
 at a design's required *n* for 80% power, Cohen's 4:1 weighting returns
 the familiar .05/.20 pair by construction.
 
+## The frontier level: one alpha for a whole MDE grid
+
+`ape_alpha()` needs a pinned effect, because its Type II error is one
+minus power *at the planning value*. In a minimum-detectable-effect
+analysis the effect is the answer, not an input, and re-optimizing the
+level at every candidate effect chases a moving target. The way out is
+a fixed point: the level that is optimal *for the effect that is just
+detectable at the target power*. Under the normal approximation that
+first-order condition loses both *n* and the standard error, so one
+level prices every sample size, and `alpha_frontier()` returns it in
+closed form.
+
+```{r}
+alpha_frontier(cost = 4, power = 0.80)                    # two-sided, 0.0274
+alpha_frontier(cost = 1, power = 0.80, claim = "minimum") # exactly 1 - power
+```
+
+Passing it as `alpha` re-prices an MDE analysis (or a grid of them)
+under the justified level:
+
+```{r, eval = FALSE}
+ape_mde(d, n = 3000, claim = "detect",
+        alpha = alpha_frontier(cost = 4, power = 0.80), seed = 6)
+```
+
+At equal costs the one-sided frontier level is exactly `1 - power` --
+the frontier is where alpha and beta balance. Unlike `ape_alpha()`,
+the frontier level is an approximation (normal, and pinned to the
+just-detectable effect) and carries no .05 cap, so treat levels above
+the convention with the same caution as an uncapped `ape_alpha()`
+optimum.
+
 ## Checking the size, and reporting
 
 Because the Type I error of a SESOI claim is its size at the claim
