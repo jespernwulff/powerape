@@ -124,7 +124,7 @@ same conservative confirmation stage as
 ape_mde(d, n = 1500, claim = "minimum", sesoi = 0.05,
         nsim = 500, seed = 6)
 #> powerape minimum detectable APE -- minimum claim
-#>   MDE = 0.1092 at n = 1500 for 80% target power (confirmed 0.805, MCSE 0.009)
+#>   MDE = 0.1094 at n = 1500 for 80% target power (confirmed 0.811, MCSE 0.009)
 #>   smallest effect demonstrably above sesoi 0.050
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
 ```
@@ -142,7 +142,10 @@ computed from a single guess is fragile (Hancock & Feng, 2025).
 [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
 re-runs the analysis over a scenario grid and reports the worst case;
 with `nmax = TRUE` it also finds **n_max**, the insurance-premium sample
-size that holds the target power in the worst scenario.
+size: the largest requirement across the scenarios, at `nmax_power` (90%
+by default, the default of
+[`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md);
+pass `nmax_power = 0.80` for the conventional target).
 
 ``` r
 
@@ -152,13 +155,13 @@ ape_robust(d, n = 2200, claim = "minimum", sesoi = 0.05,
 #> powerape robustness sweep -- minimum claim, APE, pin = ape
 #>   n = 2200, nsim = 300 per scenario, 3 scenario(s) over: baseline
 #>   power range [0.797, 0.847]; worst scenario:
-#>  baseline implied_effect     power      mcse
-#>       0.4            0.1 0.7966667 0.0232371
+#>  baseline implied_effect     power      mcse separated
+#>       0.4            0.1 0.7966667 0.0232371         0
 #>   scenarios:
-#>  baseline implied_effect     power       mcse
-#>       0.2            0.1 0.8466667 0.02080242
-#>       0.3            0.1 0.8466667 0.02080242
-#>       0.4            0.1 0.7966667 0.02323710
+#>  baseline implied_effect     power       mcse separated
+#>       0.2            0.1 0.8466667 0.02080242         0
+#>       0.3            0.1 0.8466667 0.02080242         0
+#>       0.4            0.1 0.7966667 0.02323710         0
 ```
 
 By default the APE is **re-pinned in every scenario** (`pin = "ape"`),
@@ -173,11 +176,13 @@ pw <- ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05,
                 nsim = 500, seed = 5)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.10.0), following the
+#> (APE) of treat using the powerape package (version 1.11.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
-#> 0.50); parametric covariates (age, female; Gaussian-copula dependence);
-#> baseline outcome rate 0.300 with the focal at reference; nuisance covariates
+#> 0.50); parametric covariates age (continuous, mean 45, SD 12), female
+#> (binary, prevalence 0.55), with an exchangeable latent (Gaussian-copula)
+#> correlation of 0.20 among the focal variable and the covariates; baseline
+#> outcome rate 0.300 with the focal at reference; nuisance covariates
 #> contribute a latent pseudo-R-squared of 0.15. The assumed true APE was 0.100
 #> (10.0 percentage points). At a sample size of n = 2200, simulated power for
 #> the minimum-effect claim (the 90% confidence interval's lower bound exceeding
@@ -186,8 +191,9 @@ power_statement(pw)
 #> probability of concluding a meaningful effect was 0.808, of detection without
 #> meaningfulness 0.192, of an inconclusive result 0.000, and of equivalence
 #> 0.000. Estimation used maximum likelihood with delta-method Wald confidence
-#> intervals; replications that failed to converge (0.0%) counted against the
-#> claim.
+#> intervals; replications without a maximum-likelihood estimate, from a failed
+#> fit or from separation (a focal cell with no events or no non-events),
+#> counted against the claim (0.0% of replications).
 ```
 
 ## References

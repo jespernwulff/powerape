@@ -19,7 +19,9 @@ ape_mde(
   max_iter = 6,
   confirm = TRUE,
   nsim_confirm = 4 * nsim,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  direction = NULL,
+  separation = c("fail", "keep")
 )
 }
 \arguments{
@@ -66,12 +68,25 @@ defaults to the values stored by a previous \code{\link[=set_aie]{set_aie()}} ca
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
 stacked method-of-moments robust sandwich; \code{se} is ignored there.}
+
+\item{direction}{\code{"positive"} (an increase) or \code{"negative"} (a
+decrease) for the detect and minimum-effect claims; default: the sign
+of the DGP's pinned effect, \code{"positive"} when none is pinned. Ignored
+for equivalence.}
+
+\item{separation}{How simulated studies with separation in an
+identifying cell are scored: \code{"fail"} (default; counted as failed, as
+the field's reference analysis refuses them) or \code{"keep"} (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.}
 }
 \value{
 A \code{powerape_mde} object: \code{mde} (the minimum detectable effect,
-or for equivalence the smallest establishable margin), the confirmed
-\code{power} and \code{mcse} at that effect, the search \code{history}, and the DGP
-re-pinned at the answer (so the object feeds \code{\link[=power_statement]{power_statement()}}).
+signed, or for equivalence the smallest establishable margin), the
+confirmed \code{power} and \code{mcse} at that effect, the search \code{history}, the
+\code{direction}, the separation diagnostics of the final run (see
+\code{\link[=ape_power]{ape_power()}}), and the DGP re-pinned at the answer (so the object
+feeds \code{\link[=power_statement]{power_statement()}}).
 }
 \description{
 The inverse of \code{\link[=ape_n]{ape_n()}}: the sample size is fixed -- an archive with
@@ -85,10 +100,28 @@ every candidate, until simulated power at \code{n} hits the goal; for
 the tightest equivalence bounds the design can expect to establish.
 }
 \details{
-By default the answer is verified the way \code{\link[=ape_n]{ape_n()}} verifies its n: a
-high-precision confirmation stage re-measures power at the candidate
-and pushes the effect upward (never downward) if it falls short, so
-the reported MDE errs on the conservative side.
+\strong{Direction.} For the detect and minimum-effect claims the search runs
+in one direction: \code{direction = "positive"} searches increases,
+\code{"negative"} decreases (a drop in a rare event, an attenuating
+interaction). With a binary outcome the two differ whenever the
+baseline is not 0.5, because the Bernoulli variance moves with the
+rate: above a 0.5 baseline a decrease is harder to detect than an
+increase of the same size, below it easier. The default follows the
+sign of the DGP's pinned effect (\code{"positive"} for an unpinned DGP), and
+the returned \code{mde} carries the sign.
+
+\strong{Search.} A pilot simulation measures the standard error at a
+reference effect (the pinned one, or half the distance from the
+baseline to the nearer bound), a normal approximation proposes a
+candidate, and the standard error is re-measured at that candidate
+before the search starts: the standard error of an APE moves with the
+effect through the Bernoulli variances, so a standard error taken far
+from the answer would bias the first candidate (by 2-4\% at large \code{n}
+from a 0.15 reference at a 0.30 baseline, more at rarer baselines).
+By default the answer is then verified the way \code{\link[=ape_n]{ape_n()}} verifies its
+n: a high-precision confirmation stage re-measures power at the
+candidate and pushes the effect outward (never inward) if it falls
+short, so the reported MDE errs on the conservative side.
 
 For a DGP with a moderator the searched effect is the AIE; the two
 conditional-at-reference main-effect anchors are taken from the
@@ -99,5 +132,8 @@ fixed across candidates.
 \donttest{
 d <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5), baseline = 0.30)
 ape_mde(d, n = 712, claim = "detect", nsim = 600, seed = 1)
+## a decrease from the same baseline
+ape_mde(d, n = 712, claim = "detect", nsim = 600, seed = 1,
+        direction = "negative")
 }
 }

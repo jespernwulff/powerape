@@ -95,10 +95,34 @@ print.powerape_power <- function(x, ...) {
   o <- x$outcomes
   cat("  outcomes:", paste(sprintf("%s %.3f", gsub("_", "-", names(o)), o),
                            collapse = " | "), "\n")
-  if (o[["failed"]] > 0)
-    cat(sprintf("  note: %.1f%% of replications failed to fit; they count against power.\n",
-                100 * o[["failed"]]))
+  print_separation_note(x)
   invisible(x)
+}
+
+# Notes on failed fits, separation, and sparse identifying cells, shared by
+# the power, n, and mde print methods (DESIGN.md section 16).
+print_separation_note <- function(x) {
+  sepd <- x$separated %||% 0
+  keep <- identical(x$separation, "keep")
+  cell <- if (identical(x$estimand, "aie")) "focal-by-moderator cell" else "focal cell"
+  if (!is.null(x$outcomes)) {
+    other <- x$outcomes[["failed"]] - (if (keep) 0 else sepd)
+    if (other > 1e-12)
+      cat(sprintf("  note: %.1f%% of replications failed to fit; they count against power.\n",
+                  100 * other))
+  }
+  if (sepd > 0)
+    cat(sprintf(paste0("  note: %.1f%% of replications had separation (a %s ",
+                       "with no events or no non-events)%s.\n"),
+                100 * sepd, cell,
+                if (keep) "; kept with their degenerate Wald intervals (separation = \"keep\")"
+                else "; they count as failed (separation = \"fail\")"))
+  mc <- x$min_cell
+  if (!is.null(mc) && !is.na(mc) && mc < 10)
+    cat(sprintf(paste0("  note: the smallest %s averages %.1f events (or ",
+                       "non-events) per study; Wald inference is unreliable ",
+                       "at this sparsity.\n"), cell, mc))
+  invisible(NULL)
 }
 
 #' @export
@@ -122,12 +146,15 @@ print.powerape_n <- function(x, ...) {
   cat(sprintf("  %s for %.0f%% target power (%s %.3f, MCSE %.3f)\n",
               unit_lab, 100 * x$goal, lab, x$power, x$mcse))
   al <- x$alpha %||% (if (identical(x$claim, "detect")) 1 - x$conf else (1 - x$conf) / 2)
-  cat(sprintf("  assumed true %s %+.4f, sesoi %s, %.4g%% CI (alpha = %.4g%s), %s\n",
+  se_lab <- if (identical(x$dgp$route, "iv")) ", stacked robust SEs"
+            else if (identical(x$se, "robust")) ", robust SEs"
+            else ""
+  cat(sprintf("  assumed true %s %+.4f, sesoi %s, %.4g%% CI (alpha = %.4g%s), %s%s\n",
               toupper(x$estimand), x$target,
               if (is.null(x$sesoi)) "-" else sprintf("%.3f", x$sesoi),
               100 * x$conf, al,
               if (!is.null(x$alpha_rule)) " by sample-size rule" else "",
-              x$model))
+              x$model, se_lab))
   n_search <- sum(x$history$stage == "search")
   n_conf <- sum(x$history$stage == "confirm")
   if (isTRUE(x$confirm_requested)) {
@@ -142,5 +169,6 @@ print.powerape_n <- function(x, ...) {
     cat(sprintf("  search: %d step(s); confirm with ape_power() at a larger nsim.\n",
                 n_search))
   }
+  print_separation_note(x)
   invisible(x)
 }

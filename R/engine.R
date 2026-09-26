@@ -36,27 +36,85 @@ claim_levels <- function(claim, alpha = NULL, conf = NULL, n = NULL) {
        conf_claim = if (identical(claim, "detect")) 1 - alpha else 1 - 2 * alpha)
 }
 
+# Separation in the cells that identify the estimand (DESIGN.md section 16):
+# a level of a binary focal variable -- or, for AIE designs, a cell of the
+# binary focal x moderator layout -- whose outcomes are all 0 or all 1. The
+# maximum-likelihood estimate of the effect does not exist there: Stata's
+# probit/logit drop the perfect predictor and margins reports "not
+# estimable", while glm.fit silently "converges" to a large finite
+# coefficient whose delta-method APE standard error collapses to the other
+# cell's binomial SE (the Hauck-Donner pathology). Returns the flag and the
+# smallest cell's count of events or non-events (NA when no binary cell
+# identifies the estimand, e.g. a continuous focal without a binary
+# moderator).
+cell_check <- function(y, b1 = NULL, b2 = NULL) {
+  g <- if (!is.null(b1) && !is.null(b2)) {
+    2L * as.integer(b1) + as.integer(b2)
+  } else if (!is.null(b1)) {
+    as.integer(b1)
+  } else if (!is.null(b2)) {
+    as.integer(b2)
+  } else {
+    return(list(sep = FALSE, min_cell = NA_real_))
+  }
+  gi <- g + 1L
+  nn <- tabulate(gi, nbins = 4L)
+  ev <- tabulate(gi[y == 1], nbins = 4L)
+  keep <- nn > 0L                  # absent cells make the design rank deficient
+  nn <- nn[keep]
+  ev <- ev[keep]
+  list(sep = any(ev == 0L | ev == nn), min_cell = min(pmin(ev, nn - ev)))
+}
+
+# Backup separation check on a fitted index model: a focal-side coefficient
+# (focal, moderator, interaction) whose standardized standard error is
+# absurd (> 50 on the latent-index scale) marks a quasi-separated fit the
+# cell check cannot see, e.g. complete separation by a continuous focal.
+# Legitimate fits sit two orders of magnitude below the threshold.
+hauck_donner <- function(fit, X, cols) {
+  V0 <- vcov_from_glmfit(fit)
+  sds <- apply(X[, cols, drop = FALSE], 2, sd)
+  any(sqrt(pmax(diag(V0)[cols], 0)) * sds > 50)
+}
+
 # Core loop: nsim replications at design size n; returns the point estimate
 # and delta-method SE of the APE/AIE per replication (plus CI bounds at
-# `conf` for callers that want them) and a convergence flag. Replications
-# that fail (non-convergence, separation, degenerate y) get ok = FALSE and
-# count against every claim downstream (conservative).
-sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model") {
+# `conf` for callers that want them), a usable-estimate flag `ok`, a
+# separation flag `sep`, and each replication's smallest identifying-cell
+# count of events or non-events (`min_cell`). Replications that fail
+# (non-convergence, rank deficiency, degenerate y, runaway coefficients)
+# get ok = FALSE and count against every claim downstream (conservative).
+# Replications with separation count as failed under separation = "fail"
+# (the default since 1.11.0: the field's reference analysis refuses such
+# fits) and are kept with their degenerate Wald intervals under "keep"
+# (R's glm + marginaleffects, Stata's `asis`); either way they are flagged.
+sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model",
+                   separation = "fail") {
   z <- zcrit(conf)
   is_aie <- identical(dgp$estimand, "aie")
   is_panel <- identical(dgp$route, "panel")
   is_iv <- identical(dgp$route, "iv")
+  sep_fail <- !identical(separation, "keep")
+  fb <- identical(dgp$focal$type, "binary")
+  mb <- !is.null(dgp$moderator) && identical(dgp$moderator$type, "binary")
+  hd_cols <- if (!is.null(dgp$moderator)) 2:4 else 2L
   bt <- if (is_panel || is_iv) NULL else beta_true(dgp)
   with_seed(seed, {
-    l <- u <- se <- pt <- rep(NA_real_, nsim)
-    ok <- logical(nsim)
+    l <- u <- se <- pt <- mc <- rep(NA_real_, nsim)
+    ok <- sep <- logical(nsim)
     for (r in seq_len(nsim)) {
       xx <- draw_x(dgp, n)
       if (is_iv) {
         ## y is drawn from the latent index inside draw_x_iv (the
         ## endogeneity lives in the joint (u, v) draw)
         y <- xx$y
-        if (all(y == y[1L])) next
+        cc <- cell_check(y, if (fb) xx$d, if (mb) xx$m)
+        mc[r] <- cc$min_cell
+        if (all(y == y[1L])) next      # degenerate outcome: failed, not "separated"
+        if (cc$sep) {
+          sep[r] <- TRUE
+          if (sep_fail) next
+        }
         ft <- cf_fit(y, xx$d, m = xx$m, Z = xx$Zx, X1 = xx$X1,
                      first = dgp$first_stage, start = xx$start)
         if (!isTRUE(ft$ok)) next
@@ -69,10 +127,20 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model") {
       } else {
         pr <- if (is_panel) xx$pr else dgp$G(drop(xx$X %*% bt))
         y <- rbinom(length(pr), 1L, pr)
-        if (all(y == y[1L])) next
+        cc <- cell_check(y, if (fb) xx$X[, 2L], if (mb) xx$X[, 3L])
+        mc[r] <- cc$min_cell
+        if (all(y == y[1L])) next      # degenerate outcome: failed, not "separated"
+        if (cc$sep) {
+          sep[r] <- TRUE
+          if (sep_fail) next
+        }
         ft <- fit_index_model(xx$X, y, dgp$link,
                               start = if (is_panel) xx$start else bt)
         if (!ft$ok) next
+        if (!sep[r] && hauck_donner(ft$fit, xx$X, hd_cols)) {
+          sep[r] <- TRUE
+          if (sep_fail) next
+        }
         est <- if (is_aie) {
           aie_est(ft$fit$coefficients, xx$X, dgp$link,
                   dgp$focal$type, dgp$moderator$type)
@@ -96,7 +164,7 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model") {
       l[r] <- est$ape - z * s_
       u[r] <- est$ape + z * s_
     }
-    list(est = pt, l = l, u = u, se = se, ok = ok)
+    list(est = pt, l = l, u = u, se = se, ok = ok, sep = sep, min_cell = mc)
   })
 }
 
@@ -169,10 +237,46 @@ summarize_sim <- function(sim, target, claim, sesoi, nsim, alpha = 0.05) {
                   failed = mean(!ok))
     power <- mean(det)
   }
+  ## separation diagnostics (absent from synthetic draws)
+  sep <- sim$sep %||% logical(length(ok))
+  mc <- sim$min_cell
   list(power = power,
        mcse = sqrt(power * (1 - power) / nsim),
        outcomes = outcomes,
-       n_failed = sum(!ok))
+       n_failed = sum(!ok),
+       separated = mean(sep),
+       n_separated = sum(sep),
+       min_cell = if (is.null(mc) || all(is.na(mc))) NA_real_ else mean(mc, na.rm = TRUE))
+}
+
+# One warning for a design whose simulated studies have separation or
+# sparse identifying cells (DESIGN.md section 16). `p` carries the
+# `separated` share, the mean smallest-cell count `min_cell`, and the
+# `separation` convention; `where` names the design (e.g. "At n = 523").
+sparse_warning <- function(p, where = NULL, aie = FALSE) {
+  cell <- if (aie) "focal-by-moderator cell" else "focal cell"
+  msg <- character()
+  if (isTRUE(p$separated > 0.01))
+    msg <- c(msg, sprintf(paste0(
+      "%.1f%% of simulated studies had separation (a %s with no events or ",
+      "no non-events, where the maximum-likelihood effect does not exist)%s"),
+      100 * p$separated, cell,
+      if (identical(p$separation, "keep"))
+        "; they were kept with their degenerate Wald intervals (separation = \"keep\")"
+      else "; they count as failed (separation = \"fail\", the default; Stata's probit also refuses such fits)"))
+  if (isTRUE(!is.na(p$min_cell) && p$min_cell < 10))
+    msg <- c(msg, sprintf(paste0(
+      "the smallest %s averages %.1f events (or non-events) per simulated ",
+      "study; delta-method Wald inference is unreliable at this sparsity ",
+      "(one-sided error rates can run up to about twice nominal, in the ",
+      "direction in which the sparse cell has the lower rate)"),
+      cell, p$min_cell))
+  if (length(msg))
+    warning(paste0(if (!is.null(where)) paste0(where, ": ") else "",
+                   paste(msg, collapse = "; "),
+                   ". See ?ape_power, section 'Separation and sparse cells'."),
+            call. = FALSE)
+  invisible(length(msg) > 0L)
 }
 
 # Shared power computation. `enforce = FALSE` skips the coherence guards --
@@ -180,7 +284,7 @@ summarize_sim <- function(sim, target, claim, sesoi, nsim, alpha = 0.05) {
 # implied effect across a claim boundary and the point is to SHOW that.
 power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
                        enforce = TRUE, se = "model", alpha = NULL,
-                       keep_draws = FALSE) {
+                       keep_draws = FALSE, separation = "fail") {
   stopifnot(is.numeric(n), length(n) == 1L, n >= 20)
   if (identical(dgp$route, "panel") && n < 30)
     warning("Fewer than 30 units (clusters): cluster-robust inference is unreliable at this size.")
@@ -195,7 +299,7 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
     se <- "model"
   }
   if (enforce) check_coherence(dgp, claim, sesoi, conf)
-  sim <- sim_ci(dgp, n, nsim, conf, seed, se_type = se)
+  sim <- sim_ci(dgp, n, nsim, conf, seed, se_type = se, separation = separation)
   res <- summarize_sim(sim, dgp$target_est, claim, sesoi, nsim, lv$alpha)
   structure(
     c(res, list(claim = claim, sesoi = sesoi, conf = conf, alpha = lv$alpha,
@@ -203,8 +307,8 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
                 n = as.integer(n),
                 nsim = as.integer(nsim), target = dgp$target_est,
                 estimand = dgp$estimand %||% "ape",
-                se = se, model = dgp$model, dgp = dgp,
-                draws = if (isTRUE(keep_draws)) sim[c("est", "se", "ok")] else NULL)),
+                se = se, separation = separation, model = dgp$model, dgp = dgp,
+                draws = if (isTRUE(keep_draws)) sim[c("est", "se", "ok", "sep")] else NULL)),
     class = "powerape_power"
   )
 }
@@ -234,6 +338,28 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #' described in `vignette("justified-alpha")`: a sample-size rule passed
 #' as `alpha`, and [ape_alpha()] for the error-cost optimum of Maier and
 #' Lakens (2022), computed from this function's stored draws.
+#'
+#' @section Separation and sparse cells:
+#' With rare outcomes, small samples, or a small treated group, a simulated
+#' study can contain a cell that identifies the effect -- a level of a
+#' binary focal variable, or for AIE designs a focal-by-moderator cell --
+#' with no events or no non-events. The maximum-likelihood effect does not
+#' exist there (quasi-complete separation): Stata's `probit`/`logit` drop
+#' the perfect predictor and `margins` reports the effect as not
+#' estimable, whereas R's `glm()` stops silently at a large finite
+#' coefficient whose delta-method standard error collapses to the other
+#' cell's binomial SE, so the replication usually counts as a detection.
+#' By default (`separation = "fail"`) such replications count as failed,
+#' against every claim, like any other replication without a usable
+#' estimate; `separation = "keep"` retains them with their degenerate Wald
+#' intervals (the R `glm()` + marginaleffects analysis, and Stata's `asis`
+#' option; the behavior before powerape 1.11.0). Either way the share is
+#' reported (`separated`), and the function warns when it exceeds 1%, or
+#' when the smallest identifying cell averages fewer than 10 events (or
+#' non-events) per simulated study: there the Wald test's one-sided error
+#' rates can run up to about twice their nominal level in the direction in
+#' which the sparse cell has the lower rate, and score, Fisher, or Firth
+#' analyses have different power than the Wald analysis powered here.
 #'
 #' @param dgp A `powerape_dgp` after [set_ape()] or [set_aie()].
 #' @param n Total sample size of the simulated study.
@@ -265,10 +391,18 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #'   and convergence flags in the result (default TRUE; a few kilobytes).
 #'   They let [power_at()] and [ape_alpha()] re-evaluate the claim at any
 #'   error rate without simulating again.
+#' @param separation How simulated studies with separation in an
+#'   identifying cell are scored: `"fail"` (default; counted as failed, as
+#'   the field's reference analysis refuses them) or `"keep"` (retained with
+#'   their degenerate Wald intervals). See the section 'Separation and
+#'   sparse cells'.
 #'
 #' @return A `powerape_power` object: power, Monte Carlo standard error,
 #'   outcome distribution, the failed-fit count (failures count against
-#'   power, conservatively), the error rate used (`alpha`, and
+#'   power, conservatively), the share of simulated studies with separation
+#'   (`separated`) and the average smallest identifying-cell count of
+#'   events or non-events (`min_cell`, `NA` without binary cells), the
+#'   separation convention used, the error rate used (`alpha`, and
 #'   `alpha_rule` when it came from a sample-size rule), the stored draws,
 #'   and the embedded DGP spec for reproducibility and
 #'   [power_statement()].
@@ -282,9 +416,13 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 ape_power <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                       sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 1000,
                       seed = NULL, se = c("model", "robust"),
-                      keep_draws = TRUE) {
+                      keep_draws = TRUE, separation = c("fail", "keep")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
-  power_once(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE, se = se,
-             alpha = alpha, keep_draws = keep_draws)
+  separation <- match.arg(separation)
+  res <- power_once(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE,
+                    se = se, alpha = alpha, keep_draws = keep_draws,
+                    separation = separation)
+  sparse_warning(res, aie = identical(res$estimand, "aie"))
+  res
 }

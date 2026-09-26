@@ -104,13 +104,13 @@ ape_robust(d, n = 1200, claim = "detect",
 #> powerape robustness sweep -- detect claim, APE, pin = ape
 #>   n = 1200, nsim = 300 per scenario, 3 scenario(s) over: iv_strength
 #>   power range [0.133, 0.353]; worst scenario:
-#>  iv_strength implied_effect     power       mcse
-#>          0.1            0.1 0.1333333 0.01962614
+#>  iv_strength implied_effect     power       mcse separated
+#>          0.1            0.1 0.1333333 0.01962614         0
 #>   scenarios:
-#>  iv_strength implied_effect     power       mcse
-#>          0.1            0.1 0.1333333 0.01962614
-#>          0.2            0.1 0.2200000 0.02391652
-#>          0.3            0.1 0.3533333 0.02759764
+#>  iv_strength implied_effect     power       mcse separated
+#>          0.1            0.1 0.1333333 0.01962614         0
+#>          0.2            0.1 0.2200000 0.02391652         0
+#>          0.3            0.1 0.3533333 0.02759764         0
 ```
 
 ## Endogenous interactions

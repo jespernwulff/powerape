@@ -42,7 +42,7 @@ pw <- ape_power(d, n = 800, claim = "minimum", sesoi = 0.03,
                 nsim = 500, seed = 1)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.10.0), following the
+#> (APE) of treat using the powerape package (version 1.11.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); no additional covariates; baseline outcome rate 0.300 with the focal
@@ -55,6 +55,8 @@ power_statement(pw)
 #> a meaningful effect was 0.678, of detection without meaningfulness 0.176, of
 #> an inconclusive result 0.146, and of equivalence 0.000. Estimation used
 #> maximum likelihood with delta-method Wald confidence intervals; replications
-#> that failed to converge (0.0%) counted against the claim.
+#> without a maximum-likelihood estimate, from a failed fit or from separation
+#> (a focal cell with no events or no non-events), counted against the claim
+#> (0.0% of replications).
 # }
 ```

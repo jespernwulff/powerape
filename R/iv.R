@@ -242,21 +242,32 @@ draw_x_iv <- function(dgp, n) {
   ## endogeneity.
   v_std <- if (dgp$focal$type == "binary") rd$v else rd$v / dgp$sigma_v
   u <- rho * v_std + sqrt(1 - rho^2) * rnorm(n)
-  eta <- dgp$beta0 + dgp$beta_focal * rd$d +
+  ## structural index in the centered parameterization calibration and
+  ## inversion use (a continuous focal enters as d - its mean; a binary
+  ## focal's reference is 0, so its index is unchanged bit for bit)
+  fr <- dgp$focal_ref
+  mr <- dgp$mod_ref %||% 0
+  d_c <- rd$d - fr
+  eta <- dgp$beta0 + dgp$beta_focal * d_c +
     (if (dgp$k > 0L) drop(rd$X %*% dgp$gamma) else 0)
   if (!is.null(rd$m)) {
-    eta <- eta + dgp$beta_mod * rd$m + dgp$beta_int * rd$d * rd$m
+    eta <- eta + dgp$beta_mod * (rd$m - mr) + dgp$beta_int * d_c * (rd$m - mr)
   }
   y <- as.integer(eta + u > 0)
 
-  ## second-stage pseudo-true start values: structural coefficients scaled
-  ## by 1/sqrt(1 - rho^2); CF coefficient rho/(sigma_v sqrt(1 - rho^2))
+  ## second-stage pseudo-true start values: structural coefficients (mapped
+  ## to the raw design columns) scaled by 1/sqrt(1 - rho^2); CF coefficient
+  ## rho/(sigma_v sqrt(1 - rho^2))
   s2s <- sqrt(1 - rho^2)
   lam <- if (dgp$focal$type == "binary") rho / s2s else rho / (dgp$sigma_v * s2s)
   start <- if (is.null(rd$m)) {
-    c(c(dgp$beta0, dgp$beta_focal, dgp$gamma) / s2s, lam)
+    c(c(dgp$beta0 - dgp$beta_focal * fr, dgp$beta_focal, dgp$gamma) / s2s, lam)
   } else {
-    c(c(dgp$beta0, dgp$beta_focal, dgp$beta_mod, dgp$beta_int, dgp$gamma) / s2s,
+    c(c(dgp$beta0 - dgp$beta_focal * fr - dgp$beta_mod * mr +
+          dgp$beta_int * fr * mr,
+        dgp$beta_focal - dgp$beta_int * mr,
+        dgp$beta_mod - dgp$beta_int * fr,
+        dgp$beta_int, dgp$gamma) / s2s,
       lam, 0)
   }
 

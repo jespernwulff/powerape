@@ -62,6 +62,45 @@ test_that("from-fit validation errors fire", {
   expect_error(ape_dgp_from_fit(fit3, focal = "d"), "probit or logit")
 })
 
+test_that("the focal guard refuses every other route by which the focal enters", {
+  ## each of these pilots would hold a function of the focal fixed while the
+  ## focal changes, so the pinned effect would not be the model's APE
+  set.seed(3)
+  pd <- data.frame(dose = rnorm(900), age = rnorm(900),
+                   female = rbinom(900, 1, 0.5), treatL = runif(900) < 0.5,
+                   expo = runif(900, 1, 3))
+  pd$treat <- as.integer(pd$treatL)
+  pd$y <- rbinom(900, 1, pnorm(-0.5 + 0.3 * pd$dose + 0.2 * pd$age +
+                                 0.2 * pd$treat))
+  f <- function(fml) glm(fml, binomial("probit"), pd)
+  expect_error(ape_dgp_from_fit(f(y ~ dose + I(dose^2) + age), "dose"),
+               "also enters")
+  expect_error(ape_dgp_from_fit(f(y ~ expo + log(expo) + age), "expo"),
+               "also enters")
+  expect_error(ape_dgp_from_fit(f(y ~ treatL * female + age), "treatLTRUE"),
+               "nteract")
+  expect_error(ape_dgp_from_fit(f(y ~ factor(treat) * female + age),
+                                "factor(treat)1"), "nteract")
+  expect_error(ape_dgp_from_fit(f(y ~ treat + I(treat * female) + age), "treat"),
+               "also enters")
+  expect_error(ape_dgp_from_fit(f(y ~ poly(dose, 2) + age), "poly(dose, 2)1"),
+               "single column")
+  expect_error(ape_dgp_from_fit(f(y ~ treat + age + offset(0.1 * age)), "treat"),
+               "offset")
+  expect_error(ape_dgp_from_fit(glm(y ~ treat + age, binomial("probit"), pd,
+                                    offset = 0.1 * age), "treat"),
+               "offset")
+  ## clean pilots still pass, including nuisance-side interactions and a
+  ## logical focal entering as a single main-effect dummy
+  pd$industry <- sample(c("a", "b", "c"), 900, TRUE)
+  d1 <- ape_dgp_from_fit(f(y ~ treat + age + factor(industry) + age:female),
+                         "treat")
+  expect_identical(d1$focal$type, "binary")
+  d2 <- ape_dgp_from_fit(f(y ~ treatL + age), "treatLTRUE")
+  expect_identical(d2$focal$type, "binary")
+  expect_equal(true_ape(set_ape(d2, 0.05)), 0.05, tolerance = 1e-7)
+})
+
 test_that("ape_robust varies baseline for from-fit DGPs and blocks signal", {
   fit <- make_fit()
   d <- set_ape(ape_dgp_from_fit(fit, focal = "treat"), 0.05)

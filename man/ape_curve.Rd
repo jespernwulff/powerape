@@ -14,7 +14,8 @@ ape_curve(
   conf = NULL,
   nsim = 1000,
   seed = NULL,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  separation = c("fail", "keep")
 )
 
 \method{plot}{powerape_curve}(x, target_power = NULL, ...)
@@ -55,6 +56,12 @@ pre-1.8.0 behavior (one-sided error rate 2.5\%).}
 Panel designs always use unit-clustered SEs and IV designs the
 stacked method-of-moments robust sandwich; \code{se} is ignored there.}
 
+\item{separation}{How simulated studies with separation in an
+identifying cell are scored: \code{"fail"} (default; counted as failed, as
+the field's reference analysis refuses them) or \code{"keep"} (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.}
+
 \item{x}{A \code{powerape_curve} object.}
 
 \item{target_power}{Optional horizontal reference line; when the curve
@@ -64,8 +71,10 @@ crosses it, the crossing n is marked and annotated.}
 }
 \value{
 A \code{powerape_curve} object with a \code{results} data frame
-(\code{n}, \code{alpha}, \code{power}, \code{mcse}, \code{failed}); \code{alpha} varies along the
-grid when it is a sample-size rule.
+(\code{n}, \code{alpha}, \code{power}, \code{mcse}, \code{failed}, \code{separated}); \code{alpha}
+varies along the grid when it is a sample-size rule, and \code{separated}
+is the share of simulated studies with separation (counted within
+\code{failed} under the default \code{separation = "fail"}).
 }
 \description{
 Runs the power simulation at each element of \code{n} and collects the

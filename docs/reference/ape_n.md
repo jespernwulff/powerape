@@ -28,7 +28,8 @@ ape_n(
   max_iter = 5,
   confirm = TRUE,
   nsim_confirm = 4 * nsim,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  separation = c("fail", "keep")
 )
 ```
 
@@ -107,11 +108,21 @@ ape_n(
   Panel designs always use unit-clustered SEs and IV designs the stacked
   method-of-moments robust sandwich; `se` is ignored there.
 
+- separation:
+
+  How simulated studies with separation in an identifying cell are
+  scored: `"fail"` (default; counted as failed, as the field's reference
+  analysis refuses them) or `"keep"` (retained with their degenerate
+  Wald intervals). See the section 'Separation and sparse cells'.
+
 ## Value
 
 A `powerape_n` object: the required `n`, the confirmed (or, with
 `confirm = FALSE`, search-stage) power and MCSE at that `n`, the search
 history (`stage` column distinguishes search and confirmation rounds),
+the standard-error type and separation convention used, the separation
+diagnostics of the final run (`separated`, `min_cell`; see
+[`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md)),
 and the embedded DGP.
 
 ## Examples

@@ -133,7 +133,10 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   self-contained methods paragraph for grants and preregistrations,
   including the justification paragraph for an `ape_alpha()` result.
 - **Monte Carlo honesty**: every power estimate carries its MCSE; failed
-  fits count against the claim, never silently dropped.
+  fits count against the claim, never silently dropped, and so by default
+  do fits with separation (a focal cell without events or non-events,
+  where the maximum-likelihood effect does not exist) -- their share is
+  reported, with a warning when cells get sparse.
 
 ## Validation
 

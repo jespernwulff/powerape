@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -186,7 +186,7 @@ counted in units:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_mde.html">ape_mde</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">400</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>        nsim <span class="op">=</span> <span class="fl">400</span>, seed <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape minimum detectable APE -- minimum claim</span></span>
-<span><span class="co">#&gt;   MDE = 0.1097 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.792, MCSE 0.010)</span></span>
+<span><span class="co">#&gt;   MDE = 0.1100 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.795, MCSE 0.010)</span></span>
 <span><span class="co">#&gt;   smallest effect demonstrably above sesoi 0.050</span></span>
 <span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.</span></span></code></pre></div>
 </div>
@@ -233,13 +233,13 @@ so only the precision channel moves:</p>
 <span><span class="co">#&gt; powerape robustness sweep -- minimum claim, APE, pin = ape</span></span>
 <span><span class="co">#&gt;   n = 300, nsim = 300 per scenario, 3 scenario(s) over: rho</span></span>
 <span><span class="co">#&gt;   power range [0.507, 0.630]; worst scenario:</span></span>
-<span><span class="co">#&gt;  rho implied_effect     power       mcse</span></span>
-<span><span class="co">#&gt;  0.3            0.1 0.5066667 0.02886495</span></span>
+<span><span class="co">#&gt;  rho implied_effect     power       mcse separated</span></span>
+<span><span class="co">#&gt;  0.3            0.1 0.5066667 0.02886495         0</span></span>
 <span><span class="co">#&gt;   scenarios:</span></span>
-<span><span class="co">#&gt;  rho implied_effect     power       mcse</span></span>
-<span><span class="co">#&gt;  0.1            0.1 0.6300000 0.02787472</span></span>
-<span><span class="co">#&gt;  0.3            0.1 0.5066667 0.02886495</span></span>
-<span><span class="co">#&gt;  0.5            0.1 0.5366667 0.02878979</span></span></code></pre></div>
+<span><span class="co">#&gt;  rho implied_effect     power       mcse separated</span></span>
+<span><span class="co">#&gt;  0.1            0.1 0.6300000 0.02787472         0</span></span>
+<span><span class="co">#&gt;  0.3            0.1 0.5066667 0.02886495         0</span></span>
+<span><span class="co">#&gt;  0.5            0.1 0.5366667 0.02878979         0</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="unbalanced-panels-and-attrition-wooldridge-2019">Unbalanced panels and attrition (Wooldridge, 2019)<a class="anchor" aria-label="anchor" href="#unbalanced-panels-and-attrition-wooldridge-2019"></a>
@@ -282,13 +282,13 @@ the retention guess to price it:</p>
 <span><span class="co">#&gt; powerape robustness sweep -- minimum claim, APE, pin = ape</span></span>
 <span><span class="co">#&gt;   n = 300, nsim = 300 per scenario, 3 scenario(s) over: retention</span></span>
 <span><span class="co">#&gt;   power range [0.437, 0.617]; worst scenario:</span></span>
-<span><span class="co">#&gt;  retention implied_effect     power     mcse</span></span>
-<span><span class="co">#&gt;        0.7            0.1 0.4366667 0.028635</span></span>
+<span><span class="co">#&gt;  retention implied_effect     power     mcse separated</span></span>
+<span><span class="co">#&gt;        0.7            0.1 0.4366667 0.028635         0</span></span>
 <span><span class="co">#&gt;   scenarios:</span></span>
-<span><span class="co">#&gt;  retention implied_effect     power       mcse</span></span>
-<span><span class="co">#&gt;       0.70            0.1 0.4366667 0.02863500</span></span>
-<span><span class="co">#&gt;       0.85            0.1 0.5233333 0.02883606</span></span>
-<span><span class="co">#&gt;       1.00            0.1 0.6166667 0.02807068</span></span></code></pre></div>
+<span><span class="co">#&gt;  retention implied_effect     power       mcse separated</span></span>
+<span><span class="co">#&gt;       0.70            0.1 0.4366667 0.02863500         0</span></span>
+<span><span class="co">#&gt;       0.85            0.1 0.5233333 0.02883606         0</span></span>
+<span><span class="co">#&gt;       1.00            0.1 0.6166667 0.02807068         0</span></span></code></pre></div>
 <p>Two facts from the validation battery are worth knowing at the design
 stage. Power is monotone in retention, and the cost is material (in the
 battery’s example, going from no attrition to 30% annual attrition costs

@@ -9,7 +9,7 @@ results. Works for APE and AIE designs alike."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,8 @@ results. Works for APE and AIE designs alike.</p>
 <span>  conf <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nsim <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span></span>
+<span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span>,</span>
+<span>  separation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"keep"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'powerape_curve'</span></span>
@@ -124,6 +125,14 @@ Panel designs always use unit-clustered SEs and IV designs the
 stacked method-of-moments robust sandwich; <code>se</code> is ignored there.</p></dd>
 
 
+<dt id="arg-separation">separation<a class="anchor" aria-label="anchor" href="#arg-separation"></a></dt>
+<dd><p>How simulated studies with separation in an
+identifying cell are scored: <code>"fail"</code> (default; counted as failed, as
+the field's reference analysis refuses them) or <code>"keep"</code> (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.</p></dd>
+
+
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A <code>powerape_curve</code> object.</p></dd>
 
@@ -140,8 +149,10 @@ crosses it, the crossing n is marked and annotated.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>powerape_curve</code> object with a <code>results</code> data frame
-(<code>n</code>, <code>alpha</code>, <code>power</code>, <code>mcse</code>, <code>failed</code>); <code>alpha</code> varies along the
-grid when it is a sample-size rule.</p>
+(<code>n</code>, <code>alpha</code>, <code>power</code>, <code>mcse</code>, <code>failed</code>, <code>separated</code>); <code>alpha</code>
+varies along the grid when it is a sample-size rule, and <code>separated</code>
+is the share of simulated studies with separation (counted within
+<code>failed</code> under the default <code>separation = "fail"</code>).</p>
     </div>
 
     <div class="section level2">

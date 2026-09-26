@@ -3,9 +3,11 @@
 # has an EXACT finite-sample value by triple binomial enumeration -- no
 # approximation of any kind. Simulated power must match it within Monte Carlo
 # error. This validates the DGP draw, the ML fit, the APE estimator, the
-# delta-method SE, the CI, the claim logic, and the failed-fit handling, all
-# at once, against arithmetic. (exact_power_sat lives in helper-exact.R;
-# mirrored in validation/run-validation.R, V1.)
+# delta-method SE, the CI, and the claim logic against arithmetic; the
+# rare-outcome case below also certifies the separation convention, which
+# the common designs never exercise (their boundary mass is ~1e-80).
+# (exact_power_sat lives in helper-exact.R; mirrored in
+# validation/run-validation.R, V1.)
 
 test_that("simulated power equals the exact enumerated power (saturated case)", {
   n <- 400
@@ -32,6 +34,31 @@ test_that("simulated power equals the exact enumerated power (saturated case)", 
     expect_lt(abs(pw$power - ex), 4 * mcse + 1e-4,
               label = sprintf("|simulated - exact| for claim %s", cs$claim))
   }
+})
+
+test_that("separation convention matches exact enumeration where it matters", {
+  ## rare outcome, protective effect: .05 -> .01 at n = 300. Over a fifth of
+  ## simulated studies have a treated arm without events; the ML effect does
+  ## not exist there. "fail" (default) scores them as failed fits, "keep"
+  ## with their degenerate Wald intervals (the arm contributes zero
+  ## variance); the two conventions differ by ~21 points of exact power.
+  ## Negative direction: enumerate with the arms swapped.
+  d <- set_ape(ape_dgp("probit", focal = pa_var("t", "binary", p = 0.5),
+                       baseline = 0.05), -0.04)
+  nsim <- 4000
+  for (conv in c("fail", "keep")) {
+    ex <- exact_power_sat(300, 0.5, 0.01, 0.05, 0.95, "detect",
+                          separation = conv)
+    pw <- suppressWarnings(ape_power(d, n = 300, claim = "detect", nsim = nsim,
+                                     seed = 11, separation = conv))
+    mcse <- sqrt(ex * (1 - ex) / nsim)
+    expect_lt(abs(pw$power - ex), 4 * mcse,
+              label = sprintf("|simulated - exact| under separation = '%s'", conv))
+    expect_gt(pw$separated, 0.15)
+  }
+  expect_lt(exact_power_sat(300, 0.5, 0.01, 0.05, 0.95, "detect"), 0.36)
+  expect_gt(exact_power_sat(300, 0.5, 0.01, 0.05, 0.95, "detect",
+                            separation = "keep"), 0.55)
 })
 
 test_that("probit and logit give identical saturated-case power on the same seed", {

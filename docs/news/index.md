@@ -1,5 +1,119 @@
 # Changelog
 
+## powerape 1.11.0
+
+Fixes from the September 2026 blindspot audit. Numbers from designs
+without rare outcomes, small focal groups, or the affected options are
+unchanged: every seeded result of the article’s worked designs
+regenerates bit for bit, apart from
+[`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+(fixed below).
+
+- **Separation is now detected, reported, and by default scored as a
+  failed fit** (new argument `separation = c("fail", "keep")` in
+  [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md),
+  [`ape_curve()`](https://jespernwulff.github.io/powerape/reference/ape_curve.md),
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md),
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md),
+  and
+  [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md);
+  DESIGN.md section 16). When a simulated study has a cell that
+  identifies the effect – a level of a binary focal variable, or for AIE
+  designs a focal-by-moderator cell – with no events or no non-events,
+  the maximum-likelihood effect does not exist. Stata’s probit/logit
+  drop the perfect predictor and `margins` reports the effect as not
+  estimable; R’s [`glm()`](https://rdrr.io/r/stats/glm.html) instead
+  stops silently at a large finite coefficient whose delta-method
+  standard error collapses to the other cell’s binomial SE. Through
+  1.10.0 the engine kept such replications, contrary to its
+  documentation, and they usually counted as detections: power was
+  overstated, and required sample sizes understated, in rare-outcome
+  designs with small focal groups (by up to about half in the audit’s
+  unbalanced examples), with `failed 0.000` printed throughout. They now
+  count as failed (`"fail"`, the default, matching the documentation and
+  Stata’s default analysis); `separation = "keep"` restores the 1.10.0
+  behavior (R’s [`glm()`](https://rdrr.io/r/stats/glm.html) +
+  marginaleffects analysis, Stata’s `asis`). Either way results report
+  the share of simulated studies with separation (`separated`) and the
+  average smallest identifying-cell count of events or non-events
+  (`min_cell`); print methods and
+  [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+  state both, and the functions warn when the share exceeds 1% or the
+  smallest cell averages fewer than 10 events. A backup check flags
+  quasi-separated fits the cell check cannot see (a focal-side
+  coefficient with an absurd standardized standard error). The
+  exact-enumeration certificate (`tests/testthat/helper-exact.R`,
+  battery V1) now enumerates either convention and is exercised where
+  the conventions differ.
+- **Panel and IV routes: a continuous focal is now centered in the
+  simulated outcome index**, as it already was in calibration,
+  inversion, and truth evaluation. With a focal mean other than 0 the
+  simulation used to run in a world with a different baseline and APE
+  than the ones pinned and reported (e.g. an APE about 8% larger and a
+  baseline of .365 instead of .300 at focal mean 2 on the panel route;
+  for IV-AIE designs the moderator’s main effect was also displaced).
+  Binary focals and mean-zero continuous focals are unaffected bit for
+  bit; shifting the focal’s location now leaves every draw and estimate
+  unchanged (unit-tested to 1e-6).
+- **[`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  gains `direction`** (`"positive"` or `"negative"`, defaulting to the
+  sign of the pinned effect): it used to search increases only and
+  silently re-pinned a DGP pinned at a negative effect to a positive
+  MDE. With a binary outcome the direction matters away from a 0.5
+  baseline (a decrease is harder to detect than an increase of the same
+  size above 0.5, easier below it); the returned `mde` is signed, and
+  print and
+  [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+  name the direction. `ape_robust(mode = "mde")` passes `direction`
+  through and takes the MDE largest in magnitude as its worst case.
+- **[`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  re-measures the standard error at its first proposal** before
+  searching. The pilot SE was taken at a reference effect (half the
+  distance from the baseline to the nearer bound), and at large `n` –
+  where the MDE lies far below that reference – the first candidate
+  overshot by 2-4% at a 0.30 baseline (more at rarer baselines) and was
+  accepted within the search tolerance without ever being trimmed. MDE
+  results change accordingly (the confirmation stage still pushes only
+  outward).
+- **[`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)’s
+  `n_max` is now the largest requirement across scenarios.** It used to
+  be solved in the scenario with the lowest simulated power at the
+  user’s `n`; when every scenario’s power saturated near 1, that tie
+  went to the first grid row (often the most favorable scenario), so
+  `n_max` could be understated by about half. Scenarios are now ranked
+  by a criterion that does not saturate (the normal-approximation
+  requirement implied by each scenario’s simulated standard error),
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+  runs in the least favorable scenario and in any within 5% of it (up to
+  three), and the result reports the scenario that sets `n_max`
+  (`nmax_scenario`) and every candidate searched (`nmax_candidates`).
+  When a scenario’s implied effect sits on or beyond the claim boundary
+  (possible with `pin = "coefficients"`), `n_max` is withheld with a
+  warning. Ties in the worst-power scenario are broken by the same
+  criterion. The documented `nmax_power = 0.90` default is unchanged;
+  the vignette now says so.
+- **[`ape_dgp_from_fit()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_from_fit.md)’s
+  focal guard is structural.** It checked the focal’s *variable* name
+  while addressing its model-matrix *column*, so interactions of a
+  logical or factor focal, transformed copies of the focal (`I(dose^2)`
+  next to `dose`, `log(dose)`, `I(treat * female)`), multi-column terms,
+  and offsets were accepted silently – and the pinned “APE” was then a
+  partial effect holding the focal’s other columns fixed, not the APE
+  that margins or marginaleffects report for the same model. All of
+  these are now refused with an explanation; a logical or two-level
+  factor focal entering as a single main-effect dummy is accepted.
+- **[`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+  describes the world it priced**: the latent (Gaussian-copula)
+  correlation actually specified (or that the regressors are independent
+  – it used to assert “Gaussian-copula dependence” even without one),
+  the covariates’ marginals, each panel variable’s within-unit
+  persistence, and the empirical route’s resampling mode, plus the
+  separation convention.
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+  now stores its standard-error type (`se`), so statements for robust-SE
+  sample-size results no longer describe model-based standard errors;
+  [`print()`](https://rdrr.io/r/base/print.html) shows it.
+
 ## powerape 1.10.0
 
 - **[`alpha_frontier()`](https://jespernwulff.github.io/powerape/reference/alpha_frontier.md)**:

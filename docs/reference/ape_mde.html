@@ -23,7 +23,7 @@ the tightest equivalence bounds the design can expect to establish."><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,9 @@ the tightest equivalence bounds the design can expect to establish.</p>
 <span>  max_iter <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  confirm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nsim_confirm <span class="op">=</span> <span class="fl">4</span> <span class="op">*</span> <span class="va">nsim</span>,</span>
-<span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span></span>
+<span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span>,</span>
+<span>  direction <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  separation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"keep"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -164,20 +166,54 @@ defaults to the values stored by a previous <code><a href="set_aie.html">set_aie
 Panel designs always use unit-clustered SEs and IV designs the
 stacked method-of-moments robust sandwich; <code>se</code> is ignored there.</p></dd>
 
+
+<dt id="arg-direction">direction<a class="anchor" aria-label="anchor" href="#arg-direction"></a></dt>
+<dd><p><code>"positive"</code> (an increase) or <code>"negative"</code> (a
+decrease) for the detect and minimum-effect claims; default: the sign
+of the DGP's pinned effect, <code>"positive"</code> when none is pinned. Ignored
+for equivalence.</p></dd>
+
+
+<dt id="arg-separation">separation<a class="anchor" aria-label="anchor" href="#arg-separation"></a></dt>
+<dd><p>How simulated studies with separation in an
+identifying cell are scored: <code>"fail"</code> (default; counted as failed, as
+the field's reference analysis refuses them) or <code>"keep"</code> (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>powerape_mde</code> object: <code>mde</code> (the minimum detectable effect,
-or for equivalence the smallest establishable margin), the confirmed
-<code>power</code> and <code>mcse</code> at that effect, the search <code>history</code>, and the DGP
-re-pinned at the answer (so the object feeds <code><a href="power_statement.html">power_statement()</a></code>).</p>
+signed, or for equivalence the smallest establishable margin), the
+confirmed <code>power</code> and <code>mcse</code> at that effect, the search <code>history</code>, the
+<code>direction</code>, the separation diagnostics of the final run (see
+<code><a href="ape_power.html">ape_power()</a></code>), and the DGP re-pinned at the answer (so the object
+feeds <code><a href="power_statement.html">power_statement()</a></code>).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>By default the answer is verified the way <code><a href="ape_n.html">ape_n()</a></code> verifies its n: a
-high-precision confirmation stage re-measures power at the candidate
-and pushes the effect upward (never downward) if it falls short, so
-the reported MDE errs on the conservative side.</p>
+    <p><strong>Direction.</strong> For the detect and minimum-effect claims the search runs
+in one direction: <code>direction = "positive"</code> searches increases,
+<code>"negative"</code> decreases (a drop in a rare event, an attenuating
+interaction). With a binary outcome the two differ whenever the
+baseline is not 0.5, because the Bernoulli variance moves with the
+rate: above a 0.5 baseline a decrease is harder to detect than an
+increase of the same size, below it easier. The default follows the
+sign of the DGP's pinned effect (<code>"positive"</code> for an unpinned DGP), and
+the returned <code>mde</code> carries the sign.</p>
+<p><strong>Search.</strong> A pilot simulation measures the standard error at a
+reference effect (the pinned one, or half the distance from the
+baseline to the nearer bound), a normal approximation proposes a
+candidate, and the standard error is re-measured at that candidate
+before the search starts: the standard error of an APE moves with the
+effect through the Bernoulli variances, so a standard error taken far
+from the answer would bias the first candidate (by 2-4% at large <code>n</code>
+from a 0.15 reference at a 0.30 baseline, more at rarer baselines).
+By default the answer is then verified the way <code><a href="ape_n.html">ape_n()</a></code> verifies its
+n: a high-precision confirmation stage re-measures power at the
+candidate and pushes the effect outward (never inward) if it falls
+short, so the reported MDE errs on the conservative side.</p>
 <p>For a DGP with a moderator the searched effect is the AIE; the two
 conditional-at-reference main-effect anchors are taken from the
 pinned DGP (or passed via <code>main_focal</code>/<code>main_moderator</code>) and held
@@ -190,7 +226,13 @@ fixed across candidates.</p>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="ape_dgp.html">ape_dgp</a></span><span class="op">(</span>focal <span class="op">=</span> <span class="fu"><a href="pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>, baseline <span class="op">=</span> <span class="fl">0.30</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">ape_mde</span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">712</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">600</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> powerape minimum detectable APE -- detect claim</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   MDE = 0.1003 at n = 712 for 80% target power (confirmed 0.808, MCSE 0.008)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   MDE = 0.0996 at n = 712 for 80% target power (confirmed 0.804, MCSE 0.008)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2400.</span>
+<span class="r-in"><span><span class="co">## a decrease from the same baseline</span></span></span>
+<span class="r-in"><span><span class="fu">ape_mde</span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">712</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">600</span>, seed <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>        direction <span class="op">=</span> <span class="st">"negative"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> powerape minimum detectable APE -- detect claim, decreases</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   MDE = -0.0908 at n = 712 for 80% target power (confirmed 0.801, MCSE 0.008)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2400.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

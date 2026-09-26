@@ -119,8 +119,10 @@ scenario, with the *largest* MDE as the worst case.
 The baseline rate and the covariate signal are guesses, and power computed
 from a single guess is fragile (Hancock & Feng, 2025). `ape_robust()`
 re-runs the analysis over a scenario grid and reports the worst case; with
-`nmax = TRUE` it also finds **n_max**, the insurance-premium sample size
-that holds the target power in the worst scenario.
+`nmax = TRUE` it also finds **n_max**, the insurance-premium sample size:
+the largest requirement across the scenarios, at `nmax_power` (90% by
+default, the default of `ape_n()`; pass `nmax_power = 0.80` for the
+conventional target).
 
 ```{r}
 ape_robust(d, n = 2200, claim = "minimum", sesoi = 0.05,

@@ -5,7 +5,7 @@ rate, nuisance signal, covariate dependence – is fragile (Hancock &
 Feng, 2025). `ape_robust()` re-runs the power analysis over a scenario
 grid of those inputs and reports per-scenario power, the worst case, and
 (optionally) `n_max`: the sample size that reaches the target power in
-the worst scenario – the insurance-premium n.
+every scenario – the insurance-premium n.
 
 ## Usage
 
@@ -26,7 +26,9 @@ ape_robust(
   grid_points = 3,
   nmax = TRUE,
   nmax_power = 0.9,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  direction = NULL,
+  separation = c("fail", "keep")
 )
 ```
 
@@ -100,9 +102,9 @@ ape_robust(
   `"power"` (default) reports power at the pinned effect per scenario;
   `"mde"` reports the **minimum detectable effect** per scenario via
   [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
-  – the worst case is then the *largest* MDE, answering "what is the
-  smallest effect this design finds even under the least favorable
-  contextual assumptions?".
+  – the worst case is then the MDE largest in magnitude, answering "what
+  is the smallest effect this design finds even under the least
+  favorable contextual assumptions?".
 
 - power:
 
@@ -114,12 +116,12 @@ ape_robust(
 
 - nmax:
 
-  Run the n_max search in the worst scenario (default TRUE; power mode
-  only).
+  Run the n_max search (default TRUE; power mode only).
 
 - nmax_power:
 
-  Target power for the n_max search (default 0.90).
+  Target power for the n_max search (default 0.90, the default of
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)).
 
 - se:
 
@@ -129,11 +131,27 @@ ape_robust(
   Panel designs always use unit-clustered SEs and IV designs the stacked
   method-of-moments robust sandwich; `se` is ignored there.
 
+- direction:
+
+  MDE mode only: `"positive"` or `"negative"` search direction, as in
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md);
+  default: the sign of the base DGP's pinned effect.
+
+- separation:
+
+  How simulated studies with separation in an identifying cell are
+  scored: `"fail"` (default; counted as failed, as the field's reference
+  analysis refuses them) or `"keep"` (retained with their degenerate
+  Wald intervals). See the section 'Separation and sparse cells'.
+
 ## Value
 
 A `powerape_robust` object: `scenarios` (inputs, implied effect, power,
-MCSE), the worst scenario, marginal mean power per input, and the n_max
-result.
+MCSE, share of simulated studies with separation), the worst scenario,
+marginal mean power per input, and the n_max result (`nmax`, the
+[`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+result in the scenario that sets it; `nmax_scenario`, that scenario's
+inputs; `nmax_candidates`, every scenario searched with its answer).
 
 ## Details
 
@@ -150,6 +168,19 @@ Two pinning modes (DESIGN.md section 3.3):
   Claim-boundary guards are relaxed here on purpose – showing that a
   scenario collapses power is the point.
 
+**n_max.** The insurance-premium n is the largest requirement across
+scenarios. Power at the user's `n` cannot rank the scenarios for that
+purpose – at a generous `n` every scenario's power is near 1 – so the
+scenarios are ranked by a criterion that does not saturate: the
+normal-approximation requirement implied by each scenario's simulated
+standard error and its effect's distance from the claim boundary.
+[`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
+then runs in the least favorable scenario and in any scenario within 5%
+of it on that criterion (up to three), and `n_max` is the largest
+confirmed answer. When the implied effect of a feasible scenario sits on
+or beyond the claim boundary (possible with `pin = "coefficients"`), no
+n reaches the target there, and `n_max` is not reported.
+
 ## Examples
 
 ``` r
@@ -162,12 +193,12 @@ ape_robust(d, n = 700, claim = "detect",
 #> powerape robustness sweep -- detect claim, APE, pin = ape
 #>   n = 700, nsim = 300 per scenario, 3 scenario(s) over: baseline
 #>   power range [0.773, 0.890]; worst scenario:
-#>  baseline implied_effect     power       mcse
-#>       0.4            0.1 0.7733333 0.02417222
+#>  baseline implied_effect     power       mcse separated
+#>       0.4            0.1 0.7733333 0.02417222         0
 #>   scenarios:
-#>  baseline implied_effect     power       mcse
-#>       0.2            0.1 0.8900000 0.01806470
-#>       0.3            0.1 0.8466667 0.02080242
-#>       0.4            0.1 0.7733333 0.02417222
+#>  baseline implied_effect     power       mcse separated
+#>       0.2            0.1 0.8900000 0.01806470         0
+#>       0.3            0.1 0.8466667 0.02080242         0
+#>       0.4            0.1 0.7733333 0.02417222         0
 # }
 ```

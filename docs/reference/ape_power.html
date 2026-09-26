@@ -19,7 +19,7 @@ full outcome distribution."><meta property="og:image" content="https://jespernwu
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,8 @@ full outcome distribution.</p>
 <span>  nsim <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span>,</span>
-<span>  keep_draws <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  keep_draws <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  separation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"keep"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -143,12 +144,23 @@ and convergence flags in the result (default TRUE; a few kilobytes).
 They let <code><a href="power_at.html">power_at()</a></code> and <code><a href="ape_alpha.html">ape_alpha()</a></code> re-evaluate the claim at any
 error rate without simulating again.</p></dd>
 
+
+<dt id="arg-separation">separation<a class="anchor" aria-label="anchor" href="#arg-separation"></a></dt>
+<dd><p>How simulated studies with separation in an
+identifying cell are scored: <code>"fail"</code> (default; counted as failed, as
+the field's reference analysis refuses them) or <code>"keep"</code> (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>powerape_power</code> object: power, Monte Carlo standard error,
 outcome distribution, the failed-fit count (failures count against
-power, conservatively), the error rate used (<code>alpha</code>, and
+power, conservatively), the share of simulated studies with separation
+(<code>separated</code>) and the average smallest identifying-cell count of
+events or non-events (<code>min_cell</code>, <code>NA</code> without binary cells), the
+separation convention used, the error rate used (<code>alpha</code>, and
 <code>alpha_rule</code> when it came from a sample-size rule), the stored draws,
 and the embedded DGP spec for reproducibility and
 <code><a href="power_statement.html">power_statement()</a></code>.</p>
@@ -170,6 +182,31 @@ Two routes to an error rate that is chosen rather than inherited are
 described in <code><a href="../articles/justified-alpha.html">vignette("justified-alpha")</a></code>: a sample-size rule passed
 as <code>alpha</code>, and <code><a href="ape_alpha.html">ape_alpha()</a></code> for the error-cost optimum of Maier and
 Lakens (2022), computed from this function's stored draws.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="separation-and-sparse-cells">Separation and sparse cells<a class="anchor" aria-label="anchor" href="#separation-and-sparse-cells"></a></h2>
+
+
+<p>With rare outcomes, small samples, or a small treated group, a simulated
+study can contain a cell that identifies the effect – a level of a
+binary focal variable, or for AIE designs a focal-by-moderator cell –
+with no events or no non-events. The maximum-likelihood effect does not
+exist there (quasi-complete separation): Stata's <code>probit</code>/<code>logit</code> drop
+the perfect predictor and <code>margins</code> reports the effect as not
+estimable, whereas R's <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code> stops silently at a large finite
+coefficient whose delta-method standard error collapses to the other
+cell's binomial SE, so the replication usually counts as a detection.
+By default (<code>separation = "fail"</code>) such replications count as failed,
+against every claim, like any other replication without a usable
+estimate; <code>separation = "keep"</code> retains them with their degenerate Wald
+intervals (the R <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code> + marginaleffects analysis, and Stata's <code>asis</code>
+option; the behavior before powerape 1.11.0). Either way the share is
+reported (<code>separated</code>), and the function warns when it exceeds 1%, or
+when the smallest identifying cell averages fewer than 10 events (or
+non-events) per simulated study: there the Wald test's one-sided error
+rates can run up to about twice their nominal level in the direction in
+which the sparse cell has the lower rate, and score, Fisher, or Firth
+analyses have different power than the Wald analysis powered here.</p>
     </div>
 
     <div class="section level2">

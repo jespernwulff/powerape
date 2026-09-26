@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -170,7 +170,7 @@
 <li>
 <strong>Citable output</strong>: <code><a href="reference/power_statement.html">power_statement()</a></code> renders any result as a self-contained methods paragraph for grants and preregistrations, including the justification paragraph for an <code><a href="reference/ape_alpha.html">ape_alpha()</a></code> result.</li>
 <li>
-<strong>Monte Carlo honesty</strong>: every power estimate carries its MCSE; failed fits count against the claim, never silently dropped.</li>
+<strong>Monte Carlo honesty</strong>: every power estimate carries its MCSE; failed fits count against the claim, never silently dropped, and so by default do fits with separation (a focal cell without events or non-events, where the maximum-likelihood effect does not exist) – their share is reported, with a warning when cells get sparse.</li>
 </ul>
 </div>
 <div class="section level2">

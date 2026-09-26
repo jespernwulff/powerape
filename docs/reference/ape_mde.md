@@ -30,7 +30,9 @@ ape_mde(
   max_iter = 6,
   confirm = TRUE,
   nsim_confirm = 4 * nsim,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  direction = NULL,
+  separation = c("fail", "keep")
 )
 ```
 
@@ -113,20 +115,53 @@ ape_mde(
   Panel designs always use unit-clustered SEs and IV designs the stacked
   method-of-moments robust sandwich; `se` is ignored there.
 
+- direction:
+
+  `"positive"` (an increase) or `"negative"` (a decrease) for the detect
+  and minimum-effect claims; default: the sign of the DGP's pinned
+  effect, `"positive"` when none is pinned. Ignored for equivalence.
+
+- separation:
+
+  How simulated studies with separation in an identifying cell are
+  scored: `"fail"` (default; counted as failed, as the field's reference
+  analysis refuses them) or `"keep"` (retained with their degenerate
+  Wald intervals). See the section 'Separation and sparse cells'.
+
 ## Value
 
-A `powerape_mde` object: `mde` (the minimum detectable effect, or for
-equivalence the smallest establishable margin), the confirmed `power`
-and `mcse` at that effect, the search `history`, and the DGP re-pinned
-at the answer (so the object feeds
+A `powerape_mde` object: `mde` (the minimum detectable effect, signed,
+or for equivalence the smallest establishable margin), the confirmed
+`power` and `mcse` at that effect, the search `history`, the
+`direction`, the separation diagnostics of the final run (see
+[`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md)),
+and the DGP re-pinned at the answer (so the object feeds
 [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)).
 
 ## Details
 
-By default the answer is verified the way
+**Direction.** For the detect and minimum-effect claims the search runs
+in one direction: `direction = "positive"` searches increases,
+`"negative"` decreases (a drop in a rare event, an attenuating
+interaction). With a binary outcome the two differ whenever the baseline
+is not 0.5, because the Bernoulli variance moves with the rate: above a
+0.5 baseline a decrease is harder to detect than an increase of the same
+size, below it easier. The default follows the sign of the DGP's pinned
+effect (`"positive"` for an unpinned DGP), and the returned `mde`
+carries the sign.
+
+**Search.** A pilot simulation measures the standard error at a
+reference effect (the pinned one, or half the distance from the baseline
+to the nearer bound), a normal approximation proposes a candidate, and
+the standard error is re-measured at that candidate before the search
+starts: the standard error of an APE moves with the effect through the
+Bernoulli variances, so a standard error taken far from the answer would
+bias the first candidate (by 2-4% at large `n` from a 0.15 reference at
+a 0.30 baseline, more at rarer baselines). By default the answer is then
+verified the way
 [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
 verifies its n: a high-precision confirmation stage re-measures power at
-the candidate and pushes the effect upward (never downward) if it falls
+the candidate and pushes the effect outward (never inward) if it falls
 short, so the reported MDE errs on the conservative side.
 
 For a DGP with a moderator the searched effect is the AIE; the two
@@ -141,7 +176,13 @@ candidates.
 d <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5), baseline = 0.30)
 ape_mde(d, n = 712, claim = "detect", nsim = 600, seed = 1)
 #> powerape minimum detectable APE -- detect claim
-#>   MDE = 0.1003 at n = 712 for 80% target power (confirmed 0.808, MCSE 0.008)
+#>   MDE = 0.0996 at n = 712 for 80% target power (confirmed 0.804, MCSE 0.008)
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2400.
+## a decrease from the same baseline
+ape_mde(d, n = 712, claim = "detect", nsim = 600, seed = 1,
+        direction = "negative")
+#> powerape minimum detectable APE -- detect claim, decreases
+#>   MDE = -0.0908 at n = 712 for 80% target power (confirmed 0.801, MCSE 0.008)
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2400.
 # }
 ```

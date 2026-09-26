@@ -504,16 +504,26 @@ draw_x_panel <- function(dgp, n_units) {
     rep(0, n_units)
   }
   a_i <- if (dgp$var_a > 0) rnorm(n_units, 0, sqrt(dgp$var_a)) else rep(0, n_units)
-  eta <- dgp$beta0 + dgp$beta_focal * d + idxz + (m_i + a_i)[rd$unit]
-  if (has_m) eta <- eta + dgp$beta_mod * m + dgp$beta_int * dm
+  ## structural index in the centered parameterization calibration and
+  ## inversion use (focal and moderator at their reference values; a binary
+  ## focal's reference is 0, so its index is unchanged bit for bit)
+  fr <- dgp$focal_ref
+  mr <- dgp$mod_ref %||% 0
+  d_c <- d - fr
+  eta <- dgp$beta0 + dgp$beta_focal * d_c + idxz + (m_i + a_i)[rd$unit]
+  if (has_m) eta <- eta + dgp$beta_mod * (m - mr) + dgp$beta_int * d_c * (m - mr)
   pr <- dgp$G(eta)
 
-  ## pseudo-true (attenuated) coefficients as IRLS start values; the
-  ## interaction-mean and cohort-dummy columns' structural coefficients are 0
+  ## pseudo-true (attenuated) coefficients as IRLS start values, mapped to
+  ## the raw (uncentered) design columns; the interaction-mean and
+  ## cohort-dummy columns' structural coefficients are 0
   s <- dgp$scale_a
-  start <- c(c(dgp$beta0 - sum(dgp$xi * dgp$xbar_center),
-               dgp$beta_focal,
-               if (has_m) c(dgp$beta_mod, dgp$beta_int),
+  b0_raw <- dgp$beta0 - dgp$beta_focal * fr
+  if (has_m)
+    b0_raw <- b0_raw - dgp$beta_mod * mr + dgp$beta_int * fr * mr
+  start <- c(c(b0_raw - sum(dgp$xi * dgp$xbar_center),
+               if (has_m) dgp$beta_focal - dgp$beta_int * mr else dgp$beta_focal,
+               if (has_m) c(dgp$beta_mod - dgp$beta_int * fr, dgp$beta_int),
                dgp$gamma, dgp$xi,
                if (has_m && (dgp$iccs[1L] < 1 || dgp$iccs[2L] < 1)) 0) / s,
              rep(0, n_dum))

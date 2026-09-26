@@ -10,8 +10,9 @@ ape_dgp_from_fit(fit, focal, baseline = NULL)
 \item{fit}{A fitted \code{glm} with \code{family = binomial("probit")} or
 \code{binomial("logit")}.}
 
-\item{focal}{Name of the focal regressor: an untransformed numeric
-variable in the model (binary 0/1 or continuous).}
+\item{focal}{Name of the focal regressor's model-matrix column: a
+numeric variable in the model (binary 0/1 or continuous), or the single
+dummy column of a two-level factor or logical (e.g. \code{"treatTRUE"}).}
 
 \item{baseline}{Optional override, in (0, 1): recalibrate the intercept
 so the average \code{P(Y = 1)} with the focal at reference equals this
@@ -34,11 +35,19 @@ pilot: it is re-solved in APE units by \code{\link[=set_ape]{set_ape()}}, keepin
 for the effect size you care about" logic intact.
 }
 \details{
-The pilot fit must be a binomial \code{glm} with a probit or logit link and a
-main-effects role for the focal variable (terms interacting with the
-focal variable are not supported here — use \code{\link[=ape_dgp]{ape_dgp()}} + \code{\link[=set_aie]{set_aie()}}
-for interaction designs). Nuisance-side interactions and transformed
-covariates are fine: they are just columns of the model matrix.
+The pilot fit must be a binomial \code{glm} with a probit or logit link, no
+offset, and a main-effects role for the focal variable: the focal must
+enter the model through exactly one column of the model matrix, and its
+variable may appear in no other term -- no interactions with it, no
+polynomial or other transformed copies of it (\code{I(dose^2)} next to
+\code{dose}, \code{log(dose)}, splines), because those columns would be held at
+their pilot values while the focal changes, so the pinned effect would
+not be the APE that \code{margins} or marginaleffects report for the same
+model. Such pilots are refused with an error (use \code{\link[=ape_dgp]{ape_dgp()}} +
+\code{\link[=set_aie]{set_aie()}} for interaction designs). Nuisance-side interactions and
+transformed covariates are fine: they are just columns of the model
+matrix. A precomputed column that is a function of the focal (a data
+column \code{dose_sq}) cannot be detected; leave such columns out.
 }
 \examples{
 set.seed(1)

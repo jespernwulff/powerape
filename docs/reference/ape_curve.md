@@ -15,7 +15,8 @@ ape_curve(
   conf = NULL,
   nsim = 1000,
   seed = NULL,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  separation = c("fail", "keep")
 )
 
 # S3 method for class 'powerape_curve'
@@ -81,6 +82,13 @@ plot(x, target_power = NULL, ...)
   Panel designs always use unit-clustered SEs and IV designs the stacked
   method-of-moments robust sandwich; `se` is ignored there.
 
+- separation:
+
+  How simulated studies with separation in an identifying cell are
+  scored: `"fail"` (default; counted as failed, as the field's reference
+  analysis refuses them) or `"keep"` (retained with their degenerate
+  Wald intervals). See the section 'Separation and sparse cells'.
+
 - x:
 
   A `powerape_curve` object.
@@ -97,8 +105,10 @@ plot(x, target_power = NULL, ...)
 ## Value
 
 A `powerape_curve` object with a `results` data frame (`n`, `alpha`,
-`power`, `mcse`, `failed`); `alpha` varies along the grid when it is a
-sample-size rule.
+`power`, `mcse`, `failed`, `separated`); `alpha` varies along the grid
+when it is a sample-size rule, and `separated` is the share of simulated
+studies with separation (counted within `failed` under the default
+`separation = "fail"`).
 
 ## Examples
 

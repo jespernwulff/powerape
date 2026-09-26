@@ -11,8 +11,10 @@
 #' @param seed Optional; grid point i uses `seed + i - 1`.
 #'
 #' @return A `powerape_curve` object with a `results` data frame
-#'   (`n`, `alpha`, `power`, `mcse`, `failed`); `alpha` varies along the
-#'   grid when it is a sample-size rule.
+#'   (`n`, `alpha`, `power`, `mcse`, `failed`, `separated`); `alpha`
+#'   varies along the grid when it is a sample-size rule, and `separated`
+#'   is the share of simulated studies with separation (counted within
+#'   `failed` under the default `separation = "fail"`).
 #' @examples
 #' \donttest{
 #' d <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5), baseline = 0.30)
@@ -23,27 +25,42 @@
 #' @export
 ape_curve <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                       sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 1000,
-                      seed = NULL, se = c("model", "robust")) {
+                      seed = NULL, se = c("model", "robust"),
+                      separation = c("fail", "keep")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
+  separation <- match.arg(separation)
   n <- sort(unique(as.integer(n)))
   stopifnot(length(n) >= 2L, all(n >= 20))
   lv1 <- claim_levels(claim, alpha, conf, n[1L])
   check_coherence(dgp, claim, sesoi, lv1$conf_claim)
   rows <- vector("list", length(n))
+  diag <- vector("list", length(n))
   for (i in seq_along(n)) {
     si <- if (is.null(seed)) NULL else seed + i - 1L
     p <- power_once(dgp, n[i], claim, sesoi, conf, nsim, si, enforce = FALSE,
-                    se = se, alpha = alpha)
+                    se = se, alpha = alpha, separation = separation)
     rows[[i]] <- data.frame(n = n[i], alpha = p$alpha, power = p$power,
-                            mcse = p$mcse, failed = p$outcomes[["failed"]])
+                            mcse = p$mcse, failed = p$outcomes[["failed"]],
+                            separated = p$separated)
+    diag[[i]] <- list(separated = p$separated, min_cell = p$min_cell,
+                      separation = separation)
   }
+  ## one warning for the whole curve, stated at its sparsest (smallest) n
+  sparse_at <- which(vapply(diag, function(g) isTRUE(g$separated > 0.01) ||
+                              isTRUE(!is.na(g$min_cell) && g$min_cell < 10),
+                            logical(1)))
+  if (length(sparse_at))
+    sparse_warning(diag[[sparse_at[1L]]],
+                   where = sprintf("At n = %s", paste(n[sparse_at], collapse = ", ")),
+                   aie = identical(dgp$estimand, "aie"))
   rule <- is.function(alpha)
   structure(list(results = do.call(rbind, rows), claim = claim, sesoi = sesoi,
                  conf = if (rule) NA_real_ else lv1$conf_claim,
                  alpha = if (rule) NA_real_ else lv1$alpha,
                  alpha_rule = rule, nsim = nsim, target = dgp$target_est,
-                 estimand = dgp$estimand %||% "ape", model = dgp$model),
+                 estimand = dgp$estimand %||% "ape", model = dgp$model,
+                 separation = separation),
             class = "powerape_curve")
 }
 
@@ -115,7 +132,9 @@ plot.powerape_curve <- function(x, target_power = NULL, ...) {
 #' @return A `powerape_n` object: the required `n`, the confirmed (or, with
 #'   `confirm = FALSE`, search-stage) power and MCSE at that `n`, the
 #'   search history (`stage` column distinguishes search and confirmation
-#'   rounds), and the embedded DGP.
+#'   rounds), the standard-error type and separation convention used, the
+#'   separation diagnostics of the final run (`separated`, `min_cell`; see
+#'   [ape_power()]), and the embedded DGP.
 #' @examples
 #' \donttest{
 #' d <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5), baseline = 0.30)
@@ -127,9 +146,16 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
                   sesoi = NULL, alpha = 0.05, conf = NULL, nsim = 1500,
                   seed = NULL, n_range = c(30, 2e6), max_iter = 5,
                   confirm = TRUE, nsim_confirm = 4 * nsim,
-                  se = c("model", "robust")) {
+                  se = c("model", "robust"), separation = c("fail", "keep")) {
   claim <- match.arg(claim)
   se <- match.arg(se)
+  separation <- match.arg(separation)
+  if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
+    warning(sprintf(paste("`se` is fixed by the route: panel designs use",
+                          "unit-clustered SEs, IV designs the stacked robust",
+                          "sandwich; `se = \"%s\"` is ignored."), se))
+    se <- "model"
+  }
   rule <- is.function(alpha)
   n_pilot <- 2000L
   lv_p <- claim_levels(claim, alpha, conf, n_pilot)
@@ -164,9 +190,12 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
 
   ps <- sim_ci(dgp, n_pilot, 300L, lv_p$conf_claim,
                seed = if (is.null(seed)) NULL else seed - 1L,
-               se_type = if (dgp$route %in% c("panel", "iv")) "model" else se)
+               se_type = if (dgp$route %in% c("panel", "iv")) "model" else se,
+               separation = separation)
   if (mean(ps$ok) < 0.5)
-    stop("Most pilot replications failed to fit; the design looks degenerate (e.g. very rare outcome).",
+    stop(paste("Most pilot replications failed to fit or had separation; the",
+               "design looks degenerate (e.g. a very rare outcome or a tiny",
+               "focal group)."),
          call. = FALSE)
   c_hat <- mean(ps$se[ps$ok]) * sqrt(n_pilot)
 
@@ -185,12 +214,13 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
     n_i <- as.integer(max(n_range[1], min(n_range[2], n_i)))
     si <- if (is.null(seed)) NULL else seed + it
     pw <- power_once(dgp, n_i, claim, sesoi, conf, nsim, si, enforce = FALSE,
-                     se = se, alpha = alpha)
+                     se = se, alpha = alpha, separation = separation)
     hist <- rbind(hist, data.frame(stage = "search", iter = it, n = n_i,
                                    alpha = pw$alpha,
                                    power = pw$power, mcse = pw$mcse))
     if (is.null(best) || abs(pw$power - power) < abs(best$power - power))
-      best <- list(n = n_i, power = pw$power, mcse = pw$mcse)
+      best <- list(n = n_i, power = pw$power, mcse = pw$mcse,
+                   separated = pw$separated, min_cell = pw$min_cell)
     if (abs(pw$power - power) <= max(0.01, 2 * pw$mcse)) break
     n_i <- newton_n(n_i, pw$power)
     if (n_i %in% hist$n) break
@@ -204,11 +234,13 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
     for (cr in seq_len(3L)) {
       sc <- if (is.null(seed)) NULL else seed + 100L + cr
       pwc <- power_once(dgp, n_c, claim, sesoi, conf, nsim_confirm, sc,
-                        enforce = FALSE, se = se, alpha = alpha)
+                        enforce = FALSE, se = se, alpha = alpha,
+                        separation = separation)
       hist <- rbind(hist, data.frame(stage = "confirm", iter = cr, n = n_c,
                                      alpha = pwc$alpha,
                                      power = pwc$power, mcse = pwc$mcse))
-      best <- list(n = n_c, power = pwc$power, mcse = pwc$mcse)
+      best <- list(n = n_c, power = pwc$power, mcse = pwc$mcse,
+                   separated = pwc$separated, min_cell = pwc$min_cell)
       if (pwc$power >= power - max(0.005, 1.5 * pwc$mcse)) {
         confirmed <- TRUE
         break
@@ -227,6 +259,10 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   }
   if (best$n >= n_range[2])
     warning("Required n reached the n_range ceiling; treat the result as a lower bound.")
+  sparse_warning(list(separated = best$separated, min_cell = best$min_cell,
+                      separation = separation),
+                 where = sprintf("At the returned n = %d", best$n),
+                 aie = identical(dgp$estimand, "aie"))
   lv_b <- claim_levels(claim, alpha, conf, best$n)
   structure(list(n = best$n, power = best$power, mcse = best$mcse,
                  goal = power, claim = claim, sesoi = sesoi,
@@ -237,6 +273,8 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
                  confirm_requested = isTRUE(confirm),
                  confirmed = confirmed,
                  history = hist,
+                 se = se, separation = separation,
+                 separated = best$separated, min_cell = best$min_cell,
                  target = dgp$target_est, estimand = dgp$estimand %||% "ape",
                  model = dgp$model, dgp = dgp),
             class = "powerape_n")

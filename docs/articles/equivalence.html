@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -135,13 +135,13 @@ variance peaks at 0.5), so equivalence power inherits that dependence.
 <span><span class="co">#&gt; powerape robustness sweep -- equivalence claim, APE, pin = ape</span></span>
 <span><span class="co">#&gt;   n = 2600, nsim = 300 per scenario, 3 scenario(s) over: baseline</span></span>
 <span><span class="co">#&gt;   power range [0.703, 0.903]; worst scenario:</span></span>
-<span><span class="co">#&gt;  baseline implied_effect     power       mcse</span></span>
-<span><span class="co">#&gt;       0.5              0 0.7033333 0.02637269</span></span>
+<span><span class="co">#&gt;  baseline implied_effect     power       mcse separated</span></span>
+<span><span class="co">#&gt;       0.5              0 0.7033333 0.02637269         0</span></span>
 <span><span class="co">#&gt;   scenarios:</span></span>
-<span><span class="co">#&gt;  baseline implied_effect     power       mcse</span></span>
-<span><span class="co">#&gt;      0.20              0 0.9033333 0.01706089</span></span>
-<span><span class="co">#&gt;      0.35              0 0.7233333 0.02582778</span></span>
-<span><span class="co">#&gt;      0.50              0 0.7033333 0.02637269</span></span></code></pre></div>
+<span><span class="co">#&gt;  baseline implied_effect     power       mcse separated</span></span>
+<span><span class="co">#&gt;      0.20              0 0.9033333 0.01706089         0</span></span>
+<span><span class="co">#&gt;      0.35              0 0.7233333 0.02582778         0</span></span>
+<span><span class="co">#&gt;      0.50              0 0.7033333 0.02637269         0</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reporting">Reporting<a class="anchor" aria-label="anchor" href="#reporting"></a>
@@ -157,20 +157,22 @@ via <code>conf = 0.95</code>.</p>
 <span>                nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.10.0), following the</span></span>
+<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.11.0), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable treat (binary, prevalence</span></span>
-<span><span class="co">#&gt; 0.50); parametric covariates (age; Gaussian-copula dependence); baseline</span></span>
-<span><span class="co">#&gt; outcome rate 0.300 with the focal at reference; nuisance covariates</span></span>
-<span><span class="co">#&gt; contribute a latent pseudo-R-squared of 0.10. The assumed true APE was 0.000</span></span>
-<span><span class="co">#&gt; (0.0 percentage points). At a sample size of n = 2600, simulated power for</span></span>
-<span><span class="co">#&gt; the equivalence claim (the 90% confidence interval lying within +/-0.050; two</span></span>
-<span><span class="co">#&gt; one-sided tests at alpha = 5%) was 0.764 (Monte Carlo SE 0.019; 500</span></span>
-<span><span class="co">#&gt; replications). Across replications, the probability of concluding a</span></span>
-<span><span class="co">#&gt; meaningful effect was 0.000, of detection without meaningfulness 0.018, of an</span></span>
-<span><span class="co">#&gt; inconclusive result 0.218, and of equivalence 0.764. Estimation used maximum</span></span>
-<span><span class="co">#&gt; likelihood with delta-method Wald confidence intervals; replications that</span></span>
-<span><span class="co">#&gt; failed to converge (0.0%) counted against the claim.</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.50); parametric covariates age (continuous, mean 45, SD 12), with the focal</span></span>
+<span><span class="co">#&gt; variable and the covariates mutually independent; baseline outcome rate 0.300</span></span>
+<span><span class="co">#&gt; with the focal at reference; nuisance covariates contribute a latent</span></span>
+<span><span class="co">#&gt; pseudo-R-squared of 0.10. The assumed true APE was 0.000 (0.0 percentage</span></span>
+<span><span class="co">#&gt; points). At a sample size of n = 2600, simulated power for the equivalence</span></span>
+<span><span class="co">#&gt; claim (the 90% confidence interval lying within +/-0.050; two one-sided tests</span></span>
+<span><span class="co">#&gt; at alpha = 5%) was 0.764 (Monte Carlo SE 0.019; 500 replications). Across</span></span>
+<span><span class="co">#&gt; replications, the probability of concluding a meaningful effect was 0.000, of</span></span>
+<span><span class="co">#&gt; detection without meaningfulness 0.018, of an inconclusive result 0.218, and</span></span>
+<span><span class="co">#&gt; of equivalence 0.764. Estimation used maximum likelihood with delta-method</span></span>
+<span><span class="co">#&gt; Wald confidence intervals; replications without a maximum-likelihood</span></span>
+<span><span class="co">#&gt; estimate, from a failed fit or from separation (a focal cell with no events</span></span>
+<span><span class="co">#&gt; or no non-events), counted against the claim (0.0% of replications).</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

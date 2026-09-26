@@ -72,13 +72,13 @@ ape_robust(d, n = 2600, claim = "equivalence", sesoi = 0.05,
 #> powerape robustness sweep -- equivalence claim, APE, pin = ape
 #>   n = 2600, nsim = 300 per scenario, 3 scenario(s) over: baseline
 #>   power range [0.703, 0.903]; worst scenario:
-#>  baseline implied_effect     power       mcse
-#>       0.5              0 0.7033333 0.02637269
+#>  baseline implied_effect     power       mcse separated
+#>       0.5              0 0.7033333 0.02637269         0
 #>   scenarios:
-#>  baseline implied_effect     power       mcse
-#>      0.20              0 0.9033333 0.01706089
-#>      0.35              0 0.7233333 0.02582778
-#>      0.50              0 0.7033333 0.02637269
+#>  baseline implied_effect     power       mcse separated
+#>      0.20              0 0.9033333 0.01706089         0
+#>      0.35              0 0.7233333 0.02582778         0
+#>      0.50              0 0.7033333 0.02637269         0
 ```
 
 ## Reporting
@@ -96,18 +96,20 @@ pw <- ape_power(d, n = 2600, claim = "equivalence", sesoi = 0.05,
                 nsim = 500, seed = 5)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.10.0), following the
+#> (APE) of treat using the powerape package (version 1.11.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
-#> 0.50); parametric covariates (age; Gaussian-copula dependence); baseline
-#> outcome rate 0.300 with the focal at reference; nuisance covariates
-#> contribute a latent pseudo-R-squared of 0.10. The assumed true APE was 0.000
-#> (0.0 percentage points). At a sample size of n = 2600, simulated power for
-#> the equivalence claim (the 90% confidence interval lying within +/-0.050; two
-#> one-sided tests at alpha = 5%) was 0.764 (Monte Carlo SE 0.019; 500
-#> replications). Across replications, the probability of concluding a
-#> meaningful effect was 0.000, of detection without meaningfulness 0.018, of an
-#> inconclusive result 0.218, and of equivalence 0.764. Estimation used maximum
-#> likelihood with delta-method Wald confidence intervals; replications that
-#> failed to converge (0.0%) counted against the claim.
+#> 0.50); parametric covariates age (continuous, mean 45, SD 12), with the focal
+#> variable and the covariates mutually independent; baseline outcome rate 0.300
+#> with the focal at reference; nuisance covariates contribute a latent
+#> pseudo-R-squared of 0.10. The assumed true APE was 0.000 (0.0 percentage
+#> points). At a sample size of n = 2600, simulated power for the equivalence
+#> claim (the 90% confidence interval lying within +/-0.050; two one-sided tests
+#> at alpha = 5%) was 0.764 (Monte Carlo SE 0.019; 500 replications). Across
+#> replications, the probability of concluding a meaningful effect was 0.000, of
+#> detection without meaningfulness 0.018, of an inconclusive result 0.218, and
+#> of equivalence 0.764. Estimation used maximum likelihood with delta-method
+#> Wald confidence intervals; replications without a maximum-likelihood
+#> estimate, from a failed fit or from separation (a focal cell with no events
+#> or no non-events), counted against the claim (0.0% of replications).
 ```

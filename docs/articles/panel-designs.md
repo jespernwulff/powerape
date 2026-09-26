@@ -120,7 +120,7 @@ answers it with n still counted in units:
 ape_mde(d, n = 400, claim = "minimum", sesoi = 0.05,
         nsim = 400, seed = 9)
 #> powerape minimum detectable APE -- minimum claim
-#>   MDE = 0.1097 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.792, MCSE 0.010)
+#>   MDE = 0.1100 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.795, MCSE 0.010)
 #>   smallest effect demonstrably above sesoi 0.050
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.
 ```
@@ -173,13 +173,13 @@ ape_robust(d, n = 300, claim = "minimum", sesoi = 0.05,
 #> powerape robustness sweep -- minimum claim, APE, pin = ape
 #>   n = 300, nsim = 300 per scenario, 3 scenario(s) over: rho
 #>   power range [0.507, 0.630]; worst scenario:
-#>  rho implied_effect     power       mcse
-#>  0.3            0.1 0.5066667 0.02886495
+#>  rho implied_effect     power       mcse separated
+#>  0.3            0.1 0.5066667 0.02886495         0
 #>   scenarios:
-#>  rho implied_effect     power       mcse
-#>  0.1            0.1 0.6300000 0.02787472
-#>  0.3            0.1 0.5066667 0.02886495
-#>  0.5            0.1 0.5366667 0.02878979
+#>  rho implied_effect     power       mcse separated
+#>  0.1            0.1 0.6300000 0.02787472         0
+#>  0.3            0.1 0.5066667 0.02886495         0
+#>  0.5            0.1 0.5366667 0.02878979         0
 ```
 
 ## Unbalanced panels and attrition (Wooldridge, 2019)
@@ -227,13 +227,13 @@ ape_robust(da, n = 300, claim = "minimum", sesoi = 0.05,
 #> powerape robustness sweep -- minimum claim, APE, pin = ape
 #>   n = 300, nsim = 300 per scenario, 3 scenario(s) over: retention
 #>   power range [0.437, 0.617]; worst scenario:
-#>  retention implied_effect     power     mcse
-#>        0.7            0.1 0.4366667 0.028635
+#>  retention implied_effect     power     mcse separated
+#>        0.7            0.1 0.4366667 0.028635         0
 #>   scenarios:
-#>  retention implied_effect     power       mcse
-#>       0.70            0.1 0.4366667 0.02863500
-#>       0.85            0.1 0.5233333 0.02883606
-#>       1.00            0.1 0.6166667 0.02807068
+#>  retention implied_effect     power       mcse separated
+#>       0.70            0.1 0.4366667 0.02863500         0
+#>       0.85            0.1 0.5233333 0.02883606         0
+#>       1.00            0.1 0.6166667 0.02807068         0
 ```
 
 Two facts from the validation battery are worth knowing at the design

@@ -86,21 +86,24 @@ pw_rule
 #>   outcomes: minimum 0.790 | detect-only 0.210 | inconclusive 0.000 | equivalence 0.000 | failed 0.000
 power_statement(pw_rule)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of program using the powerape package (version 1.10.0), following the
+#> (APE) of program using the powerape package (version 1.11.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable program (binary, prevalence
-#> 0.50); parametric covariates (z; Gaussian-copula dependence); baseline
-#> outcome rate 0.300 with the focal at reference; nuisance covariates
-#> contribute a latent pseudo-R-squared of 0.10. The assumed true APE was 0.100
-#> (10.0 percentage points). At a sample size of n = 5000, simulated power for
-#> the minimum-effect claim (the 99.79% confidence interval's lower bound
-#> exceeding the smallest effect size of interest, 0.050; a one-sided test at
-#> alpha = 0.106%, set as a function of the sample size) was 0.790 (Monte Carlo
-#> SE 0.020; 400 replications). Across replications, the probability of
-#> concluding a meaningful effect was 0.790, of detection without meaningfulness
-#> 0.210, of an inconclusive result 0.000, and of equivalence 0.000. Estimation
-#> used maximum likelihood with delta-method Wald confidence intervals;
-#> replications that failed to converge (0.0%) counted against the claim.
+#> 0.50); parametric covariates z (continuous, mean 0, SD 1), with the focal
+#> variable and the covariates mutually independent; baseline outcome rate 0.300
+#> with the focal at reference; nuisance covariates contribute a latent
+#> pseudo-R-squared of 0.10. The assumed true APE was 0.100 (10.0 percentage
+#> points). At a sample size of n = 5000, simulated power for the minimum-effect
+#> claim (the 99.79% confidence interval's lower bound exceeding the smallest
+#> effect size of interest, 0.050; a one-sided test at alpha = 0.106%, set as a
+#> function of the sample size) was 0.790 (Monte Carlo SE 0.020; 400
+#> replications). Across replications, the probability of concluding a
+#> meaningful effect was 0.790, of detection without meaningfulness 0.210, of an
+#> inconclusive result 0.000, and of equivalence 0.000. Estimation used maximum
+#> likelihood with delta-method Wald confidence intervals; replications without
+#> a maximum-likelihood estimate, from a failed fit or from separation (a focal
+#> cell with no events or no non-events), counted against the claim (0.0% of
+#> replications).
 ```
 
 ## Alpha from error costs
@@ -249,18 +252,19 @@ power_statement(ja4)
 #> and Type II error rate (Maier & Lakens, 2022; Mudge et al., 2012), weighting
 #> a Type I error 4 times a Type II error and taking prior odds of 1 for the
 #> planning value (APE = 0.100) against the claim boundary, using the powerape
-#> package (version 1.10.0). The assumed data-generating process was a probit
+#> package (version 1.11.0). The assumed data-generating process was a probit
 #> model with focal variable program (binary, prevalence 0.50); parametric
-#> covariates (z; Gaussian-copula dependence); baseline outcome rate 0.300 with
-#> the focal at reference; nuisance covariates contribute a latent
-#> pseudo-R-squared of 0.10. At n = 2000 the optimum within the conventional cap
-#> of alpha = 0.05 was alpha = 0.0290: simulated power 0.713 (Monte Carlo SE
-#> 0.014; 1000 replications), a Type II error rate of 0.287, and a weighted
-#> combined error rate of 0.0806 versus 0.0844 at alpha = 0.05; error rates
-#> between 0.0190 and 0.0460 are indistinguishable from the optimum at this
-#> precision. A verification simulation at the claim boundary (true APE = 0.050;
-#> 500 replications) gave a realized error rate of 0.0240 (Monte Carlo SE
-#> 0.0068) at the chosen alpha.
+#> covariates z (continuous, mean 0, SD 1), with the focal variable and the
+#> covariates mutually independent; baseline outcome rate 0.300 with the focal
+#> at reference; nuisance covariates contribute a latent pseudo-R-squared of
+#> 0.10. At n = 2000 the optimum within the conventional cap of alpha = 0.05 was
+#> alpha = 0.0290: simulated power 0.713 (Monte Carlo SE 0.014; 1000
+#> replications), a Type II error rate of 0.287, and a weighted combined error
+#> rate of 0.0806 versus 0.0844 at alpha = 0.05; error rates between 0.0190 and
+#> 0.0460 are indistinguishable from the optimum at this precision. A
+#> verification simulation at the claim boundary (true APE = 0.050; 500
+#> replications) gave a realized error rate of 0.0240 (Monte Carlo SE 0.0068) at
+#> the chosen alpha.
 ```
 
 The statement names the objective, the weights, the level, the flat

@@ -20,7 +20,9 @@ ape_robust(
   grid_points = 3,
   nmax = TRUE,
   nmax_power = 0.9,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  direction = NULL,
+  separation = c("fail", "keep")
 )
 }
 \arguments{
@@ -65,30 +67,43 @@ which always re-solves.}
 
 \item{mode}{\code{"power"} (default) reports power at the pinned effect per
 scenario; \code{"mde"} reports the \strong{minimum detectable effect} per
-scenario via \code{\link[=ape_mde]{ape_mde()}} -- the worst case is then the \emph{largest}
-MDE, answering "what is the smallest effect this design finds even
-under the least favorable contextual assumptions?".}
+scenario via \code{\link[=ape_mde]{ape_mde()}} -- the worst case is then the MDE largest
+in magnitude, answering "what is the smallest effect this design
+finds even under the least favorable contextual assumptions?".}
 
 \item{power}{Target power for MDE mode (default 0.80; unused in power
 mode).}
 
 \item{grid_points}{Grid size used to expand length-2 \code{vary} elements.}
 
-\item{nmax}{Run the n_max search in the worst scenario (default TRUE;
-power mode only).}
+\item{nmax}{Run the n_max search (default TRUE; power mode only).}
 
-\item{nmax_power}{Target power for the n_max search (default 0.90).}
+\item{nmax_power}{Target power for the n_max search (default 0.90, the
+default of \code{\link[=ape_n]{ape_n()}}).}
 
 \item{se}{Standard errors for the exogenous cross-sectional routes:
 \code{"model"} (default, expected-information ML) or \code{"robust"}
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
 stacked method-of-moments robust sandwich; \code{se} is ignored there.}
+
+\item{direction}{MDE mode only: \code{"positive"} or \code{"negative"} search
+direction, as in \code{\link[=ape_mde]{ape_mde()}}; default: the sign of the base DGP's
+pinned effect.}
+
+\item{separation}{How simulated studies with separation in an
+identifying cell are scored: \code{"fail"} (default; counted as failed, as
+the field's reference analysis refuses them) or \code{"keep"} (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.}
 }
 \value{
 A \code{powerape_robust} object: \code{scenarios} (inputs, implied effect,
-power, MCSE), the worst scenario, marginal mean power per input, and
-the n_max result.
+power, MCSE, share of simulated studies with separation), the worst
+scenario, marginal mean power per input, and the n_max result
+(\code{nmax}, the \code{\link[=ape_n]{ape_n()}} result in the scenario that sets it;
+\code{nmax_scenario}, that scenario's inputs; \code{nmax_candidates}, every
+scenario searched with its answer).
 }
 \description{
 Power computed from a single guess at the contextual inputs -- baseline
@@ -96,7 +111,7 @@ rate, nuisance signal, covariate dependence -- is fragile (Hancock &
 Feng, 2025). \code{ape_robust()} re-runs the power analysis over a scenario
 grid of those inputs and reports per-scenario power, the worst case, and
 (optionally) \code{n_max}: the sample size that reaches the target power in
-the worst scenario -- the insurance-premium n.
+every scenario -- the insurance-premium n.
 }
 \details{
 Two pinning modes (DESIGN.md section 3.3):
@@ -111,6 +126,18 @@ implied true effect drifts and is reported per scenario. Claim-boundary
 guards are relaxed here on purpose -- showing that a scenario collapses
 power is the point.
 }
+
+\strong{n_max.} The insurance-premium n is the largest requirement across
+scenarios. Power at the user's \code{n} cannot rank the scenarios for that
+purpose -- at a generous \code{n} every scenario's power is near 1 -- so the
+scenarios are ranked by a criterion that does not saturate: the
+normal-approximation requirement implied by each scenario's simulated
+standard error and its effect's distance from the claim boundary.
+\code{\link[=ape_n]{ape_n()}} then runs in the least favorable scenario and in any scenario
+within 5\% of it on that criterion (up to three), and \code{n_max} is the
+largest confirmed answer. When the implied effect of a feasible
+scenario sits on or beyond the claim boundary (possible with \code{pin = "coefficients"}), no n reaches the target there, and \code{n_max} is not
+reported.
 }
 \examples{
 \donttest{

@@ -199,12 +199,13 @@ ape_alpha <- function(x, cost = 1, prior = 1, error = c("minimize", "balance"),
     sgn <- if (x$target < 0) -1 else 1
     se_type <- if (x$dgp$route %in% c("panel", "iv")) "model" else (x$se %||% "model")
     sim <- sim_ci(d_b, x$n, ns, claim_levels(x$claim, a_star)$conf_claim, seed,
-                  se_type = se_type)
+                  se_type = se_type, separation = x$separation %||% "fail")
     ## summarize_sim() reads only the sign of its target argument; pass the
     ## hypothesized direction so the boundary world is scored the same way
     r <- summarize_sim(sim, sgn, x$claim, x$sesoi, ns, a_star)
     size_res <- list(size = r$power, mcse = sqrt(r$power * (1 - r$power) / ns),
-                     nsim = ns, truth = d_b$target_est, n_failed = r$n_failed)
+                     nsim = ns, truth = d_b$target_est, n_failed = r$n_failed,
+                     separated = r$separated)
   }
 
   structure(list(

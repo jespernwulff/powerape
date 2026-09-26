@@ -21,7 +21,7 @@ for the effect size you care about&quot; logic intact."><meta property="og:image
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,8 +82,9 @@ for the effect size you care about" logic intact.</p>
 
 
 <dt id="arg-focal">focal<a class="anchor" aria-label="anchor" href="#arg-focal"></a></dt>
-<dd><p>Name of the focal regressor: an untransformed numeric
-variable in the model (binary 0/1 or continuous).</p></dd>
+<dd><p>Name of the focal regressor's model-matrix column: a
+numeric variable in the model (binary 0/1 or continuous), or the single
+dummy column of a two-level factor or logical (e.g. <code>"treatTRUE"</code>).</p></dd>
 
 
 <dt id="arg-baseline">baseline<a class="anchor" aria-label="anchor" href="#arg-baseline"></a></dt>
@@ -101,11 +102,19 @@ power functions; <code><a href="ape_robust.html">ape_robust()</a></code> can var
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The pilot fit must be a binomial <code>glm</code> with a probit or logit link and a
-main-effects role for the focal variable (terms interacting with the
-focal variable are not supported here — use <code><a href="ape_dgp.html">ape_dgp()</a></code> + <code><a href="set_aie.html">set_aie()</a></code>
-for interaction designs). Nuisance-side interactions and transformed
-covariates are fine: they are just columns of the model matrix.</p>
+    <p>The pilot fit must be a binomial <code>glm</code> with a probit or logit link, no
+offset, and a main-effects role for the focal variable: the focal must
+enter the model through exactly one column of the model matrix, and its
+variable may appear in no other term – no interactions with it, no
+polynomial or other transformed copies of it (<code>I(dose^2)</code> next to
+<code>dose</code>, <code>log(dose)</code>, splines), because those columns would be held at
+their pilot values while the focal changes, so the pinned effect would
+not be the APE that <code>margins</code> or marginaleffects report for the same
+model. Such pilots are refused with an error (use <code><a href="ape_dgp.html">ape_dgp()</a></code> +
+<code><a href="set_aie.html">set_aie()</a></code> for interaction designs). Nuisance-side interactions and
+transformed covariates are fine: they are just columns of the model
+matrix. A precomputed column that is a function of the focal (a data
+column <code>dose_sq</code>) cannot be detected; leave such columns out.</p>
     </div>
 
     <div class="section level2">

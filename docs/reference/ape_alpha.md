@@ -154,15 +154,15 @@ power_statement(ja)
 #> and Type II error rate (Maier & Lakens, 2022; Mudge et al., 2012), weighting
 #> a Type I error 4 times a Type II error and taking prior odds of 1 for the
 #> planning value (APE = 0.100) against the claim boundary, using the powerape
-#> package (version 1.10.0). The assumed data-generating process was a probit
+#> package (version 1.11.0). The assumed data-generating process was a probit
 #> model with focal variable treat (binary, prevalence 0.50); parametric
-#> covariates (z; Gaussian-copula dependence); baseline outcome rate 0.300 with
-#> the focal at reference; nuisance covariates contribute a latent
-#> pseudo-R-squared of 0.10. At n = 2000 the optimum within the conventional cap
-#> of alpha = 0.05 was alpha = 0.0350: simulated power 0.736 (Monte Carlo SE
-#> 0.014; 1000 replications), a Type II error rate of 0.264, and a weighted
-#> combined error rate of 0.0808 versus 0.0828 at alpha = 0.05; error rates
-#> between 0.0255 and 0.0500 are indistinguishable from the optimum at this
-#> precision.
+#> covariates z (continuous, mean 0, SD 1), with the focal variable and the
+#> covariates mutually independent; baseline outcome rate 0.300 with the focal
+#> at reference; nuisance covariates contribute a latent pseudo-R-squared of
+#> 0.10. At n = 2000 the optimum within the conventional cap of alpha = 0.05 was
+#> alpha = 0.0350: simulated power 0.736 (Monte Carlo SE 0.014; 1000
+#> replications), a Type II error rate of 0.264, and a weighted combined error
+#> rate of 0.0808 versus 0.0828 at alpha = 0.05; error rates between 0.0255 and
+#> 0.0500 are indistinguishable from the optimum at this precision.
 # }
 ```

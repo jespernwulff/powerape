@@ -64,6 +64,37 @@ test_that("n_max runs in the worst scenario", {
   expect_lt(abs(rb$nmax$power - 0.80), 0.06)
 })
 
+test_that("n_max is the largest requirement even when every scenario saturates", {
+  ## at n = 4000 every baseline's power is ~1, so power cannot rank the
+  ## scenarios; 1.10.0 then solved n_max in grid row 1 (baseline .10, ~400)
+  ## instead of the true worst case (analytic totals 398/588/712/776/776)
+  d <- set_ape(ape_dgp("probit", focal = pa_var("t", "binary", p = 0.5),
+                       baseline = 0.30), 0.10)
+  rb <- ape_robust(d, n = 4000, claim = "detect",
+                   vary = list(baseline = c(0.1, 0.2, 0.3, 0.4, 0.5)),
+                   nsim = 300, seed = 9, nmax = TRUE, nmax_power = 0.80)
+  expect_true(all(rb$scenarios$power > 0.99))
+  expect_gte(rb$nmax_scenario$baseline, 0.4)
+  expect_gt(rb$nmax$n, 730)
+  expect_lt(rb$nmax$n, 830)
+  expect_gte(nrow(rb$nmax_candidates), 2L)        # near-ties are all searched
+  expect_equal(rb$nmax$n, max(rb$nmax_candidates$n))
+  expect_output(print(rb), "least favorable")
+})
+
+test_that("n_max is withheld when a scenario's effect crosses the claim boundary", {
+  ## pin = "coefficients": at baseline .05 the fixed coefficient implies an
+  ## APE of ~.035, below the .05 SESOI, so no n reaches the target there
+  d <- set_ape(ape_dgp("probit", focal = pa_var("t", "binary", p = 0.5),
+                       baseline = 0.30), 0.10)
+  expect_warning(
+    rb <- ape_robust(d, n = 2000, claim = "minimum", sesoi = 0.05,
+                     vary = list(baseline = c(0.05, 0.30)), pin = "coefficients",
+                     nsim = 100, seed = 1, nmax = TRUE),
+    "n_max not reported")
+  expect_null(rb$nmax)
+})
+
 test_that("ape_robust prices the sweep under the requested SEs", {
   d <- ape_dgp("probit", focal = pa_var("treat", "binary", p = 0.5),
                covariates = list(pa_var("z", "normal")),

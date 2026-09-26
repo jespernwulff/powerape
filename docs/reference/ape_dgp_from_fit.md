@@ -25,8 +25,9 @@ ape_dgp_from_fit(fit, focal, baseline = NULL)
 
 - focal:
 
-  Name of the focal regressor: an untransformed numeric variable in the
-  model (binary 0/1 or continuous).
+  Name of the focal regressor's model-matrix column: a numeric variable
+  in the model (binary 0/1 or continuous), or the single dummy column of
+  a two-level factor or logical (e.g. `"treatTRUE"`).
 
 - baseline:
 
@@ -45,13 +46,21 @@ can vary `baseline`.
 
 ## Details
 
-The pilot fit must be a binomial `glm` with a probit or logit link and a
-main-effects role for the focal variable (terms interacting with the
-focal variable are not supported here — use
+The pilot fit must be a binomial `glm` with a probit or logit link, no
+offset, and a main-effects role for the focal variable: the focal must
+enter the model through exactly one column of the model matrix, and its
+variable may appear in no other term – no interactions with it, no
+polynomial or other transformed copies of it (`I(dose^2)` next to
+`dose`, `log(dose)`, splines), because those columns would be held at
+their pilot values while the focal changes, so the pinned effect would
+not be the APE that `margins` or marginaleffects report for the same
+model. Such pilots are refused with an error (use
 [`ape_dgp()`](https://jespernwulff.github.io/powerape/reference/ape_dgp.md) +
 [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md)
 for interaction designs). Nuisance-side interactions and transformed
-covariates are fine: they are just columns of the model matrix.
+covariates are fine: they are just columns of the model matrix. A
+precomputed column that is a function of the focal (a data column
+`dose_sq`) cannot be detected; leave such columns out.
 
 ## Examples
 

@@ -17,7 +17,8 @@ ape_n(
   max_iter = 5,
   confirm = TRUE,
   nsim_confirm = 4 * nsim,
-  se = c("model", "robust")
+  se = c("model", "robust"),
+  separation = c("fail", "keep")
 )
 }
 \arguments{
@@ -66,12 +67,20 @@ carries search-stage precision only.}
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
 stacked method-of-moments robust sandwich; \code{se} is ignored there.}
+
+\item{separation}{How simulated studies with separation in an
+identifying cell are scored: \code{"fail"} (default; counted as failed, as
+the field's reference analysis refuses them) or \code{"keep"} (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.}
 }
 \value{
 A \code{powerape_n} object: the required \code{n}, the confirmed (or, with
 \code{confirm = FALSE}, search-stage) power and MCSE at that \code{n}, the
 search history (\code{stage} column distinguishes search and confirmation
-rounds), and the embedded DGP.
+rounds), the standard-error type and separation convention used, the
+separation diagnostics of the final run (\code{separated}, \code{min_cell}; see
+\code{\link[=ape_power]{ape_power()}}), and the embedded DGP.
 }
 \description{
 Search plus confirmation. A pilot run estimates the SE scale

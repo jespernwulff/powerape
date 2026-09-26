@@ -14,7 +14,8 @@ ape_power(
   nsim = 1000,
   seed = NULL,
   se = c("model", "robust"),
-  keep_draws = TRUE
+  keep_draws = TRUE,
+  separation = c("fail", "keep")
 )
 }
 \arguments{
@@ -57,11 +58,20 @@ stacked method-of-moments robust sandwich; \code{se} is ignored there.}
 and convergence flags in the result (default TRUE; a few kilobytes).
 They let \code{\link[=power_at]{power_at()}} and \code{\link[=ape_alpha]{ape_alpha()}} re-evaluate the claim at any
 error rate without simulating again.}
+
+\item{separation}{How simulated studies with separation in an
+identifying cell are scored: \code{"fail"} (default; counted as failed, as
+the field's reference analysis refuses them) or \code{"keep"} (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.}
 }
 \value{
 A \code{powerape_power} object: power, Monte Carlo standard error,
 outcome distribution, the failed-fit count (failures count against
-power, conservatively), the error rate used (\code{alpha}, and
+power, conservatively), the share of simulated studies with separation
+(\code{separated}) and the average smallest identifying-cell count of
+events or non-events (\code{min_cell}, \code{NA} without binary cells), the
+separation convention used, the error rate used (\code{alpha}, and
 \code{alpha_rule} when it came from a sample-size rule), the stored draws,
 and the embedded DGP spec for reproducibility and
 \code{\link[=power_statement]{power_statement()}}.
@@ -92,6 +102,30 @@ described in \code{vignette("justified-alpha")}: a sample-size rule passed
 as \code{alpha}, and \code{\link[=ape_alpha]{ape_alpha()}} for the error-cost optimum of Maier and
 Lakens (2022), computed from this function's stored draws.
 }
+\section{Separation and sparse cells}{
+
+With rare outcomes, small samples, or a small treated group, a simulated
+study can contain a cell that identifies the effect -- a level of a
+binary focal variable, or for AIE designs a focal-by-moderator cell --
+with no events or no non-events. The maximum-likelihood effect does not
+exist there (quasi-complete separation): Stata's \code{probit}/\code{logit} drop
+the perfect predictor and \code{margins} reports the effect as not
+estimable, whereas R's \code{glm()} stops silently at a large finite
+coefficient whose delta-method standard error collapses to the other
+cell's binomial SE, so the replication usually counts as a detection.
+By default (\code{separation = "fail"}) such replications count as failed,
+against every claim, like any other replication without a usable
+estimate; \code{separation = "keep"} retains them with their degenerate Wald
+intervals (the R \code{glm()} + marginaleffects analysis, and Stata's \code{asis}
+option; the behavior before powerape 1.11.0). Either way the share is
+reported (\code{separated}), and the function warns when it exceeds 1\%, or
+when the smallest identifying cell averages fewer than 10 events (or
+non-events) per simulated study: there the Wald test's one-sided error
+rates can run up to about twice their nominal level in the direction in
+which the sparse cell has the lower rate, and score, Fisher, or Firth
+analyses have different power than the Wald analysis powered here.
+}
+
 \examples{
 \donttest{
 d <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5), baseline = 0.30)

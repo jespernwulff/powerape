@@ -92,6 +92,58 @@ test_that("IV-route MDE inverts the Design E anchor", {
   expect_lt(abs(m$mde - 0.10), 0.02)
 })
 
+test_that("ape_mde follows the pinned direction and obeys the outcome-flip identity", {
+  ## y -> 1 - y maps the world (baseline b, gamma, APE -t) exactly onto
+  ## (1 - b, -gamma, +t) (probit symmetry; rbinom's inversion couples the
+  ## draws), so the decrease MDE of one world is minus the increase MDE of
+  ## the other -- a relation 1.10.0 violated by always searching increases
+  dA <- ape_dgp("probit", focal = pa_var("t", "binary", p = 0.5),
+                covariates = list(pa_var("z", "normal")), baseline = 0.08,
+                gamma = 0.3)
+  dB <- ape_dgp("probit", focal = pa_var("t", "binary", p = 0.5),
+                covariates = list(pa_var("z", "normal")), baseline = 0.92,
+                gamma = -0.3)
+  mA <- ape_mde(set_ape(dA, -0.03), n = 3000, claim = "detect", nsim = 200,
+                seed = 5, confirm = FALSE)
+  mB <- ape_mde(set_ape(dB, 0.03), n = 3000, claim = "detect", nsim = 200,
+                seed = 5, confirm = FALSE)
+  expect_identical(mA$direction, "negative")
+  expect_identical(mB$direction, "positive")
+  expect_lt(mA$mde, 0)
+  expect_equal(mA$mde, -mB$mde, tolerance = 1e-8)
+  expect_equal(mA$dgp$target_est, mA$mde)
+  ## away from a .5 baseline the direction matters: at .08 a decrease is
+  ## easier to detect than an increase (two-proportion analytic: .0256 vs
+  ## .0300 at n = 3000)
+  mInc <- ape_mde(dA, n = 3000, claim = "detect", nsim = 200, seed = 5,
+                  confirm = FALSE)
+  expect_identical(mInc$direction, "positive")
+  expect_gt(mInc$mde, 1.08 * abs(mA$mde))
+  expect_lt(abs(abs(mA$mde) - 0.0256), 0.0015)
+  expect_output(print(mA), "decreases")
+  expect_match(unclass(power_statement(mA)), "a decrease of")
+  ## an explicit direction on an unpinned DGP
+  mD <- ape_mde(dA, n = 3000, claim = "detect", nsim = 200, seed = 5,
+                confirm = FALSE, direction = "negative")
+  expect_lt(mD$mde, 0)
+  expect_error(ape_mde(dA, n = 3000, claim = "detect", nsim = 50,
+                       direction = "down"), "arg")
+})
+
+test_that("ape_mde re-measures the SE at its proposal: no first-step bias at large n", {
+  ## at n = 10,000 the MDE (~.0175) is far below the reference effect of a
+  ## .10 baseline (.05), where the APE's SE is ~6% larger; an SE taken there
+  ## overshot the MDE by ~6% in 1.10.0, and a first candidate accepted
+  ## within the search tolerance is never trimmed afterwards
+  d <- ape_dgp("probit", focal = pa_var("t", "binary", p = 0.5), baseline = 0.10)
+  cf <- uniroot(function(dd) dd - (qnorm(0.975) + qnorm(0.8)) *
+                  sqrt(0.1 * 0.9 / 5000 + (0.1 + dd) * (0.9 - dd) / 5000),
+                c(0.001, 0.1))$root
+  m <- ape_mde(d, n = 10000, claim = "detect", nsim = 200, seed = 7,
+               confirm = FALSE)
+  expect_lt(abs(m$mde / cf - 1), 0.025)
+})
+
 test_that("MDE guards fire", {
   da <- ape_dgp(focal = pa_var("treat", "binary", p = 0.5),
                 moderator = pa_var("female", "binary", p = 0.55),

@@ -312,3 +312,19 @@ test_that("panel AIE statement and print compose", {
   expect_match(txt, "units observed over")
   expect_output(print(d), "moderator: public")
 })
+
+test_that("a continuous panel focal is centered in the simulated index", {
+  ## calibration and inversion work with the focal centered at its mean; the
+  ## outcome draw must too, so shifting the focal's location changes nothing
+  ## (1.10.0 simulated the raw focal, i.e. a different baseline and APE
+  ## whenever the mean was not 0)
+  mk <- function(mu) set_ape(ape_dgp_panel(
+    focal = pa_var("x", "normal", mean = mu, sd = 1.5, icc = 0.5),
+    covariates = list(pa_var("z", "normal", icc = 0.5)),
+    n_periods = 3, rho = 0.4, cre_share = 0.6,
+    baseline = 0.30, signal = 0.1, n_int = 4e4), 0.03)
+  p0 <- ape_power(mk(0), n = 200, claim = "detect", nsim = 40, seed = 4)
+  p3 <- ape_power(mk(3), n = 200, claim = "detect", nsim = 40, seed = 4)
+  expect_identical(p0$power, p3$power)
+  expect_lt(max(abs(p0$draws$est - p3$draws$est), na.rm = TRUE), 1e-6)
+})

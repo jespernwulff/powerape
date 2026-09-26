@@ -27,7 +27,7 @@ and AIE designs alike."><meta property="og:image" content="https://jespernwulff.
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,8 @@ and AIE designs alike.</p>
 <span>  max_iter <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  confirm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nsim_confirm <span class="op">=</span> <span class="fl">4</span> <span class="op">*</span> <span class="va">nsim</span>,</span>
-<span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span></span>
+<span>  se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"robust"</span><span class="op">)</span>,</span>
+<span>  separation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"keep"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -170,13 +171,23 @@ carries search-stage precision only.</p></dd>
 Panel designs always use unit-clustered SEs and IV designs the
 stacked method-of-moments robust sandwich; <code>se</code> is ignored there.</p></dd>
 
+
+<dt id="arg-separation">separation<a class="anchor" aria-label="anchor" href="#arg-separation"></a></dt>
+<dd><p>How simulated studies with separation in an
+identifying cell are scored: <code>"fail"</code> (default; counted as failed, as
+the field's reference analysis refuses them) or <code>"keep"</code> (retained with
+their degenerate Wald intervals). See the section 'Separation and
+sparse cells'.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>powerape_n</code> object: the required <code>n</code>, the confirmed (or, with
 <code>confirm = FALSE</code>, search-stage) power and MCSE at that <code>n</code>, the
 search history (<code>stage</code> column distinguishes search and confirmation
-rounds), and the embedded DGP.</p>
+rounds), the standard-error type and separation convention used, the
+separation diagnostics of the final run (<code>separated</code>, <code>min_cell</code>; see
+<code><a href="ape_power.html">ape_power()</a></code>), and the embedded DGP.</p>
     </div>
 
     <div class="section level2">

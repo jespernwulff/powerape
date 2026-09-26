@@ -163,3 +163,27 @@ test_that("IV print and statement compose", {
   expect_match(txt, "instrumented by subsidy")
   expect_match(txt, "stacked method-of-moments")
 })
+
+test_that("a continuous endogenous focal is centered in the simulated index", {
+  ## calibration and inversion work with the focal centered at its mean; the
+  ## outcome draw must too, so shifting the focal's location changes nothing
+  ## -- not the draws, not the estimates (1.10.0 simulated the raw focal and
+  ## so a different baseline and APE whenever the mean was not 0)
+  mk <- function(mu, mod = FALSE) {
+    d <- ape_dgp_iv(focal = pa_var("rd", "normal", mean = mu, sd = 1.5),
+                    moderator = if (mod) pa_var("m", "binary", p = 0.5),
+                    covariates = list(pa_var("z", "normal")),
+                    instruments = pa_var("s", "normal"),
+                    endogeneity = 0.3, iv_strength = 0.3,
+                    baseline = 0.30, signal = 0.1, n_int = 4e4)
+    if (mod) set_aie(d, 0.03, main_focal = 0.04, main_moderator = 0.05)
+    else set_ape(d, 0.05)
+  }
+  p0 <- ape_power(mk(0), n = 800, claim = "detect", nsim = 40, seed = 4)
+  p3 <- ape_power(mk(3), n = 800, claim = "detect", nsim = 40, seed = 4)
+  expect_identical(p0$power, p3$power)
+  expect_lt(max(abs(p0$draws$est - p3$draws$est), na.rm = TRUE), 1e-6)
+  a0 <- ape_power(mk(0, TRUE), n = 800, claim = "detect", nsim = 30, seed = 5)
+  a3 <- ape_power(mk(3, TRUE), n = 800, claim = "detect", nsim = 30, seed = 5)
+  expect_lt(max(abs(a0$draws$est - a3$draws$est), na.rm = TRUE), 1e-6)
+})
