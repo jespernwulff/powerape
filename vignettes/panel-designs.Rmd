@@ -188,13 +188,18 @@ ape_robust(da, n = 300, claim = "minimum", sesoi = 0.05,
            nsim = 300, seed = 5, nmax = FALSE)
 ```
 
-Two facts from the validation battery are worth knowing at the design
-stage. Power is monotone in retention, and the cost is material (in the
-battery's example, going from no attrition to 30% annual attrition
-costs about 13 points of power at fixed units). But a *mean-preserving*
-mixture of panel lengths showed no penalty against the balanced panel
-of the same average length -- the crude "unequal clusters hurt"
-discount is a guess too, and the simulation replaces it.
+Two facts are worth knowing at the design stage. The sweep above
+prices the first: the lower the retention, the lower the power, and the
+cost is material. The second is that unequal panel lengths cost power
+even when the average length is held fixed: a *mean-preserving*
+mixture of lengths inflates the clustered standard error by the design
+effect for unequal cluster sizes (Eldridge, Ashby & Kerry, 2006).
+The validation battery reproduces it:
+for a mixture of 2, 4, and 6 periods with mean 4, the standard error
+rises by a factor of about 1.02 to 1.03 against the balanced panel,
+worth one to two points of power in its examples. The simulation
+prices this automatically; a hand calculation from the average length
+alone would be slightly optimistic.
 
 ## Panel interactions: the AIE under CRE
 
@@ -251,8 +256,10 @@ matches the APE to all seven decimals with cohort dummies in the model)
 Stata's observed-Hessian bread; the clustered sandwich matches
 `sandwich::vcovCL`; unbalanced pure-RE panels anchor against `xtprobit`;
 the AIE reproduces `ginteff` on the identical
-fit; and the engine reduces to exact enumeration and to the Donner-Klar
-cluster design effect in the cases where those are available. Degenerate
+fit; and the engine reduces to exact enumeration, to the Donner-Klar
+cluster design effect, and, for unequal panel lengths, to the
+Eldridge-Ashby-Kerry design effect in the cases where those are
+available. Degenerate
 length mixtures reproduce the balanced route bit-identically. See the
 validation battery in the repository for the full dossier.
 
@@ -263,6 +270,10 @@ pairs, and time effects are on the roadmap).
 
 ## References
 
+* Eldridge, S. M., Ashby, D., & Kerry, S. (2006). Sample size for
+  cluster randomized trials: Effect of coefficient of variation of
+  cluster size and analysis method. *International Journal of
+  Epidemiology*, 35(5), 1292-1300.
 * Mundlak, Y. (1978). On the pooling of time series and cross section
   data. *Econometrica*, 46(1), 69-85.
 * Wooldridge, J. M. (2019). Correlated random effects models with

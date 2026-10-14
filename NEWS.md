@@ -1,3 +1,21 @@
+# powerape 1.11.1
+
+Documentation only; no code changed, so every result is identical to
+1.11.0.
+
+* **Unequal panel lengths do cost power.** The panel-designs vignette
+  and the 1.7.0 entry below said that a mean-preserving mixture of
+  panel lengths showed no penalty against a balanced panel of the same
+  average length. That was wrong: the comparison behind it (validation
+  battery V18, 2,000 replications per design, run under the pre-1.8.0
+  interval convention) could not resolve a penalty of one to two points.
+  The engine prices the design effect for unequal cluster sizes of
+  Eldridge, Ashby & Kerry (2006): under a mixture of 2, 4, and 6
+  periods with mean 4, its clustered standard error exceeds the
+  balanced panel's by a factor of 1.0282 against the formula's 1.0295
+  (battery V26, which replaces V18's comparison). The vignette now says
+  so, cites the formula, and names it among the validation anchors.
+
 # powerape 1.11.0
 
 Fixes from the September 2026 blindspot audit. Numbers from designs
@@ -221,8 +239,9 @@ regenerates bit for bit, apart from `ape_mde()` (fixed below).
   with the 0.12% clustered-SE gap reproduced to 4e-8 from the
   observed-information bread; an unbalanced `xtprobit` ASF anchor
   (|diff| .0012); consistency and 95% coverage; and content anchors
-  (power monotone in retention; no unequal-cluster penalty for a
-  mean-preserving length mixture at the tested settings).
+  (power monotone in retention; the absence of an unequal-cluster
+  penalty for a mean-preserving length mixture reported here was
+  wrong, see 1.11.1).
 
 # powerape 1.6.0
 
