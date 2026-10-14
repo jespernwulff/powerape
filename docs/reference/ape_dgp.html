@@ -19,7 +19,7 @@ units, by set_ape() (no moderator) or set_aie() (with moderator)."><meta propert
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,9 +119,16 @@ reproduce it.</p></dd>
 
 
 <dt id="arg-signal">signal<a class="anchor" aria-label="anchor" href="#arg-signal"></a></dt>
-<dd><p>Nuisance-signal strength: the McKelvey-Zavoina-style latent
-pseudo-R-squared of the nuisance index, i.e. <code>Var(z'gamma) / (Var(z'gamma) + 1)</code>. Equal standardized weights, scaled to hit
-<code>signal</code>. Ignored when <code>gamma</code> is supplied.</p></dd>
+<dd><p>Nuisance-signal strength: the share of the latent-index
+variance due to the nuisance covariates, <code>Var(z'gamma) / (Var(z'gamma) + 1)</code>, with the latent error variance fixed at 1 under
+both links. Under probit this is the covariates' McKelvey-Zavoina
+R-squared. Under logit the latent error variance is <code>pi^2/3</code>, so the
+same <code>signal</code> describes a weaker world: with <code>s2 = signal / (1 - signal)</code>, the covariates' McKelvey-Zavoina R-squared on the logistic
+scale is <code>s2 / (s2 + pi^2/3)</code> (0.033 at <code>signal = 0.10</code>, 0.115 at
+0.30). To match an R-squared <code>R2</code> read off a logit pilot, use
+<code>s2 = R2 * (pi^2/3) / (1 - R2)</code> and <code>signal = s2 / (1 + s2)</code>. Equal
+standardized weights, scaled to hit <code>signal</code>. Ignored when <code>gamma</code> is
+supplied.</p></dd>
 
 
 <dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>

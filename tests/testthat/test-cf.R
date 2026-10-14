@@ -71,7 +71,7 @@ test_that("CF probit and poisson first stages match cfprobit", {
   expect_equal(pa_se_cf(ep, fp$V_main), 0.0168097, tolerance = 1e-5)
 })
 
-test_that("CF fprobit matches cfprobit's fit; margins gap is Stata's remake bug", {
+test_that("CF fprobit matches cfprobit's fit; margins gap documents Stata's pre-fix remake bug", {
   fx <- cf_fixture
   X1 <- cbind(1, fx$x1, fx$z1)
   f <- powerape:::cf_fit(fx$y0f, fx$y2f, Z = cbind(fx$x1), X1 = X1,
@@ -83,9 +83,15 @@ test_that("CF fprobit matches cfprobit's fit; margins gap is Stata's remake bug"
   ## powerape's ASF uses the estimation-time generalized residuals
   e <- powerape:::cf_ape_est(f$theta, f$W, "normal", f$cf_col)
   expect_equal(e$ape, 0.1618274, tolerance = 1e-6)
-  ## Stata's margins (0.0438960) instead rebuilds the CF with the BINARY
-  ## branch of _remake_cfs -- lambda(q) for every y > 0 -- which is
-  ## inconsistent with its own estimator for fractional y. Attribution:
+  ## Stata's margins (0.0438960, Stata 18.5 on 2026-08-14) instead rebuilt
+  ## the CF with the BINARY branch of _remake_cfs -- lambda(q) for every
+  ## y > 0 -- inconsistent with its own estimator for fractional y. The
+  ## gap is historical: StataCorp confirmed the bug on 2026-08-28 and
+  ## fixed it in the 14 Oct 2026 update of StataNow 19.5 (whatsnew item
+  ## 9; _remake_cfs.ado 1.0.2 gains an fprobit branch), so an updated
+  ## Stata's margins returns the estimation-consistent ASF. The stored
+  ## 0.0438960 documents the pre-fix behaviour (stata-bug-report/
+  ## recheck-2026-10-14.md). Attribution of the pre-fix number:
   fs <- powerape:::cf_first(fx$y2f, X1, "fprobit")
   q <- drop(X1 %*% fs$pi)
   c_remake <- ifelse(fx$y2f > 0, dnorm(q) / pnorm(q), -dnorm(q) / pnorm(-q))

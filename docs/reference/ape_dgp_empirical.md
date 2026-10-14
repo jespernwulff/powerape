@@ -45,11 +45,13 @@ ape_dgp_empirical(
 
 - signal:
 
-  Nuisance-signal strength (latent pseudo-R-squared of the nuisance
-  index), as in
-  [`ape_dgp()`](https://jespernwulff.github.io/powerape/reference/ape_dgp.md);
-  equal weights on the standardized scale, scaled on the empirical rows.
-  Ignored when `gamma` is supplied.
+  Nuisance-signal strength, as in
+  [`ape_dgp()`](https://jespernwulff.github.io/powerape/reference/ape_dgp.md):
+  the covariates' share of the latent-index variance with the latent
+  error variance fixed at 1, which under logit is a weaker world than
+  under probit (see there for the conversion). Equal weights on the
+  standardized scale, scaled on the empirical rows. Ignored when `gamma`
+  is supplied.
 
 - gamma:
 

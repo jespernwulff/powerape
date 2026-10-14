@@ -52,7 +52,11 @@ d <- ape_dgp(
 The nuisance side is anchored on a friendly scale: the **baseline outcome
 rate** and the covariates' **latent pseudo-R-squared**. Explicit
 coefficients (`gamma`), pilot data (`ape_dgp_empirical()`), or a fitted
-pilot model (`ape_dgp_from_fit()`) are the expert routes.
+pilot model (`ape_dgp_from_fit()`) are the expert routes. The signal
+fixes the latent error variance at 1, which is exact for probit; under
+`model = "logit"`, whose latent error variance is pi^2/3, the same
+signal is a weaker world, and `?ape_dgp` gives the conversion from a
+logit pilot's McKelvey-Zavoina R-squared.
 
 ## Step 2: pin the true APE (the inversion step)
 

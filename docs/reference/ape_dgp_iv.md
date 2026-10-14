@@ -80,10 +80,18 @@ ape_dgp_iv(
 
 - signal:
 
-  Nuisance-signal strength: the McKelvey-Zavoina-style latent
-  pseudo-R-squared of the nuisance index, i.e.
-  `Var(z'gamma) / (Var(z'gamma) + 1)`. Equal standardized weights,
-  scaled to hit `signal`. Ignored when `gamma` is supplied.
+  Nuisance-signal strength: the share of the latent-index variance due
+  to the nuisance covariates, `Var(z'gamma) / (Var(z'gamma) + 1)`, with
+  the latent error variance fixed at 1 under both links. Under probit
+  this is the covariates' McKelvey-Zavoina R-squared. Under logit the
+  latent error variance is `pi^2/3`, so the same `signal` describes a
+  weaker world: with `s2 = signal / (1 - signal)`, the covariates'
+  McKelvey-Zavoina R-squared on the logistic scale is
+  `s2 / (s2 + pi^2/3)` (0.033 at `signal = 0.10`, 0.115 at 0.30). To
+  match an R-squared `R2` read off a logit pilot, use
+  `s2 = R2 * (pi^2/3) / (1 - R2)` and `signal = s2 / (1 + s2)`. Equal
+  standardized weights, scaled to hit `signal`. Ignored when `gamma` is
+  supplied.
 
 - n_int, seed_int:
 

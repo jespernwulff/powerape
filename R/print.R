@@ -44,8 +44,16 @@ print.powerape_dgp <- function(x, ...) {
   if (identical(x$builder, "from_fit"))
     cat(sprintf("  pilot model: %s (nuisance coefficients lifted; focal coefficient re-solved)\n",
                 x$formula_str))
-  cat(sprintf("  baseline P(Y=1 | reference) = %.3f, nuisance signal (latent pseudo-R2) = %.3f\n",
-              x$baseline, x$signal_implied))
+  ## the signal fixes the latent error variance at 1 under both links: for
+  ## logit, name the scale and add the logistic-scale McKelvey-Zavoina R2
+  sig <- if (identical(x$link, "logit") && isTRUE(x$s2 > 0)) {
+    sprintf(paste("nuisance signal = %.3f (latent index at unit error variance;",
+                  "McKelvey-Zavoina R2 on the logistic scale = %.3f)"),
+            x$signal_implied, mz_r2_logit(x$s2))
+  } else {
+    sprintf("nuisance signal (latent pseudo-R2) = %.3f", x$signal_implied)
+  }
+  cat(sprintf("  baseline P(Y=1 | reference) = %.3f, %s\n", x$baseline, sig))
   if (!is.null(x$target_est)) {
     if (identical(x$estimand, "aie")) {
       cat(sprintf("  true AIE pinned at %+.4f (beta_int = %.4f)\n",

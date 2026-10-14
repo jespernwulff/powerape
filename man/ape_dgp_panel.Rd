@@ -64,9 +64,16 @@ reference values (0 for binary, the mean for continuous), covariates
 at their population distribution. The intercept is calibrated to
 reproduce it.}
 
-\item{signal}{Nuisance-signal strength: the McKelvey-Zavoina-style latent
-pseudo-R-squared of the nuisance index, i.e. \verb{Var(z'gamma) / (Var(z'gamma) + 1)}. Equal standardized weights, scaled to hit
-\code{signal}. Ignored when \code{gamma} is supplied.}
+\item{signal}{Nuisance-signal strength: the share of the latent-index
+variance due to the nuisance covariates, \verb{Var(z'gamma) / (Var(z'gamma) + 1)}, with the latent error variance fixed at 1 under
+both links. Under probit this is the covariates' McKelvey-Zavoina
+R-squared. Under logit the latent error variance is \code{pi^2/3}, so the
+same \code{signal} describes a weaker world: with \code{s2 = signal / (1 - signal)}, the covariates' McKelvey-Zavoina R-squared on the logistic
+scale is \code{s2 / (s2 + pi^2/3)} (0.033 at \code{signal = 0.10}, 0.115 at
+0.30). To match an R-squared \code{R2} read off a logit pilot, use
+\code{s2 = R2 * (pi^2/3) / (1 - R2)} and \code{signal = s2 / (1 + s2)}. Equal
+standardized weights, scaled to hit \code{signal}. Ignored when \code{gamma} is
+supplied.}
 
 \item{n_int, seed_int}{Size (in \strong{units}, each contributing its drawn
 number of rows) and seed of the deterministic integration draw used

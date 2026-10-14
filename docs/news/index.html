@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,14 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.11.3" id="powerape-1113">powerape 1.11.3<a class="anchor" aria-label="anchor" href="#powerape-1113"></a></h2>
+<p>Wording and documentation only: no result changes, and every printed line of a probit world is unchanged.</p>
+<ul><li>
+<strong><code>signal</code> under logit.</strong> <code>signal</code> is the share of the latent-index variance due to the nuisance covariates with the latent error variance fixed at 1 under both links. Under probit that is the covariates’ McKelvey-Zavoina R-squared; under logit, whose latent error variance is pi^2/3, the same signal describes a weaker world (a McKelvey-Zavoina R-squared of 0.033 at <code>signal = 0.10</code>, 0.115 at 0.30). The documentation called it a latent pseudo-R-squared for both links, and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="../reference/power_statement.html">power_statement()</a></code> did the same. For logit worlds they now name the scale and add the logistic-scale McKelvey-Zavoina R-squared, which for an <code><a href="../reference/ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code> world built on a logit pilot is the value a fit statistic reports for that pilot. <code><a href="../reference/ape_dgp.html">?ape_dgp</a></code> gives the conversion from a logit pilot’s R-squared to <code>signal</code>, and the minimum-effect vignette points to it.</li>
+<li>
+<strong>Upstream note.</strong> The Stata <code>margins</code> inconsistency after <code>cfprobit</code> with a fractional-probit first stage (1.4.0 below; confirmed by StataCorp on 28 Aug 2026) was fixed in the 14 Oct 2026 update of StataNow 19.5 (whatsnew item 9); an updated Stata now agrees with the estimation-consistent generalized residuals powerape has always used. Nothing in powerape changes.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.11.2" id="powerape-1112">powerape 1.11.2<a class="anchor" aria-label="anchor" href="#powerape-1112"></a></h2>
 <ul><li>

@@ -90,3 +90,23 @@ test_that("power_statement states the dependence, marginals, and persistence it 
 test_that("power_statement rejects other objects", {
   expect_error(power_statement(42))
 })
+
+test_that("the signal is reported on its own scale under logit, unchanged under probit", {
+  ## the signal fixes the latent error variance at 1 under both links; the
+  ## logistic error variance is pi^2/3, so a logit world names its
+  ## logistic-scale McKelvey-Zavoina R-squared (s2 / (s2 + pi^2 / 3))
+  mk <- function(model) set_ape(ape_dgp(model, focal = pa_var("t", "binary", p = 0.5),
+                                        covariates = list(pa_var("z", "normal")),
+                                        baseline = 0.30, signal = 0.10), 0.10)
+  dp <- mk("probit"); dl <- mk("logit")
+  mz <- (1 / 9) / (1 / 9 + pi^2 / 3)                      # signal .10: s2 = 1/9
+  expect_equal(powerape:::mz_r2_logit(dl$s2), mz, tolerance = 1e-12)
+  expect_output(print(dp), "nuisance signal (latent pseudo-R2) = 0.100", fixed = TRUE)
+  expect_output(print(dl), "McKelvey-Zavoina R2 on the logistic scale = 0.033", fixed = TRUE)
+  st <- function(d) paste(unclass(power_statement(
+    ape_power(d, n = 300, claim = "detect", nsim = 20, seed = 1))), collapse = " ")
+  expect_match(st(dp), "contribute a latent pseudo-R-squared of 0.10", fixed = TRUE)
+  sl <- st(dl)
+  expect_match(sl, "a McKelvey-Zavoina R-squared of 0.033 on the logistic scale", fixed = TRUE)
+  expect_no_match(sl, "pseudo-R-squared", fixed = TRUE)
+})

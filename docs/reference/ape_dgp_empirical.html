@@ -17,7 +17,7 @@ exist (DESIGN.md section 3.1)."><meta property="og:image" content="https://jespe
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,9 +98,12 @@ continuous), covariates at their empirical distribution.</p></dd>
 
 
 <dt id="arg-signal">signal<a class="anchor" aria-label="anchor" href="#arg-signal"></a></dt>
-<dd><p>Nuisance-signal strength (latent pseudo-R-squared of the
-nuisance index), as in <code><a href="ape_dgp.html">ape_dgp()</a></code>; equal weights on the standardized
-scale, scaled on the empirical rows. Ignored when <code>gamma</code> is supplied.</p></dd>
+<dd><p>Nuisance-signal strength, as in <code><a href="ape_dgp.html">ape_dgp()</a></code>: the
+covariates' share of the latent-index variance with the latent error
+variance fixed at 1, which under logit is a weaker world than under
+probit (see there for the conversion). Equal weights on the
+standardized scale, scaled on the empirical rows. Ignored when <code>gamma</code>
+is supplied.</p></dd>
 
 
 <dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>

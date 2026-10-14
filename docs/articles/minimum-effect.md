@@ -45,7 +45,11 @@ coefficients (`gamma`), pilot data
 ([`ape_dgp_empirical()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_empirical.md)),
 or a fitted pilot model
 ([`ape_dgp_from_fit()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_from_fit.md))
-are the expert routes.
+are the expert routes. The signal fixes the latent error variance at 1,
+which is exact for probit; under `model = "logit"`, whose latent error
+variance is pi^2/3, the same signal is a weaker world, and
+[`?ape_dgp`](https://jespernwulff.github.io/powerape/reference/ape_dgp.md)
+gives the conversion from a logit pilot’s McKelvey-Zavoina R-squared.
 
 ## Step 2: pin the true APE (the inversion step)
 
@@ -176,7 +180,7 @@ pw <- ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05,
                 nsim = 500, seed = 5)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.11.2), following the
+#> (APE) of treat using the powerape package (version 1.11.3), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); parametric covariates age (continuous, mean 45, SD 12), female

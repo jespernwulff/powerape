@@ -26,9 +26,12 @@
 #' @param baseline Baseline outcome rate in (0, 1): the average `P(Y = 1)`
 #'   with the focal at its reference value (0 for binary, the mean for
 #'   continuous), covariates at their empirical distribution.
-#' @param signal Nuisance-signal strength (latent pseudo-R-squared of the
-#'   nuisance index), as in [ape_dgp()]; equal weights on the standardized
-#'   scale, scaled on the empirical rows. Ignored when `gamma` is supplied.
+#' @param signal Nuisance-signal strength, as in [ape_dgp()]: the
+#'   covariates' share of the latent-index variance with the latent error
+#'   variance fixed at 1, which under logit is a weaker world than under
+#'   probit (see there for the conversion). Equal weights on the
+#'   standardized scale, scaled on the empirical rows. Ignored when `gamma`
+#'   is supplied.
 #' @param gamma Optional explicit nuisance coefficients, one per covariate
 #'   column.
 #' @param seed_int Seed for the deterministic draw used only when a

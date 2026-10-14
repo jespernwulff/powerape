@@ -108,12 +108,20 @@ describe_dgp <- function(d) {
            else if (n_vars > 1L) paste0(", with ", over, " mutually independent")
            else "")
   }
-  sprintf(paste0("%s; %s; baseline outcome rate %.3f with the focal%s at ",
-                 "reference; nuisance covariates contribute a latent ",
-                 "pseudo-R-squared of %.2f"),
+  ## under logit the signal (latent error variance fixed at 1) overstates
+  ## what the covariates explain on the logistic scale: say both
+  sig <- if (identical(d$link, "logit") && isTRUE(d$s2 > 0)) {
+    sprintf(paste0("nuisance covariates contribute %.2f of the latent-index ",
+                   "variance at unit error variance (a McKelvey-Zavoina ",
+                   "R-squared of %.3f on the logistic scale)"),
+            d$signal_implied, mz_r2_logit(d$s2))
+  } else {
+    sprintf("nuisance covariates contribute a latent pseudo-R-squared of %.2f",
+            d$signal_implied)
+  }
+  sprintf("%s; %s; baseline outcome rate %.3f with the focal%s at reference; %s",
           parts, covs, d$baseline,
-          if (is.null(d$moderator)) "" else " and moderator",
-          d$signal_implied)
+          if (is.null(d$moderator)) "" else " and moderator", sig)
 }
 
 claim_text <- function(claim, sesoi, conf, rule = FALSE) {

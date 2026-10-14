@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -122,7 +122,11 @@ the effect is too small to matter.</li>
 <strong>latent pseudo-R-squared</strong>. Explicit coefficients
 (<code>gamma</code>), pilot data (<code><a href="../reference/ape_dgp_empirical.html">ape_dgp_empirical()</a></code>), or
 a fitted pilot model (<code><a href="../reference/ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code>) are the expert
-routes.</p>
+routes. The signal fixes the latent error variance at 1, which is exact
+for probit; under <code>model = "logit"</code>, whose latent error
+variance is pi^2/3, the same signal is a weaker world, and
+<code><a href="../reference/ape_dgp.html">?ape_dgp</a></code> gives the conversion from a logit pilot’s
+McKelvey-Zavoina R-squared.</p>
 </div>
 <div class="section level2">
 <h2 id="step-2-pin-the-true-ape-the-inversion-step">Step 2: pin the true APE (the inversion step)<a class="anchor" aria-label="anchor" href="#step-2-pin-the-true-ape-the-inversion-step"></a>
@@ -236,7 +240,7 @@ lets the implied effect drift.</p>
 <span>                nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.11.2), following the</span></span>
+<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.11.3), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable treat (binary, prevalence</span></span>
 <span><span class="co">#&gt; 0.50); parametric covariates age (continuous, mean 45, SD 12), female</span></span>

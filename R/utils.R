@@ -5,6 +5,13 @@ zcrit <- function(conf) qnorm(1 - (1 - conf) / 2)
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
+# McKelvey-Zavoina R-squared of a nuisance index with variance s2 on the
+# logistic scale (latent error variance pi^2/3). The `signal` convention
+# fixes the error variance at 1 under both links, so under logit the
+# covariates explain less than `signal` suggests; print() and
+# power_statement() report this value next to the signal for logit worlds.
+mz_r2_logit <- function(s2) s2 / (s2 + pi^2 / 3)
+
 # Distance to the claim boundary, in standard errors, at which a claim
 # reaches power `p` under the normal approximation: the inverse power map
 # the searches of ape_n() and ape_mde() step with. A one-sided claim

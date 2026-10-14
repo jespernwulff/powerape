@@ -1,3 +1,28 @@
+# powerape 1.11.3
+
+Wording and documentation only: no result changes, and every printed
+line of a probit world is unchanged.
+
+* **`signal` under logit.** `signal` is the share of the latent-index
+  variance due to the nuisance covariates with the latent error variance
+  fixed at 1 under both links. Under probit that is the covariates'
+  McKelvey-Zavoina R-squared; under logit, whose latent error variance is
+  pi^2/3, the same signal describes a weaker world (a McKelvey-Zavoina
+  R-squared of 0.033 at `signal = 0.10`, 0.115 at 0.30). The
+  documentation called it a latent pseudo-R-squared for both links, and
+  `print()` and `power_statement()` did the same. For logit worlds they
+  now name the scale and add the logistic-scale McKelvey-Zavoina
+  R-squared, which for an `ape_dgp_from_fit()` world built on a logit
+  pilot is the value a fit statistic reports for that pilot. `?ape_dgp`
+  gives the conversion from a logit pilot's R-squared to `signal`, and
+  the minimum-effect vignette points to it.
+* **Upstream note.** The Stata `margins` inconsistency after `cfprobit`
+  with a fractional-probit first stage (1.4.0 below; confirmed by
+  StataCorp on 28 Aug 2026) was fixed in the 14 Oct 2026 update of
+  StataNow 19.5 (whatsnew item 9); an updated Stata now agrees with the
+  estimation-consistent generalized residuals powerape has always used.
+  Nothing in powerape changes.
+
 # powerape 1.11.2
 
 * **The equivalence-claim searches now invert the two-bound power.**
