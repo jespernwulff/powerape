@@ -84,7 +84,8 @@ separation diagnostics of the final run (\code{separated}, \code{min_cell}; see
 }
 \description{
 Search plus confirmation. A pilot run estimates the SE scale
-(SE ~ c/sqrt(n)), a normal-approximation formula proposes n, and
+(SE ~ c/sqrt(n)), a normal-approximation formula proposes n (for the
+equivalence claim, the TOST power of both interval bounds), and
 simulation at the proposal verifies and adjusts until the estimated power
 is within Monte Carlo precision of the goal. By default a
 \strong{confirmation stage} then re-measures the candidate at \code{nsim_confirm}

@@ -46,6 +46,9 @@ repin <- function(dgp, target, mf = NULL, mm = NULL) {
 #' effect through the Bernoulli variances, so a standard error taken far
 #' from the answer would bias the first candidate (by 2-4% at large `n`
 #' from a 0.15 reference at a 0.30 baseline, more at rarer baselines).
+#' The equivalence margin leaves the world unchanged, so its pilot
+#' standard error stands, and its proposal inverts the TOST power of both
+#' interval bounds.
 #' By default the answer is then verified the way [ape_n()] verifies its
 #' n: a high-precision confirmation stage re-measures power at the
 #' candidate and pushes the effect outward (never inward) if it falls
@@ -145,7 +148,9 @@ ape_mde <- function(dgp, n, power = 0.80,
            call. = FALSE)
     t_abs <- abs(dgp$target_est)
     se_hat <- pilot_se(dgp, sd_(-1L))
-    d_i <- t_abs + se_hat * (z + zg)
+    ## the margin at which both interval bounds clear with the goal power
+    ## (TOST; req_margin, utils.R); the SE does not move with the margin
+    d_i <- req_margin(power, se_hat, t_abs, z)
     hist <- data.frame(stage = character(), iter = integer(),
                        value = numeric(), power = numeric(), mcse = numeric())
     best <- NULL
@@ -159,8 +164,9 @@ ape_mde <- function(dgp, n, power = 0.80,
                      separated = pw$separated, min_cell = pw$min_cell)
       if (abs(pw$power - power) <= max(0.01, 2 * pw$mcse)) break
       p_cl <- min(max(pw$power, 0.02), 0.998)
-      se_impl <- (d_i - t_abs) / max(z + qnorm(p_cl), 0.1)
-      d_i <- t_abs + se_impl * (z + zg)
+      se_impl <- (d_i - t_abs) /
+        max(req_delta(p_cl, z, (d_i + t_abs) / (d_i - t_abs)), 0.1)
+      d_i <- req_margin(power, se_impl, t_abs, z)
     }
     res <- finish_mde(dgp, n, best, hist, power, "equivalence", best$value,
                       conf, nsim, seed, confirm, nsim_confirm, se,
@@ -292,8 +298,16 @@ finish_mde <- function(dgp, n, best, hist, power, claim, sesoi, conf, nsim,
       }
       if (cr == 3L) break
       p_cl <- min(max(pwc$power, 0.02), 0.998)
-      se_impl <- (abs(v_c) - anchor) / max(z + qnorm(p_cl), 0.1)
-      v_c <- sgn * (anchor + se_impl * (z + zg))
+      if (is_margin) {
+        ## TOST inverse (both bounds); confirmed power below the goal puts
+        ## the new margin outside the old one
+        se_impl <- (v_c - anchor) /
+          max(req_delta(p_cl, z, (v_c + anchor) / (v_c - anchor)), 0.1)
+        v_c <- req_margin(power, se_impl, anchor, z)
+      } else {
+        se_impl <- (abs(v_c) - anchor) / max(z + qnorm(p_cl), 0.1)
+        v_c <- sgn * (anchor + se_impl * (z + zg))
+      }
     }
   }
 

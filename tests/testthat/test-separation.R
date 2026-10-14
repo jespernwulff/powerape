@@ -128,3 +128,53 @@ test_that("fail requires the larger n in a rare, unbalanced design", {
   expect_identical(nf$separation, "fail")
   expect_true(is.finite(nf$separated))
 })
+
+test_that("the AIE cell check reads all four focal-by-moderator cells (standard and IV routes)", {
+  ## replay the engine's draws by hand (fits consume no random numbers) and
+  ## compare the reported min_cell with the four-cell minimum. This guards
+  ## the sparse-cell caveat the article's Table 5 prints only when the
+  ## min_cell < 10 warning fires (paper/make-T5-policies.py); a call that
+  ## dropped the moderator cells survived the suite before this test
+  ## (validation-gaps review, 2026-10-14).
+  cell_min <- function(y, g) {
+    nn <- tabulate(g + 1L, nbins = 4L)
+    ev <- tabulate(g[y == 1] + 1L, nbins = 4L)
+    keep <- nn > 0L
+    min(pmin(ev, nn - ev)[keep])
+  }
+  da <- set_aie(ape_dgp("probit", focal = pa_var("t", "binary", p = 0.5),
+                        moderator = pa_var("m", "binary", p = 0.2),
+                        baseline = 0.03, n_int = 2e4),
+                0.02, main_focal = 0.01, main_moderator = 0.01)
+  nsim <- 40
+  s <- powerape:::sim_ci(da, 400, nsim, 0.95, seed = 6, separation = "keep")
+  bt <- powerape:::beta_true(da)
+  set.seed(6)
+  four <- arms <- numeric(nsim)
+  for (r in seq_len(nsim)) {
+    xx <- powerape:::draw_x(da, 400)
+    y <- rbinom(400, 1L, da$G(drop(xx$X %*% bt)))
+    four[r] <- cell_min(y, 2L * as.integer(xx$X[, 2L]) + as.integer(xx$X[, 3L]))
+    arms[r] <- cell_min(y, as.integer(xx$X[, 2L]))
+  }
+  expect_equal(s$min_cell, four)
+  ## the moderator cells bind (otherwise the comparison could not tell them apart)
+  expect_true(any(four < arms))
+
+  di <- set_aie(ape_dgp_iv(focal = pa_var("t", "binary", p = 0.4),
+                           moderator = pa_var("m", "binary", p = 0.2),
+                           instruments = pa_var("z", "binary", p = 0.5),
+                           endogeneity = 0.4, iv_strength = 0.25,
+                           baseline = 0.05, n_int = 2e4, seed_int = 4L),
+                0.03, main_focal = 0.03, main_moderator = 0.01)
+  si <- powerape:::sim_ci(di, 500, 20, 0.95, seed = 7, separation = "keep")
+  set.seed(7)
+  four_iv <- arms_iv <- numeric(20)
+  for (r in seq_len(20)) {
+    xx <- powerape:::draw_x(di, 500)
+    four_iv[r] <- cell_min(xx$y, 2L * as.integer(xx$d) + as.integer(xx$m))
+    arms_iv[r] <- cell_min(xx$y, as.integer(xx$d))
+  }
+  expect_equal(si$min_cell, four_iv)
+  expect_true(any(four_iv < arms_iv))
+})

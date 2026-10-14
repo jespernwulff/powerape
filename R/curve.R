@@ -107,7 +107,8 @@ plot.powerape_curve <- function(x, target_power = NULL, ...) {
 #' Required sample size for a target power
 #'
 #' Search plus confirmation. A pilot run estimates the SE scale
-#' (SE ~ c/sqrt(n)), a normal-approximation formula proposes n, and
+#' (SE ~ c/sqrt(n)), a normal-approximation formula proposes n (for the
+#' equivalence claim, the TOST power of both interval bounds), and
 #' simulation at the proposal verifies and adjusts until the estimated power
 #' is within Monte Carlo precision of the goal. By default a
 #' **confirmation stage** then re-measures the candidate at `nsim_confirm`
@@ -172,15 +173,19 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   ## the critical value belongs to the n it is evaluated at when `alpha` is
   ## a sample-size rule; otherwise it is the same at every n
   z_at <- function(n_eval) zcrit(claim_levels(claim, alpha, conf, n_eval)$conf_claim)
-  zg <- qnorm(power)
+  ## the equivalence claim must clear both bounds: the far one sits r_far
+  ## times as many SEs from the truth as the near one (req_delta, utils.R);
+  ## the one-sided claims step with z + qnorm(p) as before
+  r_far <- if (claim == "equivalence") (sesoi + t_abs) / dist else Inf
+  zg_at <- function(n_eval) req_delta(power, z_at(n_eval), r_far)
   newton_n <- function(n_from, p_hat) {
     p_cl <- min(max(p_hat, 0.02), 0.998)
-    denom <- max(z_at(n_from) + qnorm(p_cl), 0.1)
-    n_new <- ceiling(n_from * ((z_at(n_from) + zg) / denom)^2)
+    denom <- max(req_delta(p_cl, z_at(n_from), r_far), 0.1)
+    n_new <- ceiling(n_from * (zg_at(n_from) / denom)^2)
     if (rule) {
       ## fixed-point pass: the proposal's own alpha(n) sets its critical value
       for (k in seq_len(8L)) {
-        n_fp <- ceiling(n_from * ((z_at(max(n_new, 20L)) + zg) / denom)^2)
+        n_fp <- ceiling(n_from * (zg_at(max(n_new, 20L)) / denom)^2)
         if (n_fp == n_new) break
         n_new <- n_fp
       }
@@ -199,10 +204,10 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
          call. = FALSE)
   c_hat <- mean(ps$se[ps$ok]) * sqrt(n_pilot)
 
-  n_i <- ceiling((c_hat * (z_at(n_pilot) + zg) / dist)^2)
+  n_i <- ceiling((c_hat * zg_at(n_pilot) / dist)^2)
   if (rule) {
     for (k in seq_len(10L)) {
-      n_fp <- ceiling((c_hat * (z_at(max(n_i, 20L)) + zg) / dist)^2)
+      n_fp <- ceiling((c_hat * zg_at(max(n_i, 20L)) / dist)^2)
       if (n_fp == n_i) break
       n_i <- n_fp
     }

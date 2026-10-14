@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -289,13 +289,18 @@ the retention guess to price it:</p>
 <span><span class="co">#&gt;       0.70            0.1 0.4366667 0.02863500         0</span></span>
 <span><span class="co">#&gt;       0.85            0.1 0.5233333 0.02883606         0</span></span>
 <span><span class="co">#&gt;       1.00            0.1 0.6166667 0.02807068         0</span></span></code></pre></div>
-<p>Two facts from the validation battery are worth knowing at the design
-stage. Power is monotone in retention, and the cost is material (in the
-battery’s example, going from no attrition to 30% annual attrition costs
-about 13 points of power at fixed units). But a <em>mean-preserving</em>
-mixture of panel lengths showed no penalty against the balanced panel of
-the same average length – the crude “unequal clusters hurt” discount is
-a guess too, and the simulation replaces it.</p>
+<p>Two facts are worth knowing at the design stage. The sweep above
+prices the first: the lower the retention, the lower the power, and the
+cost is material. The second is that unequal panel lengths cost power
+even when the average length is held fixed: a <em>mean-preserving</em>
+mixture of lengths inflates the clustered standard error by the design
+effect for unequal cluster sizes (Eldridge, Ashby &amp; Kerry, 2006).
+The validation battery reproduces it: for a mixture of 2, 4, and 6
+periods with mean 4, the standard error rises by a factor of about 1.02
+to 1.03 against the balanced panel, worth one to two points of power in
+its examples. The simulation prices this automatically; a hand
+calculation from the average length alone would be slightly
+optimistic.</p>
 </div>
 <div class="section level2">
 <h2 id="panel-interactions-the-aie-under-cre">Panel interactions: the AIE under CRE<a class="anchor" aria-label="anchor" href="#panel-interactions-the-aie-under-cre"></a>
@@ -359,10 +364,11 @@ printed digits on fixed panels – balanced and unbalanced alike (the
 unbalanced check matches the APE to all seven decimals with cohort
 dummies in the model) – with the small clustered-SE difference fully
 attributed to Stata’s observed-Hessian bread; the clustered sandwich
-matches <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code>; unbalanced pure-RE panels anchor
+matches <code><a href="https://rdrr.io/pkg/sandwich/man/vcovCL.html" class="external-link">sandwich::vcovCL</a></code>; unbalanced pure-RE panels anchor
 against <code>xtprobit</code>; the AIE reproduces <code>ginteff</code>
-on the identical fit; and the engine reduces to exact enumeration and to
-the Donner-Klar cluster design effect in the cases where those are
+on the identical fit; and the engine reduces to exact enumeration, to
+the Donner-Klar cluster design effect, and, for unequal panel lengths,
+to the Eldridge-Ashby-Kerry design effect in the cases where those are
 available. Degenerate length mixtures reproduce the balanced route
 bit-identically. See the validation battery in the repository for the
 full dossier.</p>
@@ -375,6 +381,10 @@ pairs, and time effects are on the roadmap).</p>
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ul>
+<li>Eldridge, S. M., Ashby, D., &amp; Kerry, S. (2006). Sample size for
+cluster randomized trials: Effect of coefficient of variation of cluster
+size and analysis method. <em>International Journal of
+Epidemiology</em>, 35(5), 1292-1300.</li>
 <li>Mundlak, Y. (1978). On the pooling of time series and cross section
 data. <em>Econometrica</em>, 46(1), 69-85.</li>
 <li>Wooldridge, J. M. (2019). Correlated random effects models with

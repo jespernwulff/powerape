@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -110,9 +110,9 @@ bounds.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_n.html">ape_n</a></span><span class="op">(</span><span class="va">d</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"equivalence"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>      nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape required sample size -- equivalence claim</span></span>
-<span><span class="co">#&gt;   n = 2669 for 80% target power (confirmed 0.799, MCSE 0.009)</span></span>
+<span><span class="co">#&gt;   n = 2705 for 80% target power (confirmed 0.805, MCSE 0.009)</span></span>
 <span><span class="co">#&gt;   assumed true APE +0.0000, sesoi 0.050, 90% CI (alpha = 0.05), probit</span></span>
-<span><span class="co">#&gt;   search: 3 step(s); confirmed in 1 round(s) at nsim = 2000.</span></span></code></pre></div>
+<span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.</span></span></code></pre></div>
 <p>Equivalence needs the CI to be <em>narrow</em>, not just centered
 near zero, so sample sizes are driven entirely by the SESOI: halving the
 SESOI roughly quadruples the required n.</p>
@@ -157,7 +157,7 @@ via <code>conf = 0.95</code>.</p>
 <span>                nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.11.0), following the</span></span>
+<span><span class="co">#&gt; (APE) of treat using the powerape package (version 1.11.2), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable treat (binary, prevalence</span></span>
 <span><span class="co">#&gt; 0.50); parametric covariates age (continuous, mean 45, SD 12), with the focal</span></span>

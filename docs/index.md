@@ -170,7 +170,7 @@ own default alpha (every claim runs at alpha = .05 in its conventional
 form). Panel designs match Stata’s clustered `margins` (APE and AIE
 double difference) to all printed digits on fixed panels, the clustered
 sandwich matches
-[`sandwich::vcovCL`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html)
+[`sandwich::vcovCL`](https://rdrr.io/pkg/sandwich/man/vcovCL.html)
 exactly, and the engine reproduces the Donner-Klar cluster design
 effect. The control-function route reproduces Stata’s `cfprobit` across
 all four first-stage models — coefficients, stacked robust/clustered

@@ -48,3 +48,17 @@ test_that("logit inversion works too", {
   d <- set_ape(d, 0.10)
   expect_equal(true_ape(d), 0.10, tolerance = 1e-8)
 })
+
+test_that("the engine draw realizes a non-exchangeable correlation matrix column by column", {
+  ## every other test passes a scalar (exchangeable) correlation, under which
+  ## a permutation of the copula columns is invisible
+  R <- matrix(c(1, 0.5, 0, 0.5, 1, 0.3, 0, 0.3, 1), 3)   # (focal, z1, z2)
+  d <- set_ape(ape_dgp("probit", focal = pa_var("w", "normal"),
+                       covariates = list(pa_var("z1", "normal"),
+                                         pa_var("z2", "normal", mean = 1, sd = 2)),
+                       correlation = R, baseline = 0.30, signal = 0.15,
+                       n_int = 1e5), 0.05)
+  set.seed(5)
+  xx <- powerape:::draw_x(d, 2e5)
+  expect_lt(max(abs(cor(xx$X[, 2:4]) - R)), 0.01)
+})

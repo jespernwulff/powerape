@@ -1,5 +1,73 @@
 # Changelog
 
+## powerape 1.11.2
+
+- **The equivalence-claim searches now invert the two-bound power.**
+  `ape_n(claim = "equivalence")` and the equivalence margin of
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  stepped with the one-sided power map z + qnorm(p) that the detect and
+  minimum-effect claims use. The equivalence claim needs both interval
+  bounds inside the margin, so at a truth of 0 the first proposal landed
+  at about 72% of the requirement, the Newton steps oscillated (most
+  searches used all their iterations), and the answer overshot by about
+  2.4% on average. In roughly 3-5% of runs the exact power at the answer
+  fell more than the confirmation tolerance below the goal, against
+  0.1-0.4% for the other claims. The proposal, the Newton step, and the
+  confirmation push of both functions now invert the TOST power
+  pnorm(d - z) + pnorm(r d - z) - 1 of both bounds (r is the far bound’s
+  distance from the truth over the near one’s; at a truth of 0 this is
+  z + qnorm((1 + p) / 2)). Measured against exact power in the saturated
+  design (400 emulated runs each), the first proposal now sits within
+  0.1% of the exact requirement, searches take 1.1 steps on average, and
+  breaches fall to 0-0.2%, at truths of 0 and .01.
+  [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
+  inherits the fix through its equivalence `n_max` and its MDE mode. The
+  detect and minimum-effect claims are unchanged bit for bit (checked on
+  seeded
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md),
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  and
+  [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
+  calls, including a sample-size rule for alpha). The equivalence
+  vignette’s required n changes; no number in the companion article
+  comes from an equivalence search.
+- **New tests from a mutation pilot.** Six plausible one-line defects
+  passed the 1.11.1 suite. New tests close each gap:
+  - every analytic delta-method gradient (18 APE, AIE, and
+    control-function Jacobians, both links) equals its finite-difference
+    gradient;
+  - the AIE separation check reads all four focal-by-moderator cells on
+    the standard and IV routes, by replaying the engine’s draws;
+  - `se = "robust"` equals `sandwich::vcovHC(type = "HC0")`, and the
+    cluster sandwich equals `vcovCL`, to 1e-6 on a tightly converged
+    fit;
+  - the confirmation stage’s acceptance rule is tested with a mocked
+    `power_once()` on both sides of its tolerance;
+  - seeded calls leave the caller’s random-number stream untouched;
+  - the engine draw realizes a non-exchangeable correlation matrix
+    column by column.
+
+  New regression tests also check the equivalence searches against exact
+  power.
+
+## powerape 1.11.1
+
+Documentation only; no code changed, so every result is identical to
+1.11.0.
+
+- **Unequal panel lengths do cost power.** The panel-designs vignette
+  and the 1.7.0 entry below said that a mean-preserving mixture of panel
+  lengths showed no penalty against a balanced panel of the same average
+  length. That was wrong: the comparison behind it (validation battery
+  V18, 2,000 replications per design, run under the pre-1.8.0 interval
+  convention) could not resolve a penalty of one to two points. The
+  engine prices the design effect for unequal cluster sizes of Eldridge,
+  Ashby & Kerry (2006): under a mixture of 2, 4, and 6 periods with mean
+  4, its clustered standard error exceeds the balanced panel’s by a
+  factor of 1.0282 against the formula’s 1.0295 (battery V26, which
+  replaces V18’s comparison). The vignette now says so, cites the
+  formula, and names it among the validation anchors.
+
 ## powerape 1.11.0
 
 Fixes from the September 2026 blindspot audit. Numbers from designs
@@ -271,8 +339,8 @@ regenerates bit for bit, apart from
   clustered-SE gap reproduced to 4e-8 from the observed-information
   bread; an unbalanced `xtprobit` ASF anchor (\|diff\| .0012);
   consistency and 95% coverage; and content anchors (power monotone in
-  retention; no unequal-cluster penalty for a mean-preserving length
-  mixture at the tested settings).
+  retention; the absence of an unequal-cluster penalty for a
+  mean-preserving length mixture reported here was wrong, see 1.11.1).
 
 ## powerape 1.6.0
 
@@ -461,7 +529,7 @@ regenerates bit for bit, apart from
   observations.
 - Clustered delta-method inference: score-based cluster-robust sandwich
   matching R’s
-  [`sandwich::vcovCL`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html)
+  [`sandwich::vcovCL`](https://rdrr.io/pkg/sandwich/man/vcovCL.html)
   convention exactly (verified against marginaleffects with
   `vcov = ~id`); Stata’s `vce(cluster)` differs only by its
   observed-Hessian bread (~0.3% in the validation example, with the

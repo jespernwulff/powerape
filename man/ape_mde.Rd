@@ -118,6 +118,9 @@ before the search starts: the standard error of an APE moves with the
 effect through the Bernoulli variances, so a standard error taken far
 from the answer would bias the first candidate (by 2-4\% at large \code{n}
 from a 0.15 reference at a 0.30 baseline, more at rarer baselines).
+The equivalence margin leaves the world unchanged, so its pilot
+standard error stands, and its proposal inverts the TOST power of both
+interval bounds.
 By default the answer is then verified the way \code{\link[=ape_n]{ape_n()}} verifies its
 n: a high-precision confirmation stage re-measures power at the
 candidate and pushes the effect outward (never inward) if it falls

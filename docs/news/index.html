@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,28 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.11.2" id="powerape-1112">powerape 1.11.2<a class="anchor" aria-label="anchor" href="#powerape-1112"></a></h2>
+<ul><li>
+<strong>The equivalence-claim searches now invert the two-bound power.</strong> <code>ape_n(claim = "equivalence")</code> and the equivalence margin of <code><a href="../reference/ape_mde.html">ape_mde()</a></code> stepped with the one-sided power map z + qnorm(p) that the detect and minimum-effect claims use. The equivalence claim needs both interval bounds inside the margin, so at a truth of 0 the first proposal landed at about 72% of the requirement, the Newton steps oscillated (most searches used all their iterations), and the answer overshot by about 2.4% on average. In roughly 3-5% of runs the exact power at the answer fell more than the confirmation tolerance below the goal, against 0.1-0.4% for the other claims. The proposal, the Newton step, and the confirmation push of both functions now invert the TOST power pnorm(d - z) + pnorm(r d - z) - 1 of both bounds (r is the far bound’s distance from the truth over the near one’s; at a truth of 0 this is z + qnorm((1 + p) / 2)). Measured against exact power in the saturated design (400 emulated runs each), the first proposal now sits within 0.1% of the exact requirement, searches take 1.1 steps on average, and breaches fall to 0-0.2%, at truths of 0 and .01. <code><a href="../reference/ape_robust.html">ape_robust()</a></code> inherits the fix through its equivalence <code>n_max</code> and its MDE mode. The detect and minimum-effect claims are unchanged bit for bit (checked on seeded <code><a href="../reference/ape_n.html">ape_n()</a></code>, <code><a href="../reference/ape_mde.html">ape_mde()</a></code> and <code><a href="../reference/ape_robust.html">ape_robust()</a></code> calls, including a sample-size rule for alpha). The equivalence vignette’s required n changes; no number in the companion article comes from an equivalence search.</li>
+<li>
+<strong>New tests from a mutation pilot.</strong> Six plausible one-line defects passed the 1.11.1 suite. New tests close each gap:
+<ul><li>every analytic delta-method gradient (18 APE, AIE, and control-function Jacobians, both links) equals its finite-difference gradient;</li>
+<li>the AIE separation check reads all four focal-by-moderator cells on the standard and IV routes, by replaying the engine’s draws;</li>
+<li>
+<code>se = "robust"</code> equals <code>sandwich::vcovHC(type = "HC0")</code>, and the cluster sandwich equals <code>vcovCL</code>, to 1e-6 on a tightly converged fit;</li>
+<li>the confirmation stage’s acceptance rule is tested with a mocked <code>power_once()</code> on both sides of its tolerance;</li>
+<li>seeded calls leave the caller’s random-number stream untouched;</li>
+<li>the engine draw realizes a non-exchangeable correlation matrix column by column.</li>
+</ul>
+New regression tests also check the equivalence searches against exact power.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.11.1" id="powerape-1111">powerape 1.11.1<a class="anchor" aria-label="anchor" href="#powerape-1111"></a></h2>
+<p>Documentation only; no code changed, so every result is identical to 1.11.0.</p>
+<ul><li>
+<strong>Unequal panel lengths do cost power.</strong> The panel-designs vignette and the 1.7.0 entry below said that a mean-preserving mixture of panel lengths showed no penalty against a balanced panel of the same average length. That was wrong: the comparison behind it (validation battery V18, 2,000 replications per design, run under the pre-1.8.0 interval convention) could not resolve a penalty of one to two points. The engine prices the design effect for unequal cluster sizes of Eldridge, Ashby &amp; Kerry (2006): under a mixture of 2, 4, and 6 periods with mean 4, its clustered standard error exceeds the balanced panel’s by a factor of 1.0282 against the formula’s 1.0295 (battery V26, which replaces V18’s comparison). The vignette now says so, cites the formula, and names it among the validation anchors.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.11.0" id="powerape-1110">powerape 1.11.0<a class="anchor" aria-label="anchor" href="#powerape-1110"></a></h2>
 <p>Fixes from the September 2026 blindspot audit. Numbers from designs without rare outcomes, small focal groups, or the affected options are unchanged: every seeded result of the article’s worked designs regenerates bit for bit, apart from <code><a href="../reference/ape_mde.html">ape_mde()</a></code> (fixed below).</p>
@@ -95,7 +117,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.7.0" id="powerape-170">powerape 1.7.0<a class="anchor" aria-label="anchor" href="#powerape-170"></a></h2>
 <ul><li>
-<strong>Unbalanced panels</strong> (Wooldridge, 2019, J. Econometrics). <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> accepts a distribution over panel lengths: a vector <code>n_periods</code> with probabilities <code>p_periods</code> (equal weights by default), or a scalar <code>n_periods</code> with a per-wave <code>retention</code> rate for monotone attrition. Mundlak means are computed over each unit’s observed periods and the estimating model gains period-count cohort indicators (the Wooldridge 2019 workhorse); selection is completely at random by construction, <code>rho</code> is the length-mixture average of the latent unit-effect share, and sample sizes still count units. Degenerate mixtures (<code>retention = 1</code>, single support) short-circuit to the balanced code path, bit-identically. <code>retention</code> is sweepable in <code><a href="../reference/ape_robust.html">ape_robust()</a></code>. Validated as battery V18: balanced-reduction identity; Stata <code>probit i.d ... i.T, vce(cluster)</code> + <code>margins</code> agreement to ~5e-7 on coefficients and all seven decimals on the APE, with the 0.12% clustered-SE gap reproduced to 4e-8 from the observed-information bread; an unbalanced <code>xtprobit</code> ASF anchor (|diff| .0012); consistency and 95% coverage; and content anchors (power monotone in retention; no unequal-cluster penalty for a mean-preserving length mixture at the tested settings).</li>
+<strong>Unbalanced panels</strong> (Wooldridge, 2019, J. Econometrics). <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> accepts a distribution over panel lengths: a vector <code>n_periods</code> with probabilities <code>p_periods</code> (equal weights by default), or a scalar <code>n_periods</code> with a per-wave <code>retention</code> rate for monotone attrition. Mundlak means are computed over each unit’s observed periods and the estimating model gains period-count cohort indicators (the Wooldridge 2019 workhorse); selection is completely at random by construction, <code>rho</code> is the length-mixture average of the latent unit-effect share, and sample sizes still count units. Degenerate mixtures (<code>retention = 1</code>, single support) short-circuit to the balanced code path, bit-identically. <code>retention</code> is sweepable in <code><a href="../reference/ape_robust.html">ape_robust()</a></code>. Validated as battery V18: balanced-reduction identity; Stata <code>probit i.d ... i.T, vce(cluster)</code> + <code>margins</code> agreement to ~5e-7 on coefficients and all seven decimals on the APE, with the 0.12% clustered-SE gap reproduced to 4e-8 from the observed-information bread; an unbalanced <code>xtprobit</code> ASF anchor (|diff| .0012); consistency and 95% coverage; and content anchors (power monotone in retention; the absence of an unequal-cluster penalty for a mean-preserving length mixture reported here was wrong, see 1.11.1).</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.0" id="powerape-160">powerape 1.6.0<a class="anchor" aria-label="anchor" href="#powerape-160"></a></h2>
@@ -138,7 +160,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.2.0" id="powerape-120">powerape 1.2.0<a class="anchor" aria-label="anchor" href="#powerape-120"></a></h2>
 <ul><li>Panel designs: <code><a href="../reference/ape_dgp_panel.html">ape_dgp_panel()</a></code> specifies a correlated random effects (CRE) probit/logit world – Mundlak heterogeneity on observed unit means, latent unit-effect share <code>rho</code> (xtprobit convention), <code>cre_share</code> for the heterogeneity-regressor correlation, and per-variable within-unit persistence via <code>pa_var(..., icc =)</code> (icc = 1 gives unit-level, time-constant variables). Estimation in the engine is pooled probit/logit with Mundlak means and unit-clustered standard errors; the target remains the ASF-based APE, which the pooled CRE estimator recovers even though coefficients are attenuated. Sample-size arguments count <strong>units (clusters)</strong>; each contributes <code>n_periods</code> observations.</li>
-<li>Clustered delta-method inference: score-based cluster-robust sandwich matching R’s <code><a href="https://sandwich.R-Forge.R-project.org/reference/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> convention exactly (verified against marginaleffects with <code>vcov = ~id</code>); Stata’s <code>vce(cluster)</code> differs only by its observed-Hessian bread (~0.3% in the validation example, with the attribution reproduced to 7 decimals). A warning is issued below 30 clusters.</li>
+<li>Clustered delta-method inference: score-based cluster-robust sandwich matching R’s <code><a href="https://rdrr.io/pkg/sandwich/man/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> convention exactly (verified against marginaleffects with <code>vcov = ~id</code>); Stata’s <code>vce(cluster)</code> differs only by its observed-Hessian bread (~0.3% in the validation example, with the attribution reproduced to 7 decimals). A warning is issued below 30 clusters.</li>
 <li>Validation: exact-enumeration reduction (no-Mundlak case), the Donner-Klar cluster design-effect anchor, clustered-CI coverage, and the documented “Mundlak insurance premium” (at rho = 0 the CRE estimator is correctly less powerful than a cross-sectional analysis of the same information). Battery gains V8.</li>
 <li>Panel scope in this release: parametric route, balanced panels, no moderator (AIE) combination yet.</li>
 </ul></div>
