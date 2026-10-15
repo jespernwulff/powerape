@@ -1,4 +1,4 @@
-# powerape <img src="man/figures/logo.png" align="right" height="139" alt="powerape hex sticker: an ape above a rising power curve" />
+# powerape <img src="man/figures/logo.png" align="right" height="139" alt="powerape hex sticker: an ape hanging from a power curve above the 80% target line" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/jespernwulff/powerape/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jespernwulff/powerape/actions/workflows/R-CMD-check.yaml)
