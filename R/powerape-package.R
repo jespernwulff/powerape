@@ -6,7 +6,7 @@
 #' smallest-effect-size-of-interest (SESOI) powering via confidence-interval
 #' criteria for detection, minimum-effect, and equivalence claims
 #' (Riesthuis, 2024) and robustness sweeps over contextual assumptions
-#' (Hancock and Feng, 2025).
+#' (Hancock and Feng, 2026).
 #'
 #' @keywords internal
 #' @importFrom stats aggregate binomial dlogis dnorm glm.fit isoreg lm.fit plogis pnorm poisson qlogis qnorm rbinom rnorm rpois sd uniroot var

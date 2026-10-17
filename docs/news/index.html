@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,6 +63,16 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.11.4" id="powerape-1114">powerape 1.11.4<a class="anchor" aria-label="anchor" href="#powerape-1114"></a></h2>
+<p>Documentation only: no result moves. The one change in the code is the year in a warning message (below).</p>
+<ul><li>
+<strong>One website for R and Stata.</strong> The package website (<a href="https://jespernwulff.github.io/powerape/" class="uri">https://jespernwulff.github.io/powerape/</a>) now documents the R package and the Stata command of the same name (<a href="https://github.com/jespernwulff/powerape-stata" class="external-link uri">https://github.com/jespernwulff/powerape-stata</a>) side by side: Get started in R and in Stata, a worked example with five designs, the workflow vignettes with R and Stata code in tabs, a guide matching the R functions to the Stata subcommands, and how both implementations are validated. The tabs exist on the website only; the vignettes installed with the package render as before. The README links to the website and to the Stata command.</li>
+<li>
+<strong>Vignettes.</strong> <code><a href="../articles/minimum-effect.html">vignette("minimum-effect")</a></code> points to the Stata guide. <code><a href="../articles/iv-designs.html">vignette("iv-designs")</a></code> now says that the Stata <code>margins</code> inconsistency after <code>cfprobit</code> with a fractional first stage was fixed in the 14 Oct 2026 update of StataNow 19.5 (see the 1.11.3 upstream note); the vignette still described it as current.</li>
+<li>
+<strong>Citation.</strong> Hancock and Feng appeared in <em>Psychological Methods</em>, 31(1), 174-199, in 2026; it was cited as 2025. The year is corrected in the DESCRIPTION, <code><a href="../reference/powerape-package.html">?powerape</a></code>, <code><a href="../reference/ape_robust.html">?ape_robust</a></code>, the README, the minimum-effect vignette (which now gives volume and pages) and the warning that <code><a href="../reference/ape_dgp_empirical.html">ape_dgp_empirical()</a></code> and <code><a href="../reference/ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code> give for pilots with fewer than 500 rows.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.11.3" id="powerape-1113">powerape 1.11.3<a class="anchor" aria-label="anchor" href="#powerape-1113"></a></h2>
 <p>Wording and documentation only: no result changes, and every printed line of a probit world is unchanged.</p>

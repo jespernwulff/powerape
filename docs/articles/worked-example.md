@@ -1125,7 +1125,7 @@ sA <- ape_power(dA, n = nA_min$n, claim = "minimum", sesoi = 0.05,
                 nsim = 4000, seed = 20260821)
 power_statement(sA)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of program using the powerape package (version 1.11.3), following the
+#> (APE) of program using the powerape package (version 1.11.4), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable program (binary, prevalence
 #> 0.50); parametric covariates z (continuous, mean 0, SD 1), with the focal
@@ -1153,7 +1153,7 @@ powerape statement
 
 ``` stata-output
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of program using the powerape package for Stata (version 0.1.2 (Stata
+(APE) of program using the powerape package for Stata (version 0.1.3 (Stata
 port of powerape 1.11.3)), following the confidence-interval approach of
 Riesthuis (2024). The assumed data-generating process was a probit model with
 focal variable program (binary, prevalence 0.50); parametric covariates z
@@ -1175,8 +1175,8 @@ replications).
 
 ## Notes on reproducibility
 
-- The R output on this page comes from `powerape` 1.11.3, the Stata
-  output from the Stata command 0.1.2 (StataNow 19.5). Every call shows
+- The R output on this page comes from `powerape` 1.11.4, the Stata
+  output from the Stata command 0.1.3 (StataNow 19.5). Every call shows
   its seed and its number of replications, so with the same versions the
   R numbers reproduce exactly.
 - R and Stata draw different random numbers, so their numbers agree up
@@ -1191,7 +1191,7 @@ replications).
 - In Stata, the single power calls fit every simulated study with
   Stata’s own commands: `probit` (with `vce(cluster)` on the panel
   route) and `cfprobit` on the IV route. That is slower: the 4,000
-  simulated panels of Design D’s first power call took 14 minutes this
+  simulated panels of Design D’s first power call took 5 minutes this
   way, on a machine that was busy with other jobs. The searches and
   sweeps use the Mata engine, which follows the R package’s conventions
   and is 10 to 30 times faster; the two engines agree up to simulation

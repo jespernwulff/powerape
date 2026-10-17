@@ -1,6 +1,6 @@
-* Runs behind the home page: Design A of the paper (a support program that
-* raises firm survival from 30% by ten points and is worth its cost from five
-* points upward). Start from this folder (see _prelude.do).
+* Runs behind the home page: a support program that raises firm survival
+* from 30% by ten points and is worth its cost from five points upward.
+* Start from this folder (see _prelude.do).
 do "_prelude.do" home
 
 * >>> world

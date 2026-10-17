@@ -1,3 +1,30 @@
+# powerape 1.11.4
+
+Documentation only: no result moves. The one change in the code is the
+year in a warning message (below).
+
+* **One website for R and Stata.** The package website
+  (<https://jespernwulff.github.io/powerape/>) now documents the R package
+  and the Stata command of the same name
+  (<https://github.com/jespernwulff/powerape-stata>) side by side: Get
+  started in R and in Stata, a worked example with five designs, the
+  workflow vignettes with R and Stata code in tabs, a guide matching the R
+  functions to the Stata subcommands, and how both implementations are
+  validated. The tabs exist on the website only; the vignettes installed
+  with the package render as before. The README links to the website and
+  to the Stata command.
+* **Vignettes.** `vignette("minimum-effect")` points to the Stata guide.
+  `vignette("iv-designs")` now says that the Stata `margins`
+  inconsistency after `cfprobit` with a fractional first stage was fixed
+  in the 14 Oct 2026 update of StataNow 19.5 (see the 1.11.3 upstream
+  note); the vignette still described it as current.
+* **Citation.** Hancock and Feng appeared in *Psychological Methods*,
+  31(1), 174-199, in 2026; it was cited as 2025. The year is corrected in
+  the DESCRIPTION, `?powerape`, `?ape_robust`, the README, the
+  minimum-effect vignette (which now gives volume and pages) and the
+  warning that `ape_dgp_empirical()` and `ape_dgp_from_fit()` give for
+  pilots with fewer than 500 rows.
+
 # powerape 1.11.3
 
 Wording and documentation only: no result changes, and every printed

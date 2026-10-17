@@ -140,7 +140,7 @@ ape_dgp_from_fit <- function(fit, focal, baseline = NULL) {
   if (n_emp < 30L)
     stop("The pilot-model route needs at least 30 pilot rows.", call. = FALSE)
   if (n_emp < 500L)
-    warning("Fewer than 500 pilot rows: pilot sampling noise becomes part of the design (cf. Hancock & Feng, 2025).")
+    warning("Fewer than 500 pilot rows: pilot sampling noise becomes part of the design (cf. Hancock & Feng, 2026).")
 
   focal_var <- if (all(xd %in% c(0, 1))) {
     pa_var(focal, "binary", p = mean(xd))

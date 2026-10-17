@@ -185,7 +185,7 @@ powerape -- minimum-effect claim (CI lower bound > 0.050)
 
 . powerape statement
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of treat using the powerape package for Stata (version 0.1.2 (Stata port
+(APE) of treat using the powerape package for Stata (version 0.1.3 (Stata port
 of powerape 1.11.3)), following the confidence-interval approach of Riesthuis
 (2024). The assumed data-generating process was a probit model with focal
 variable treat (binary, prevalence 0.50); parametric covariates age

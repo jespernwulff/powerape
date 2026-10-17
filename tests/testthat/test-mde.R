@@ -43,8 +43,8 @@ test_that("panel MDE inverts the Design D anchor (units, not rows)", {
                       covariates = list(pa_var("size", "normal", icc = 0.6)),
                       n_periods = 4, rho = 0.30, cre_share = 0.50,
                       baseline = 0.30, signal = 0.10, n_int = 4e4)
-  ## 719 units reach ~80% minimum-claim power at target .10 (Section 5,
-  ## Design D), so the MDE at 719 units should return ~.10
+  ## 719 units reach ~80% minimum-claim power at target .10 (Design D),
+  ## so the MDE at 719 units should return ~.10
   m <- ape_mde(dp, n = 719, claim = "minimum", sesoi = 0.05, nsim = 500,
                seed = 41)
   expect_lt(abs(m$mde - 0.10), 0.015)
@@ -84,7 +84,7 @@ test_that("IV-route MDE inverts the Design E anchor", {
     endogeneity = 0.4, iv_strength = 0.2,
     baseline    = 0.30, signal = 0.10, n_int = 4e4, seed_int = 2L
   )
-  ## Section 5 Design E: n = 6,433 reaches ~80% detect power at target .10,
+  ## Design E: n = 6,433 reaches ~80% detect power at target .10,
   ## so the MDE at that n must come back near .10 (verified at high nsim
   ## with confirmation: 0.104)
   m <- ape_mde(de, n = 6433, claim = "detect", nsim = 300, seed = 81,

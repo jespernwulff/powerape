@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1436,7 +1436,7 @@ Stata
 <span>                nsim <span class="op">=</span> <span class="fl">4000</span>, seed <span class="op">=</span> <span class="fl">20260821</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">sA</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of program using the powerape package (version 1.11.3), following the</span></span>
+<span><span class="co">#&gt; (APE) of program using the powerape package (version 1.11.4), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable program (binary, prevalence</span></span>
 <span><span class="co">#&gt; 0.50); parametric covariates z (continuous, mean 0, SD 1), with the focal</span></span>
@@ -1460,7 +1460,7 @@ Stata
 <span id="cb57-3"><a href="#cb57-3" tabindex="-1"></a></span>
 <span id="cb57-4"><a href="#cb57-4" tabindex="-1"></a>powerape statement</span></code></pre></div>
 <pre class="stata-output"><code>We conducted a simulation-based power analysis for the average partial effect
-(APE) of program using the powerape package for Stata (version 0.1.2 (Stata
+(APE) of program using the powerape package for Stata (version 0.1.3 (Stata
 port of powerape 1.11.3)), following the confidence-interval approach of
 Riesthuis (2024). The assumed data-generating process was a probit model with
 focal variable program (binary, prevalence 0.50); parametric covariates z
@@ -1486,8 +1486,8 @@ replications).</code></pre>
 <h2 id="notes-on-reproducibility">Notes on reproducibility<a class="anchor" aria-label="anchor" href="#notes-on-reproducibility"></a>
 </h2>
 <ul>
-<li>The R output on this page comes from <code>powerape</code> 1.11.3,
-the Stata output from the Stata command 0.1.2 (StataNow 19.5). Every
+<li>The R output on this page comes from <code>powerape</code> 1.11.4,
+the Stata output from the Stata command 0.1.3 (StataNow 19.5). Every
 call shows its seed and its number of replications, so with the same
 versions the R numbers reproduce exactly.</li>
 <li>R and Stata draw different random numbers, so their numbers agree up
@@ -1503,8 +1503,8 @@ found a power of .82.</li>
 Stata’s own commands: <code>probit</code> (with
 <code>vce(cluster)</code> on the panel route) and <code>cfprobit</code>
 on the IV route. That is slower: the 4,000 simulated panels of Design
-D’s first power call took 14 minutes this way, on a machine that was
-busy with other jobs. The searches and sweeps use the Mata engine, which
+D’s first power call took 5 minutes this way, on a machine that was busy
+with other jobs. The searches and sweeps use the Mata engine, which
 follows the R package’s conventions and is 10 to 30 times faster; the
 two engines agree up to simulation error (see <a href="validation.html">How powerape is validated</a>).</li>
 <li>The Stata code uses the R code’s numbers of replications throughout,

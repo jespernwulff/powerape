@@ -1,4 +1,4 @@
-# Robust power / n_max mode (Hancock & Feng, 2025) -----------------------------
+# Robust power / n_max mode (Hancock & Feng, 2026) -----------------------------
 
 # Rebuild a DGP from its stored constructor spec with some inputs replaced.
 rebuild_dgp <- function(dgp, spec) {
@@ -22,7 +22,7 @@ claim_distance <- function(claim, t, sesoi) {
 #'
 #' Power computed from a single guess at the contextual inputs -- baseline
 #' rate, nuisance signal, covariate dependence -- is fragile (Hancock &
-#' Feng, 2025). `ape_robust()` re-runs the power analysis over a scenario
+#' Feng, 2026). `ape_robust()` re-runs the power analysis over a scenario
 #' grid of those inputs and reports per-scenario power, the worst case, and
 #' (optionally) `n_max`: the sample size that reaches the target power in
 #' every scenario -- the insurance-premium n.

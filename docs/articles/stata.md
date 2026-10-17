@@ -208,7 +208,7 @@ stage alone ran 2,000), so this call uses the Mata engine,
 `engine(mata)`, a self-contained port of the R package’s fitting routine
 that is many times faster than calling `probit`.
 [Engines](#engines-who-fits-the-simulated-studies) below explains the
-choice. The search took 13 seconds.
+choice. The search took 15 seconds.
 
 A power curve evaluates a list of sample sizes on the same footing.
 
@@ -315,7 +315,7 @@ powerape -- minimum-effect claim (CI lower bound > 0.050)
   outcomes: minimum 0.816 | detect-only 0.180 | inconclusive 0.004 | equivalence 0.000 | failed 0.000
 
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of treat using the powerape package for Stata (version 0.1.2 (Stata port
+(APE) of treat using the powerape package for Stata (version 0.1.3 (Stata port
 of powerape 1.11.3)), following the confidence-interval approach of Riesthuis
 (2024). The assumed data-generating process was a probit model with focal
 variable treat (binary, prevalence 0.50); parametric covariates age
@@ -368,7 +368,7 @@ The power is the same, 0.652. The outcome split differs by one study of
 500, because `probit` computes standard errors from the observed
 information and the Mata engine from the expected information, which
 moves an interval that sits right at a boundary. The Mata engine took
-1.5 seconds, `probit` 20.8. Use the Mata engine for searches, curves and
+1.9 seconds, `probit` 23.8. Use the Mata engine for searches, curves and
 sweeps, and confirm the final design with Stata’s estimator.
 
 `effects(margins)` goes one step further and computes every APE with
@@ -396,7 +396,7 @@ powerape -- minimum-effect claim (CI lower bound > 0.050)
   outcomes: minimum 0.720 | detect-only 0.260 | inconclusive 0.020 | equivalence 0.000 | failed 0.000
 ```
 
-It is also slower (8.9 against 3.0 seconds for these 100 replications),
+It is also slower (14.1 against 3.6 seconds for these 100 replications),
 so its use is as a check. `engine()` and
 [`effects()`](https://rdrr.io/r/stats/effects.html) given on one command
 apply to that command only; `powerape engine` shows and sets the

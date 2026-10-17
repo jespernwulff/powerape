@@ -1,3 +1,3 @@
 label	seconds
-n_ape	     44.0
-n_aie	    182.2
+n_ape	     19.1
+n_aie	     91.9

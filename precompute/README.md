@@ -42,11 +42,16 @@ vignettes as before.
 
    Everything an article quotes is written to `precompute/stata/output/`:
    the log (`<run>.txt`), key results (`<run>-results.txt`), timings and
-   graphs. Stata's own batch log, `<run>.log`, is not kept. `panel.do` takes
-   about half an hour (each panel world is calibrated by integration), and
-   so does `worked-example-d.do` or longer; the others take a few minutes
-   each. **Do not edit a do-file while it runs**: Stata reads do-files as it
-   goes.
+   graphs. Stata's own batch log, `<run>.log`, is not kept. Most runs take a
+   few minutes, `panel.do` included: version 0.1.3 of the Stata command
+   calibrates a panel world in seconds (under 0.1.2, `panel.do` took about
+   20 minutes). The worked example takes longest: `worked-example-e.do`
+   about half an hour, most of it the instrumented sample-size search;
+   `worked-example-d.do` about 20 minutes and `worked-example-a.do` about
+   10, most of it the `probit` fits of every simulated study in the single
+   power calls. These times are for four runs at a time on a four-core
+   machine. **Do not edit a do-file while it runs**: Stata reads do-files as
+   it goes.
 
    `worked-example-c.do` reads the 900 pilot rows that the worked example's
    R code draws from `design-c-pilot.csv` (Stata cannot draw R's random

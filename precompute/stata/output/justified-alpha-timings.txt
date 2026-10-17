@@ -1,6 +1,6 @@
 label	seconds
-default	     28.9
-rule_n	      3.7
-rule_power	     15.3
-costs	     30.7
-size	     15.6
+default	     40.6
+rule_n	      6.2
+rule_power	     22.0
+costs	     40.1
+size	     20.7

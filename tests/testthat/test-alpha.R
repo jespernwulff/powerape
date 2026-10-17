@@ -226,7 +226,7 @@ test_that("ape_alpha's boundary-size simulation works for AIE designs", {
 })
 
 test_that("alpha_frontier: closed-form identities, monotonicity, and guards", {
-  ## the paper's equation (uniroot twin), Cohen's 4:1 at 80% power
+  ## the frontier condition solved by uniroot, Cohen's 4:1 at 80% power
   g <- function(a) {
     z <- qnorm(1 - a / 2)
     4 - dnorm(qnorm(0.80)) / (2 * dnorm(z))

@@ -1,6 +1,6 @@
 label	seconds
-power	    851.2
-n_minimum	     75.3
-n_detect	     23.3
-robust	     66.3
-statement	    474.2
+power	    202.7
+n_minimum	     35.6
+n_detect	     14.2
+robust	     58.2
+statement	    218.2

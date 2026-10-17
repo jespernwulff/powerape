@@ -5,9 +5,8 @@
 * every simulated panel), the searches and the sweep the Mata engine. The
 * single power calls use 4,000 and 2,000 replications where the article's R
 * code uses 20,000 and 10,000: under -probit- each simulated panel takes
-* Stata far longer than R. Every panel world is calibrated by integration,
-* which is what makes this the longest run (see precompute/README.md). Start
-* from this folder (see _prelude.do).
+* Stata far longer than R, and those fits take most of this run's time (see
+* precompute/README.md). Start from this folder (see _prelude.do).
 do "_prelude.do" worked-example-d
 
 * >>> world

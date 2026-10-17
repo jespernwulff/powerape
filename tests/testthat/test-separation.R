@@ -132,10 +132,9 @@ test_that("fail requires the larger n in a rare, unbalanced design", {
 test_that("the AIE cell check reads all four focal-by-moderator cells (standard and IV routes)", {
   ## replay the engine's draws by hand (fits consume no random numbers) and
   ## compare the reported min_cell with the four-cell minimum. This guards
-  ## the sparse-cell caveat the article's Table 5 prints only when the
-  ## min_cell < 10 warning fires (paper/make-T5-policies.py); a call that
-  ## dropped the moderator cells survived the suite before this test
-  ## (validation-gaps review, 2026-10-14).
+  ## the min_cell < 10 sparse-cell warning; a call that dropped the
+  ## moderator cells survived the suite before this test (validation-gaps
+  ## review, 2026-10-14).
   cell_min <- function(y, g) {
     nn <- tabulate(g + 1L, nbins = 4L)
     ev <- tabulate(g[y == 1] + 1L, nbins = 4L)

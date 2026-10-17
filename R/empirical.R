@@ -65,7 +65,7 @@ ape_dgp_empirical <- function(model = c("probit", "logit"), data, focal,
   if (nrow(M) < 30L)
     stop("The empirical route needs at least 30 pilot rows.", call. = FALSE)
   if (nrow(M) < 500L)
-    warning("Fewer than 500 pilot rows: pilot sampling noise becomes part of the design (cf. Hancock & Feng, 2025).")
+    warning("Fewer than 500 pilot rows: pilot sampling noise becomes part of the design (cf. Hancock & Feng, 2026).")
 
   if (is.character(focal)) {
     stopifnot(length(focal) == 1L)

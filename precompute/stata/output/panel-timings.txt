@@ -1,7 +1,7 @@
 label	seconds
-power	     20.0
-mde	    243.5
-cs_power	     10.5
-rho	    313.8
-retention	    343.6
-aie_power	     11.7
+power	     36.9
+mde	     25.7
+cs_power	     16.8
+rho	     13.9
+retention	     14.3
+aie_power	     20.4

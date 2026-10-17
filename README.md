@@ -129,7 +129,7 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   returns the tightest establishable margin.
 - **Robustness sweeps** (`ape_robust()`): worst-case power and the
   insurance-premium sample size n_max over contextual assumptions, in the
-  spirit of Hancock & Feng (2025) — and `mode = "mde"` for the minimum
+  spirit of Hancock & Feng (2026) — and `mode = "mde"` for the minimum
   detectable effect under the least favorable assumptions.
 - **Justified error rates**: `alpha` may be a sample-size rule (a
   function of n, evaluated at every candidate n by `ape_n()` and
