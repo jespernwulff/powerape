@@ -1,0 +1,179 @@
+
+. 
+end of do-file
+
+. 
+. * >>> world
+. powerape dgp e, iv focal(training, binary p(0.4)) covariates((size, normal)) ///
+>     instruments((subsidy, binary p(0.5))) endogeneity(0.4) ivstrength(0.2)   ///
+>     baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40, first-stage strength = 0.20; 
+> control-function probit, stacked robust SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape e, target(0.10)
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40, first-stage strength = 0.20; 
+> control-function probit, stacked robust SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)
+
+. * <<<
+. 
+. * >>> exog-world
+. powerape dgp ex, focal(training, binary p(0.4)) covariates((size, normal))  ///
+>     baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape ex, target(0.10)
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)
+
+. * <<<
+. 
+. tic
+
+. * >>> exog-power
+. powerape power ex, n(1200) claim(detect) nsim(2000) seed(601)
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 1200, assumed true APE + 0.1000,     95% CI (alpha = .05), nsim = 2000
+  fit: probit via engine(stata), effects(closed)
+  power = 0.962 (MCSE 0.004)
+  outcomes: detect 0.962 | inconclusive 0.038 | failed 0.000
+
+. * <<<
+. keep_r exog_power
+
+. toc exog_power
+
+. 
+. tic
+
+. * >>> power
+. powerape power e, n(1200) claim(detect) nsim(2000) seed(602)
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 1200, assumed true APE + 0.1000,     95% CI (alpha = .05), nsim = 2000, stacked robust SEs
+  fit: cfprobit via engine(stata), effects(closed)
+  power = 0.215 (MCSE 0.009)
+  outcomes: detect 0.215 | inconclusive 0.784 | failed 0.000
+
+. * <<<
+. keep_r power
+
+. toc power
+
+. 
+. tic
+
+. * >>> n
+. powerape n e, power(0.80) claim(detect) nsim(2000) nsimconfirm(16000)      ///
+>     seed(603) engine(mata)
+powerape required sample size -- detect claim
+  n = 6750 for 80% target power (confirmed 0.803, MCSE 0.003)
+  assumed true APE + 0.1000, sesoi -,     95% CI (alpha =    .05), probit, stacked robust SEs
+  fit: Mata engine (Fisher scoring; control-function probit)
+  search: 2 step(s); confirmed in 2 round(s) at nsim = 16000.
+
+. * <<<
+. keep_r n
+
+. toc n
+
+. 
+. tic
+
+. * >>> exog-n
+. powerape n ex, power(0.80) claim(detect) nsim(1000) seed(606) engine(mata)
+powerape required sample size -- detect claim
+  n = 732 for 80% target power (confirmed 0.819, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 2 round(s) at nsim = 4000.
+
+. * <<<
+. keep_r exog_n
+
+. toc exog_n
+
+. 
+. tic
+
+. * >>> robust
+. powerape robust e, n(1200) claim(detect) vary(ivstrength(0.1 0.3))         ///
+>     gridpoints(3) nsim(800) seed(604) nonmax engine(mata)
+powerape robustness sweep -- detect claim, APE, pin = ape
+  n = 1200, nsim = 800 per scenario, 3 scenario(s) over: ivstrength
+  power range [0.138, 0.319]; worst scenario: row 1
+  fit: Mata engine (Fisher scoring; control-function probit)
+ row   ivstrength    implied_eff    power     mcse separated
+   1           .1         0.1000   0.1375   0.0122    0.0000
+   2           .2         0.1000   0.2238   0.0147    0.0000
+   3           .3         0.1000   0.3187   0.0165    0.0000
+
+. * <<<
+. keep_range robust
+
+. toc robust
+
+. 
+. * >>> aie-world
+. powerape dgp ei, iv focal(training, binary p(0.4))                         ///
+>     moderator(public, binary p(0.5)) covariates((size, normal))            ///
+>     instruments((subsidy, binary p(0.5))) endogeneity(0.4)                 ///
+>     ivstrength(0.25) baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  moderator: public (binary, p = 0.50) (focal-by-moderator interaction included)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40, first-stage strength = 0.25; 
+> control-function probit, stacked robust SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setaie ei, target(0.06) mainfocal(0.10) mainmoderator(0.05)
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  moderator: public (binary, p = 0.50) (focal-by-moderator interaction included)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40, first-stage strength = 0.25; 
+> control-function probit, stacked robust SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true AIE pinned at + 0.0600 (beta_int =    0.1469)
+  main APEs at reference: training  0.100 (beta =    0.2857), public  0.050 (beta =    0.1466)
+
+. * <<<
+. 
+. tic
+
+. * >>> aie-power
+. powerape power ei, n(2000) claim(detect) nsim(1000) seed(605)
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 2000, assumed true AIE + 0.0600,     95% CI (alpha = .05), nsim = 1000, stacked robust SEs
+  fit: cfprobit via engine(stata), effects(closed)
+  power = 0.104 (MCSE 0.010)
+  outcomes: detect 0.104 | inconclusive 0.896 | failed 0.000
+
+. * <<<
+. keep_r aie_power
+
+. toc aie_power
+
+. 
+. file close res
+
+. file close tim
+
+. log close pc

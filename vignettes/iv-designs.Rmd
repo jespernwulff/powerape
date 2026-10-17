@@ -10,6 +10,17 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
                       fig.width = 6, fig.height = 4)
+# On the website (pkgdown) the examples sit in R | Stata tabs, with the Stata
+# output read from precompute/stata/output/. The package vignette shows R only.
+if (identical(Sys.getenv("IN_PKGDOWN"), "true")) {
+  root <- normalizePath(getwd(), winslash = "/")
+  while (!file.exists(file.path(root, "DESCRIPTION")) && dirname(root) != root)
+    root <- dirname(root)
+  source(file.path(root, "precompute", "helpers.R"))
+} else {
+  tabs_r <- tabs_stata <- tabs_end <- function(...) ""
+  stata_show <- stata_figure <- function(...) invisible(NULL)
+}
 ```
 
 ## Why an IV module?
@@ -41,6 +52,8 @@ Two knobs carry the IV structure, and both are quantities you can defend:
   a binary focal) the instruments explain. This is the first-stage
   strength you would defend with an F statistic in the paper.
 
+`r tabs_r("world")`
+
 ```{r}
 library(powerape)
 
@@ -57,17 +70,37 @@ d <- set_ape(d, target = 0.10)
 d
 ```
 
+`r tabs_stata("world")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("iv", c("world", "pin"), output = "pin")
+```
+
+`r tabs_end()`
+
 A continuous focal (`pa_var("rd", "normal", ...)`) gets a linear first
 stage instead; the pinning step is identical.
 
 ## Step 2: power -- and the IV price
 
+`r tabs_r("power")`
+
 ```{r}
 ape_power(d, n = 1200, claim = "detect", nsim = 400, seed = 1)
 ```
 
+`r tabs_stata("power")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("iv", "power")
+```
+
+`r tabs_end()`
+
 Compare that with the same world *without* endogeneity, estimated by
 plain probit:
+
+`r tabs_r("exog")`
 
 ```{r}
 ds <- ape_dgp(
@@ -80,6 +113,14 @@ ds <- set_ape(ds, target = 0.10)
 ape_power(ds, n = 1200, claim = "detect", nsim = 400, seed = 2)
 ```
 
+`r tabs_stata("exog")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("iv", c("exog-world", "exog-power"), output = "exog-power")
+```
+
+`r tabs_end()`
+
 The gap is **the IV price**: the CF estimator identifies the effect from
 the instrumented variation only, so its standard error is larger by
 roughly `sqrt(1 / iv_strength)` -- the familiar 2SLS variance logic.
@@ -89,11 +130,21 @@ pair of calls prices that in advance.
 
 Since `endogeneity` and `iv_strength` are guesses, sweep them:
 
+`r tabs_r("robust")`
+
 ```{r}
 ape_robust(d, n = 1200, claim = "detect",
            vary = list(iv_strength = c(0.1, 0.3)), grid_points = 3,
            nsim = 300, seed = 3, nmax = FALSE)
 ```
+
+`r tabs_stata("robust")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("iv", "robust")
+```
+
+`r tabs_end()`
 
 ## Endogenous interactions
 
@@ -104,6 +155,8 @@ and the control-function-by-moderator interaction (Stata: `interact()` +
 `mainonly()`), and the first stage includes the moderator **and the
 instrument-by-moderator interactions** -- as instruments must in
 interaction models.
+
+`r tabs_r("aie")`
 
 ```{r}
 di <- ape_dgp_iv(
@@ -120,6 +173,14 @@ di <- set_aie(di, target = 0.06, main_focal = 0.10, main_moderator = 0.05)
 ape_power(di, n = 2000, claim = "detect", nsim = 250, seed = 4)
 ```
 
+`r tabs_stata("aie")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("iv", c("aie-world", "aie-power"), output = "aie-power")
+```
+
+`r tabs_end()`
+
 The interaction tax and the IV price compound. Interaction claims from
 instrumented designs need very large samples, and it is far better to
 learn that at the design stage than from a null result.
@@ -130,12 +191,14 @@ On fixed datasets, powerape's CF estimator reproduces Stata's `cfprobit`
 across first stages (linear, probit, fractional probit, Poisson):
 coefficients and stacked SEs to ~1e-7 (robust and clustered), and the
 `margins` ASF effects exactly, including the interaction design run with
-Stata's own syntax. One caveat we discovered in the process: for
-*fractional* first stages, Stata's `margins` rebuilds the control
-function with a binary-outcome formula that ignores the fractional value
--- an internal inconsistency with its own estimator, reproduced to 7
-decimals in our validation battery. powerape uses the
-estimation-consistent generalized residuals.
+Stata's own syntax. One caveat we discovered in the process: before the
+October 14, 2026 update of StataNow 19.5, Stata's `margins` rebuilt the
+control function for *fractional* first stages with a binary-outcome
+formula that ignores the fractional value -- an internal inconsistency
+with its own estimator, reproduced to 7 decimals in our validation
+battery and fixed by StataCorp in that update. powerape uses the
+estimation-consistent generalized residuals, as Stata's `margins` now
+does.
 
 Current scope: one endogenous focal variable; linear and probit first
 stages in the DGP route (fractional probit and Poisson are supported at

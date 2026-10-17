@@ -1,0 +1,6 @@
+label	seconds
+power	     23.4
+main_power	     15.4
+n	     29.0
+closed25	      0.9
+ginteff	      8.4

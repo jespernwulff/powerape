@@ -31,6 +31,9 @@ defend:
   a binary focal) the instruments explain. This is the first-stage
   strength you would defend with an F statistic in the paper.
 
+- R
+- Stata
+
 ``` r
 
 library(powerape)
@@ -54,10 +57,31 @@ d
 #>   true APE pinned at +0.1000 (beta_focal = 0.2857, implied P(Y=1 | focal=1) = 0.400)
 ```
 
+``` stata
+powerape dgp d, iv focal(training, binary p(0.4)) covariates((size, normal)) ///
+    instruments((subsidy, binary p(0.5))) endogeneity(0.4) ivstrength(0.2)   ///
+    baseline(0.30) signal(0.10)
+
+powerape setape d, target(0.10)
+```
+
+``` stata-output
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40,
+    first-stage strength = 0.20; control-function probit, stacked robust SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)
+```
+
 A continuous focal (`pa_var("rd", "normal", ...)`) gets a linear first
 stage instead; the pinning step is identical.
 
 ## Step 2: power – and the IV price
+
+- R
+- Stata
 
 ``` r
 
@@ -68,8 +92,23 @@ ape_power(d, n = 1200, claim = "detect", nsim = 400, seed = 1)
 #>   outcomes: detect 0.210 | inconclusive 0.790 | failed 0.000
 ```
 
+``` stata
+powerape power d, n(1200) claim(detect) nsim(400) seed(1)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 1200, assumed true APE + 0.1000,     95% CI (alpha = .05), nsim = 400, stacked robust SEs
+  fit: cfprobit via engine(stata), effects(closed)
+  power = 0.250 (MCSE 0.022)
+  outcomes: detect 0.250 | inconclusive 0.750 | failed 0.000
+```
+
 Compare that with the same world *without* endogeneity, estimated by
 plain probit:
+
+- R
+- Stata
 
 ``` r
 
@@ -87,6 +126,22 @@ ape_power(ds, n = 1200, claim = "detect", nsim = 400, seed = 2)
 #>   outcomes: detect 0.955 | inconclusive 0.045 | failed 0.000
 ```
 
+``` stata
+powerape dgp ds, focal(training, binary p(0.4)) covariates((size, normal)) ///
+    baseline(0.30) signal(0.10)
+powerape setape ds, target(0.10)
+
+powerape power ds, n(1200) claim(detect) nsim(400) seed(2)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 1200, assumed true APE + 0.1000,     95% CI (alpha = .05), nsim = 400
+  fit: probit via engine(stata), effects(closed)
+  power = 0.970 (MCSE 0.009)
+  outcomes: detect 0.970 | inconclusive 0.030 | failed 0.000
+```
+
 The gap is **the IV price**: the CF estimator identifies the effect from
 the instrumented variation only, so its standard error is larger by
 roughly `sqrt(1 / iv_strength)` – the familiar 2SLS variance logic.
@@ -95,6 +150,9 @@ switch to IV at review time are, mechanically, badly underpowered. This
 pair of calls prices that in advance.
 
 Since `endogeneity` and `iv_strength` are guesses, sweep them:
+
+- R
+- Stata
 
 ``` r
 
@@ -113,6 +171,22 @@ ape_robust(d, n = 1200, claim = "detect",
 #>          0.3            0.1 0.3533333 0.02759764         0
 ```
 
+``` stata
+powerape robust d, n(1200) claim(detect) vary(ivstrength(0.1 0.3)) gridpoints(3) ///
+    nsim(300) seed(3) nonmax engine(mata)
+```
+
+``` stata-output
+powerape robustness sweep -- detect claim, APE, pin = ape
+  n = 1200, nsim = 300 per scenario, 3 scenario(s) over: ivstrength
+  power range [0.133, 0.340]; worst scenario: row 1
+  fit: Mata engine (Fisher scoring; control-function probit)
+ row   ivstrength    implied_eff    power     mcse separated
+   1           .1         0.1000   0.1333   0.0196    0.0000
+   2           .2         0.1000   0.2033   0.0232    0.0000
+   3           .3         0.1000   0.3400   0.0273    0.0000
+```
+
 ## Endogenous interactions
 
 Moderation with an endogenous focal is the fully general case: does a
@@ -122,6 +196,9 @@ function, and the control-function-by-moderator interaction (Stata:
 `interact()` + `mainonly()`), and the first stage includes the moderator
 **and the instrument-by-moderator interactions** – as instruments must
 in interaction models.
+
+- R
+- Stata
 
 ``` r
 
@@ -143,6 +220,24 @@ ape_power(di, n = 2000, claim = "detect", nsim = 250, seed = 4)
 #>   outcomes: detect 0.064 | inconclusive 0.936 | failed 0.000
 ```
 
+``` stata
+powerape dgp di, iv focal(training, binary p(0.4))                       ///
+    moderator(public, binary p(0.5)) covariates((size, normal))           ///
+    instruments((subsidy, binary p(0.5))) endogeneity(0.4)                ///
+    ivstrength(0.25) baseline(0.30) signal(0.10)
+powerape setaie di, target(0.06) mainfocal(0.10) mainmoderator(0.05)
+
+powerape power di, n(2000) claim(detect) nsim(250) seed(4)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 2000, assumed true AIE + 0.0600,     95% CI (alpha = .05), nsim = 250, stacked robust SEs
+  fit: cfprobit via engine(stata), effects(closed)
+  power = 0.084 (MCSE 0.018)
+  outcomes: detect 0.084 | inconclusive 0.916 | failed 0.000
+```
+
 The interaction tax and the IV price compound. Interaction claims from
 instrumented designs need very large samples, and it is far better to
 learn that at the design stage than from a null result.
@@ -153,12 +248,14 @@ On fixed datasets, powerape’s CF estimator reproduces Stata’s `cfprobit`
 across first stages (linear, probit, fractional probit, Poisson):
 coefficients and stacked SEs to ~1e-7 (robust and clustered), and the
 `margins` ASF effects exactly, including the interaction design run with
-Stata’s own syntax. One caveat we discovered in the process: for
-*fractional* first stages, Stata’s `margins` rebuilds the control
-function with a binary-outcome formula that ignores the fractional value
-– an internal inconsistency with its own estimator, reproduced to 7
-decimals in our validation battery. powerape uses the
-estimation-consistent generalized residuals.
+Stata’s own syntax. One caveat we discovered in the process: before the
+October 14, 2026 update of StataNow 19.5, Stata’s `margins` rebuilt the
+control function for *fractional* first stages with a binary-outcome
+formula that ignores the fractional value – an internal inconsistency
+with its own estimator, reproduced to 7 decimals in our validation
+battery and fixed by StataCorp in that update. powerape uses the
+estimation-consistent generalized residuals, as Stata’s `margins` now
+does.
 
 Current scope: one endogenous focal variable; linear and probit first
 stages in the DGP route (fractional probit and Poisson are supported at

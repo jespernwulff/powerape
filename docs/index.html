@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Power Analysis for Average Partial Effects • powerape</title>
+<title>powerape • powerape</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -13,18 +13,23 @@
 <link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/IBM_Plex_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="deps/IBM_Plex_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Power Analysis for Average Partial Effects">
-<meta name="description" content="Simulation-based power analysis in which the effect size of interest is the average partial effect (APE) or the average interaction effect (AIE) from a nonlinear model such as probit or logit. Researchers specify targets in APE units (probability points); the package calibrates the data-generating process, checks feasibility, and computes power for detection, minimum-effect, and equivalence claims via confidence-interval criteria (Riesthuis, 2024, &lt;doi:10.1177/25152459241240722&gt;), including power curves, required sample sizes for the smallest effect size of interest (SESOI), robustness sweeps over contextual assumptions (Hancock and Feng, 2025, &lt;doi:10.1037/met0000776&gt;), citable power statements, and justified error rates: alpha as a sample-size rule or as the error-cost optimum of Maier and Lakens (2022, &lt;doi:10.1177/25152459221080396&gt;) computed from one stored simulation. Supports binary and continuous focal variables, interaction designs, parametric (Gaussian-copula) covariates, and covariates resampled from pilot data.">
-<meta property="og:description" content="Simulation-based power analysis in which the effect size of interest is the average partial effect (APE) or the average interaction effect (AIE) from a nonlinear model such as probit or logit. Researchers specify targets in APE units (probability points); the package calibrates the data-generating process, checks feasibility, and computes power for detection, minimum-effect, and equivalence claims via confidence-interval criteria (Riesthuis, 2024, &lt;doi:10.1177/25152459241240722&gt;), including power curves, required sample sizes for the smallest effect size of interest (SESOI), robustness sweeps over contextual assumptions (Hancock and Feng, 2025, &lt;doi:10.1037/met0000776&gt;), citable power statements, and justified error rates: alpha as a sample-size rule or as the error-cost optimum of Maier and Lakens (2022, &lt;doi:10.1177/25152459221080396&gt;) computed from one stored simulation. Supports binary and continuous focal variables, interaction designs, parametric (Gaussian-copula) covariates, and covariates resampled from pilot data.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<script src="extra.js"></script><meta property="og:title" content="powerape">
+<meta name="description" content="Power analysis when the effect size is an average partial effect (APE) or an average interaction effect (AIE) of a probit or logit model. An R package and a Stata command.
+">
+<meta property="og:description" content="Power analysis when the effect size is an average partial effect (APE) or an average interaction effect (AIE) of a probit or logit model. An R package and a Stata command.
+">
 <meta property="og:image" content="https://jespernwulff.github.io/powerape/logo.svg">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">powerape</a>
 
@@ -37,26 +42,58 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/minimum-effect.html">Powering the minimum-effect claim</a></li>
-    <li><a class="dropdown-item" href="articles/classic-sesoi-detection.html">The classic SESOI power analysis, and what it cannot tell you</a></li>
-    <li><a class="dropdown-item" href="articles/equivalence.html">Powering for equivalence: showing an effect is too small to matter</a></li>
-    <li><a class="dropdown-item" href="articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
-    <li><a class="dropdown-item" href="articles/panel-designs.html">Panel designs: correlated random effects</a></li>
-    <li><a class="dropdown-item" href="articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
-    <li><a class="dropdown-item" href="articles/justified-alpha.html">Justifying the error rate: alpha by sample size, or by error costs</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-get-started" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Get started</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-get-started">
+<li><a class="dropdown-item" href="articles/minimum-effect.html">In R</a></li>
+    <li><a class="dropdown-item" href="articles/stata.html">In Stata</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/worked-example.html">Worked example</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-workflows" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Workflows</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-workflows">
+<li><a class="dropdown-item" href="articles/classic-sesoi-detection.html">The classic SESOI analysis</a></li>
+    <li><a class="dropdown-item" href="articles/equivalence.html">Equivalence</a></li>
+    <li><a class="dropdown-item" href="articles/interaction-effects.html">Interaction effects (AIE)</a></li>
+    <li><a class="dropdown-item" href="articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="articles/iv-designs.html">IV designs</a></li>
+    <li><a class="dropdown-item" href="articles/justified-alpha.html">Justified alpha</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-guides" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Guides</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-guides">
+<li><a class="dropdown-item" href="articles/r-and-stata.html">R and Stata side by side</a></li>
+    <li><a class="dropdown-item" href="articles/validation.html">How powerape is validated</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-reference" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Reference</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-reference">
+<li><a class="dropdown-item" href="reference/index.html">R functions</a></li>
+    <li><a class="dropdown-item" href="articles/stata-help.html">Stata help file</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-news">
+<li><a class="dropdown-item" href="news/index.html">R package</a></li>
+    <li><a class="dropdown-item" href="articles/stata-news.html">Stata command</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jespernwulff/powerape/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Source code on GitHub"><span class="fa fab fa-github fa-lg"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-">
+<li><a class="external-link dropdown-item" href="https://github.com/jespernwulff/powerape">R package</a></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/jespernwulff/powerape-stata">Stata command</a></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -66,122 +103,152 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.svg" class="logo" alt=""><h1 id="powerape-">powerape <a class="anchor" aria-label="anchor" href="#powerape-"></a>
+<img src="logo.svg" class="logo" alt=""><h1 id="powerape">powerape<a class="anchor" aria-label="anchor" href="#powerape"></a>
 </h1>
 </div>
-<!-- badges: start -->
-
-<p><strong>Power analysis for average partial effects (APEs) and average interaction effects (AIEs) from probit and logit models.</strong></p>
-<p>In nonlinear models the coefficient is not the quantity anyone interprets — conclusions are stated in probability points, i.e. the APE. But the APE depends on <em>all</em> coefficients and the covariate distribution, so coefficient- or Cohen’s-d-based power tools cannot answer the question practitioners actually have: <em>“How many observations do I need to detect a treatment effect of 5 percentage points?”</em></p>
-<p><code>powerape</code> answers it by simulation, with targets specified <strong>in APE units</strong>, built around the confidence-interval claims of Riesthuis (2024):</p>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr>
-<th>Claim</th>
-<th>CI criterion</th>
-<th>Conclusion it buys</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>
-<code>minimum</code> (default)</td>
-<td>lower bound &gt; SESOI</td>
-<td>the effect is <em>meaningfully</em> large</td>
-</tr>
-<tr>
-<td><code>detect</code></td>
-<td>CI excludes 0</td>
-<td>the effect exists (directional)</td>
-</tr>
-<tr>
-<td><code>equivalence</code></td>
-<td>CI inside ±SESOI</td>
-<td>the effect is too small to matter</td>
-</tr>
-</tbody>
-</table>
-<p>Every claim is tested at <code>alpha = .05</code> in its conventional form: detection is the two-sided test (95% interval); the minimum-effect claim is a one-sided test and equivalence a TOST, both read off the 90% interval (Lakens, 2017; Riesthuis, 2024). The level is an argument everywhere and can be <em>justified</em> rather than inherited: pass a sample-size rule (<code>alpha = function(n) alphaN::alphaN(n, BF = 3)</code>, Wulff &amp; Taylor, 2024) and the searches design jointly over alpha(n) and n, or let <code><a href="reference/ape_alpha.html">ape_alpha()</a></code> find the error-cost optimum of Maier &amp; Lakens (2022) from one stored simulation, capped at .05; <code><a href="reference/alpha_frontier.html">alpha_frontier()</a></code> gives the closed-form optimum at the detectability frontier, one level for a whole MDE grid (see <code><a href="articles/justified-alpha.html">vignette("justified-alpha")</a></code>).</p>
+<p class="lead">
+Power analysis when the effect size is an average partial effect or an average interaction effect of a probit or logit model, stated in probability points. An R package and a Stata command.
+</p>
+<p class="home-actions">
+<a class="btn btn-primary" href="articles/minimum-effect.html">Get started in R</a> <a class="btn btn-primary" href="articles/stata.html">Get started in Stata</a> <a class="btn btn-outline-primary" href="articles/index.html">Workflows</a>
+</p>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="what-it-does">What it does<a class="anchor" aria-label="anchor" href="#what-it-does"></a>
 </h2>
+<p>In a probit or logit model the coefficient is not the quantity anyone interprets. Conclusions are stated in probability points: the program raises firm survival by ten percentage points. That quantity is the <strong>average partial effect (APE)</strong>, and for a moderation question the <strong>average interaction effect (AIE)</strong>. Both depend on all coefficients and on the distribution of the covariates, so power tools that work in coefficient units cannot say how many observations a study needs to find them.</p>
+<p><code>powerape</code> takes the effect in those units. You describe the world on friendly scales (a baseline outcome rate and the share of latent variation the covariates explain), pin the effect you expect, and the package simulates the whole study: it draws the data, fits the model, computes the APE or AIE with a delta-method confidence interval, and checks a claim on that interval.</p>
+</div>
+<div class="section level2">
+<h2 id="why-it-exists">Why it exists<a class="anchor" aria-label="anchor" href="#why-it-exists"></a>
+</h2>
+<p>Powering a study to <em>detect</em> an effect is not the same as powering it to show that the effect is <em>large enough to matter</em>. Following Riesthuis (2024), <code>powerape</code> prices three claims, each read off a confidence interval: that the effect exceeds the smallest effect size of interest (the SESOI; the default), that it differs from zero, or that it is too small to matter. It reports how the simulated studies end, so the share that would detect the effect without being able to call it meaningful is in plain view. Around this sit the tools a design discussion needs: required sample sizes and minimum detectable effects, robustness sweeps over the contextual guesses (Hancock &amp; Feng, 2026), justified error rates (Maier &amp; Lakens, 2022; Wulff &amp; Taylor, 2024), and a citable methods paragraph. The R package and the Stata command implement the same procedure and are documented side by side on this site.</p>
+</div>
+<div class="section level2">
+<h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
+</h2>
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="install-r-tab" data-bs-toggle="tab" data-bs-target="#install-r" type="button" role="tab" aria-controls="install-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="install-stata-tab" data-bs-toggle="tab" data-bs-target="#install-stata" type="button" role="tab" aria-controls="install-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="install-r" class="tab-pane active" role="tabpanel" aria-labelledby="install-r-tab">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"jespernwulff/powerape"</span><span class="op">)</span></span></code></pre></div>
 </div>
+<div id="install-stata" class="tab-pane" role="tabpanel" aria-labelledby="install-stata-tab">
+<div class="sourceCode" id="cb2"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>net install powerape, from(<span class="st">"https://raw.githubusercontent.com/jespernwulff/powerape-stata/main/"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="kw">mata</span>: <span class="kw">mata</span> mlib <span class="fu">index</span></span></code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <div class="section level2">
-<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+<h2 id="one-design-question">One design question<a class="anchor" aria-label="anchor" href="#one-design-question"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>A support program might raise firm survival, which runs near 30 percent without it, by ten percentage points; it would justify its cost from five points upward. Covariates explain a modest share of the latent variation. How many firms must a study observe to show that the program is worth its cost, and how many to show merely that it does something?</p>
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="design-r-tab" data-bs-toggle="tab" data-bs-target="#design-r" type="button" role="tab" aria-controls="design-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="design-stata-tab" data-bs-toggle="tab" data-bs-target="#design-stata" type="button" role="tab" aria-controls="design-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="design-r" class="tab-pane active" role="tabpanel" aria-labelledby="design-r-tab">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jespernwulff.github.io/powerape/">powerape</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## 1. Describe the world: baseline rate + covariate signal, no coefficients</span></span>
-<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ape_dgp.html">ape_dgp</a></span><span class="op">(</span></span>
-<span>  model       <span class="op">=</span> <span class="st">"probit"</span>,</span>
-<span>  focal       <span class="op">=</span> <span class="fu"><a href="reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
-<span>  covariates  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"normal"</span>, mean <span class="op">=</span> <span class="fl">45</span>, sd <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>,</span>
-<span>                     <span class="fu"><a href="reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.55</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  correlation <span class="op">=</span> <span class="fl">0.2</span>,</span>
-<span>  baseline    <span class="op">=</span> <span class="fl">0.30</span>,</span>
-<span>  signal      <span class="op">=</span> <span class="fl">0.15</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## 2. Pin the true APE (inversion + feasibility check)</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ape_dgp.html">ape_dgp</a></span><span class="op">(</span>focal <span class="op">=</span> <span class="fu"><a href="reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"program"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>             covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"z"</span>, <span class="st">"normal"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>             baseline <span class="op">=</span> <span class="fl">0.30</span>, signal <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span>
 <span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_ape.html">set_ape</a></span><span class="op">(</span><span class="va">d</span>, target <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## 3. Power the minimum-effect claim against a 5-pp SESOI</span></span>
-<span><span class="fu"><a href="reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">1500</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>, nsim <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## 4. Required n, power curves, robustness, reporting</span></span>
-<span><span class="fu"><a href="reference/ape_n.html">ape_n</a></span><span class="op">(</span><span class="va">d</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
-<span><span class="co">## ...or, when n is fixed by the archive, the smallest effect it can find:</span></span>
-<span><span class="fu"><a href="reference/ape_mde.html">ape_mde</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">1500</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/ape_curve.html">ape_curve</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">3000</span>, <span class="fl">500</span><span class="op">)</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>,</span>
-<span>     target_power <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/ape_robust.html">ape_robust</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">2200</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>           vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>baseline <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.20</span>, <span class="fl">0.40</span><span class="op">)</span>, signal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.30</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="fu"><a href="reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">2200</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">n_min</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ape_n.html">ape_n</a></span><span class="op">(</span><span class="va">d</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>, nsim <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">502</span><span class="op">)</span></span>
+<span><span class="va">n_det</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ape_n.html">ape_n</a></span><span class="op">(</span><span class="va">d</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">503</span><span class="op">)</span></span>
+<span><span class="va">n_min</span></span>
+<span><span class="co">#&gt; powerape required sample size -- minimum claim</span></span>
+<span><span class="co">#&gt;   n = 2091 for 80% target power (confirmed 0.808, MCSE 0.006)</span></span>
+<span><span class="co">#&gt;   assumed true APE +0.1000, sesoi 0.050, 90% CI (alpha = 0.05), probit</span></span>
+<span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.</span></span>
+<span><span class="va">n_det</span></span>
+<span><span class="co">#&gt; powerape required sample size -- detect claim</span></span>
+<span><span class="co">#&gt;   n = 663 for 80% target power (confirmed 0.803, MCSE 0.006)</span></span>
+<span><span class="co">#&gt;   assumed true APE +0.1000, sesoi -, 95% CI (alpha = 0.05), probit</span></span>
+<span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.</span></span></code></pre></div>
+</div>
+<div id="design-stata" class="tab-pane" role="tabpanel" aria-labelledby="design-stata-tab">
+<div class="sourceCode" id="cb4"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>powerape dgp <span class="kw">program</span>, focal(<span class="kw">program</span>, binary <span class="kw">p</span>(0.5)) covariates((z, <span class="fu">normal</span>)) <span class="co">///</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    baseline(0.30) signal(0.10)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>powerape setape <span class="kw">program</span>, target(0.10)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>powerape n <span class="kw">program</span>, power(0.80) claim(minimum) sesoi(0.05)               <span class="co">///</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    nsim(1000) <span class="dv">seed</span>(502) engine(<span class="kw">mata</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>powerape n <span class="kw">program</span>, power(0.80) claim(detect)                            <span class="co">///</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    nsim(1000) <span class="dv">seed</span>(503) engine(<span class="kw">mata</span>)</span></code></pre></div>
+<pre class="stata-output"><code>powerape required sample size -- minimum claim
+  n = 2084 for 80% target power (confirmed 0.800, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+powerape required sample size -- detect claim
+  n = 663 for 80% target power (confirmed 0.796, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.</code></pre>
+</div>
+</div>
+</div>
+<p>Showing that the program is worth its cost takes about 2,091 firms; showing that it does something takes 663 (Stata: 2,084 and 663; R and Stata draw different random numbers, so the two agree up to simulation error). A study planned for detection would be about a third of the size it needs for the conclusion its authors want to draw. The <a href="articles/worked-example.html">worked example</a> takes this design all the way through, together with four more: an interaction, a design built from a pilot, a firm-year panel and an instrumented treatment.</p>
 </div>
 <div class="section level2">
-<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+<h2 id="what-you-get">What you get<a class="anchor" aria-label="anchor" href="#what-you-get"></a>
 </h2>
-<ul>
-<li>
-<strong>Binary and continuous focal variables</strong> (discrete-change and average-derivative APEs), with plateau-aware inversion and informative feasibility errors.</li>
-<li>
-<strong>Interaction designs</strong>: pin the average interaction effect — the <a href="https://github.com/jespernwulff/ginteff" class="external-link"><code>ginteff</code></a> estimand — with <code><a href="reference/set_aie.html">set_aie()</a></code>; the internal AIE is unit-tested to reproduce <code>ginteff</code> exactly for all four variable-type pairs.</li>
-<li>
-<strong>Panel designs</strong> (<code><a href="reference/ape_dgp_panel.html">ape_dgp_panel()</a></code>): correlated random effects probit — Mundlak means, unit-clustered SEs, per-variable within-unit persistence via <code>pa_var(icc = )</code>, and sample sizes counted in <strong>units (clusters)</strong>. The target stays the ASF-based APE, which the pooled CRE estimator recovers; binary-by-binary panel AIE designs included. <strong>Unbalanced panels</strong> follow Wooldridge (2019): give a distribution of panel lengths or a per-wave <code>retention</code> rate, and the engine uses observed-period Mundlak means plus period-count cohort indicators (<code>retention</code> is sweepable in <code><a href="reference/ape_robust.html">ape_robust()</a></code>). Probit-only by design: a pooled CRE logit would estimate the ASF only approximately, so <code>model = "logit"</code> is refused with a teaching error.</li>
-<li>
-<strong>IV designs</strong> (<code><a href="reference/ape_dgp_iv.html">ape_dgp_iv()</a></code>): endogenous focal variables via control-function probit — the estimator of Stata’s <code>cfprobit</code>, replicated exactly with its stacked no-bootstrap standard errors (robust and clustered). Friendly knobs: <code>endogeneity</code> (error correlation) and <code>iv_strength</code> (first-stage share of the focal’s variance); endogenous-interaction AIE designs include the instrument-by-moderator first-stage terms.</li>
-<li>
-<strong>Robust standard errors</strong> for the standard routes via <code>se = "robust"</code> (HC0 sandwich); panel and IV routes carry their own clustered / stacked inference.</li>
-<li>
-<strong>Three covariate routes</strong>: parametric marginals with a Gaussian copula, pilot-data resampling (<code><a href="reference/ape_dgp_empirical.html">ape_dgp_empirical()</a></code>), or a fitted pilot model (<code><a href="reference/ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code>).</li>
-<li>
-<strong>Minimum detectable effects</strong> (<code><a href="reference/ape_mde.html">ape_mde()</a></code>): when n is fixed — an archive of so many firms, a panel of so many units and waves — find the smallest APE or AIE the design reliably concludes, with the same conservative confirmation stage as <code><a href="reference/ape_n.html">ape_n()</a></code>; the equivalence variant returns the tightest establishable margin.</li>
-<li>
-<strong>Robustness sweeps</strong> (<code><a href="reference/ape_robust.html">ape_robust()</a></code>): worst-case power and the insurance-premium sample size n_max over contextual assumptions, in the spirit of Hancock &amp; Feng (2025) — and <code>mode = "mde"</code> for the minimum detectable effect under the least favorable assumptions.</li>
-<li>
-<strong>Justified error rates</strong>: <code>alpha</code> may be a sample-size rule (a function of n, evaluated at every candidate n by <code><a href="reference/ape_n.html">ape_n()</a></code> and friends), and <code><a href="reference/ape_alpha.html">ape_alpha()</a></code> minimizes or balances the weighted combined Type I and Type II error rate for stated error costs and prior odds, re-thresholding one stored simulation (<code><a href="reference/power_at.html">power_at()</a></code>), reporting the flat range of indistinguishable levels, capping the search at .05, and measuring the realized size at the claim boundary on request; <code><a href="reference/alpha_frontier.html">alpha_frontier()</a></code> is its closed-form companion at the just-detectable effect — the same level at every n, made for pricing MDE grids.</li>
-<li>
-<strong>Citable output</strong>: <code><a href="reference/power_statement.html">power_statement()</a></code> renders any result as a self-contained methods paragraph for grants and preregistrations, including the justification paragraph for an <code><a href="reference/ape_alpha.html">ape_alpha()</a></code> result.</li>
-<li>
-<strong>Monte Carlo honesty</strong>: every power estimate carries its MCSE; failed fits count against the claim, never silently dropped, and so by default do fits with separation (a focal cell without events or non-events, where the maximum-likelihood effect does not exist) – their share is reported, with a warning when cells get sparse.</li>
-</ul>
+<div class="home-features">
+<p><strong>Effects in the units you report.</strong> APEs of binary and continuous variables and AIEs, the estimand of <code>ginteff</code>, pinned in probability points; impossible targets are refused with the attainable range.</p>
+<p><strong>Three claims, and how studies end.</strong> Minimum-effect, detection and equivalence power, with the share of studies that detect without being able to call the effect meaningful.</p>
+<p><strong>Sample size, detectable effect, curves.</strong> Required n and minimum detectable effects, each confirmed by a high-precision run, and power curves.</p>
+<p><strong>Insurance against the guesses.</strong> Sweeps over the baseline rate, the covariate signal and design parameters, with the worst case and n_max.</p>
+<p><strong>Justified error rates.</strong> Alpha as a function of n, or the error-cost optimum, computed from one stored simulation, with a size check.</p>
+<p><strong>Real designs.</strong> Pilot data or a fitted pilot model, correlated random effects panels, and endogenous treatments by control functions; in Stata, every simulated study can be fitted by <code>probit</code>, <code>logit</code> or <code>cfprobit</code>.</p>
+</div>
+<figure class="home-figure"><img src="reference/figures/home-curves.png" alt="Power against the sample size for the detection claim and the minimum-effect claim in the design above. Detection reaches 80 percent power at about 660 firms, the minimum-effect claim at about 2,100."><figcaption>
+The price of a meaningful conclusion. Power of the detection claim and of the minimum-effect claim against the sample size in the design above; the dashed line marks 80 percent.
+</figcaption></figure>
 </div>
 <div class="section level2">
-<h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a>
+<h2 id="where-to-go-from-here">Where to go from here<a class="anchor" aria-label="anchor" href="#where-to-go-from-here"></a>
 </h2>
-<p>The engine is anchored against independent implementations: the two-proportion case reproduces <code><a href="https://rdrr.io/r/stats/power.prop.test.html" class="external-link">power.prop.test()</a></code> and Stata <code>power twoproportions</code>; APE estimates and delta-method SEs match <code>marginaleffects</code> and Stata <code>margins, dydx()</code> to ~1e-6 on fixed datasets; the AIE matches <code>ginteff</code> exactly; simulated power matches exact finite-sample enumeration in the saturated case and TOSTER at its own default alpha (every claim runs at alpha = .05 in its conventional form). Panel designs match Stata’s clustered <code>margins</code> (APE and AIE double difference) to all printed digits on fixed panels, the clustered sandwich matches <code><a href="https://rdrr.io/pkg/sandwich/man/vcovCL.html" class="external-link">sandwich::vcovCL</a></code> exactly, and the engine reproduces the Donner-Klar cluster design effect. The control-function route reproduces Stata’s <code>cfprobit</code> across all four first-stage models — coefficients, stacked robust/clustered SEs, and <code>margins</code> ASF effects to ~1e-6 — including the endogenous-interaction design run with Stata’s own syntax. See the package tests and the validation battery for details.</p>
+<div class="home-cards">
+<p><a class="home-card" href="articles/minimum-effect.html"><span class="home-card-title">Get started in R</span><span class="home-card-text">Describe the world, pin the APE, and interrogate the design in six steps.</span></a> <a class="home-card" href="articles/stata.html"><span class="home-card-title">Get started in Stata</span><span class="home-card-text">The same six steps with the Stata command, plus engines and pilot data.</span></a> <a class="home-card" href="articles/worked-example.html"><span class="home-card-title">Worked example</span><span class="home-card-text">Five designs in both languages, from a treatment effect to an instrument.</span></a> <a class="home-card" href="articles/classic-sesoi-detection.html"><span class="home-card-title">The classic SESOI analysis</span><span class="home-card-text">What powering detection at the SESOI buys, and what it cannot.</span></a> <a class="home-card" href="articles/equivalence.html"><span class="home-card-title">Equivalence</span><span class="home-card-text">Showing that an effect is too small to matter.</span></a> <a class="home-card" href="articles/interaction-effects.html"><span class="home-card-title">Interaction effects</span><span class="home-card-text">Power for the AIE, and why interactions are expensive.</span></a> <a class="home-card" href="articles/panel-designs.html"><span class="home-card-title">Panel designs</span><span class="home-card-text">Correlated random effects probit, with n counted in units.</span></a> <a class="home-card" href="articles/iv-designs.html"><span class="home-card-title">IV designs</span><span class="home-card-text">Endogenous treatments by control functions, and the price of instruments.</span></a> <a class="home-card" href="articles/justified-alpha.html"><span class="home-card-title">Justified alpha</span><span class="home-card-text">Alpha by sample size or by error costs, from one simulation.</span></a> <a class="home-card" href="articles/r-and-stata.html"><span class="home-card-title">R and Stata side by side</span><span class="home-card-text">Every function and subcommand, matched.</span></a></p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>Seven vignettes cover the workflows: <code><a href="articles/minimum-effect.html">vignette("minimum-effect")</a></code>, <code><a href="articles/classic-sesoi-detection.html">vignette("classic-sesoi-detection")</a></code>, <code><a href="articles/equivalence.html">vignette("equivalence")</a></code>, <code><a href="articles/interaction-effects.html">vignette("interaction-effects")</a></code>, <code><a href="articles/panel-designs.html">vignette("panel-designs")</a></code>, <code><a href="articles/iv-designs.html">vignette("iv-designs")</a></code>, and <code><a href="articles/justified-alpha.html">vignette("justified-alpha")</a></code>.</p>
+<p>If you use <code>powerape</code>, please cite the software, and the methods it builds on where you use them.</p>
+<p>Wulff, J. N. (2026). <em>powerape: Power analysis for average partial effects</em> (R package version 1.11.3; Stata command version 0.1.3). <a href="https://jespernwulff.github.io/powerape/" class="uri">https://jespernwulff.github.io/powerape/</a></p>
+<p>Hancock, G. R., &amp; Feng, Y. (2026). nmax and the quest to restore caution, integrity, and practicality to the sample size planning process. <em>Psychological Methods</em>, <em>31</em>(1), 174–199. <a href="https://doi.org/10.1037/met0000776" class="external-link uri">https://doi.org/10.1037/met0000776</a></p>
+<p>Maier, M., &amp; Lakens, D. (2022). Justify your alpha: A primer on two practical approaches. <em>Advances in Methods and Practices in Psychological Science</em>, 5(2). <a href="https://doi.org/10.1177/25152459221080396" class="external-link uri">https://doi.org/10.1177/25152459221080396</a></p>
+<p>Riesthuis, P. (2024). Simulation-based power analyses for the smallest effect size of interest: A confidence-interval approach for minimum-effect and equivalence testing. <em>Advances in Methods and Practices in Psychological Science</em>, 7(2). <a href="https://doi.org/10.1177/25152459241240722" class="external-link uri">https://doi.org/10.1177/25152459241240722</a></p>
+<p>Wulff, J. N., &amp; Taylor, L. (2024). How and why alpha should depend on sample size: A Bayesian-frequentist compromise for significance testing. <em>Strategic Organization</em>, 22(3), 550–581. <a href="https://doi.org/10.1177/14761270231214429" class="external-link uri">https://doi.org/10.1177/14761270231214429</a></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -189,6 +256,8 @@
 <ul class="list-unstyled">
 <li><a href="https://github.com/jespernwulff/powerape/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/jespernwulff/powerape/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/jespernwulff/powerape-stata" class="external-link">Stata command on GitHub</a></li>
+<li><a href="https://github.com/jespernwulff/powerape-stata/issues" class="external-link">Report a bug (Stata)</a></li>
 </ul>
 </div>
 
@@ -199,7 +268,6 @@
 <li><small><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
-
 
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
@@ -212,14 +280,6 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Jesper Wulff <br><small class="roles"> Author, maintainer </small>   </li>
-</ul>
-</div>
-
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/jespernwulff/powerape/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/jespernwulff/powerape/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://github.com/jespernwulff/powerape/blob/main/LICENSE.md" class="external-link"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a></li>
 </ul>
 </div>
 

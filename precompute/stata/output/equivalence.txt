@@ -1,0 +1,155 @@
+
+. 
+end of do-file
+
+. 
+. * >>> world
+. powerape dgp d, focal(treat, binary p(0.5))                               ///
+>     covariates((age, normal mean(45) sd(12))) baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50)
+  covariates: age (normal, mean 45.00, sd 12.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape d, target(0)
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50)
+  covariates: age (normal, mean 45.00, sd 12.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.0000 (beta_focal =    0.0000, implied P(Y=1 | focal=1) = 0.300)
+
+. * <<<
+. 
+. tic
+
+. * >>> power
+. powerape power d, n(2000) claim(equivalence) sesoi(0.05) nsim(600) seed(1)
+powerape -- equivalence claim (CI within +/-0.050)
+  probit, n = 2000, assumed true APE + 0.0000,     90% CI (alpha = .05), nsim = 600
+  fit: probit via engine(stata), effects(closed)
+  power = 0.605 (MCSE 0.020)
+  outcomes: minimum 0.000 | detect-only 0.028 | inconclusive 0.367 | equivalence 0.605 | failed 0.000
+
+. * <<<
+. keep_r power
+
+. toc power
+
+. 
+. tic
+
+. * >>> n
+. powerape n d, power(0.80) claim(equivalence) sesoi(0.05)                 ///
+>     nsim(500) seed(2) engine(mata)
+powerape required sample size -- equivalence claim
+  n = 2705 for 80% target power (confirmed 0.799, MCSE 0.009)
+  assumed true APE + 0.0000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
+
+. * <<<
+. keep_r n
+
+. toc n
+
+. 
+. tic
+
+. * >>> curve
+. powerape curve d, n(500(750)3500) claim(equivalence) sesoi(0.05)         ///
+>     nsim(300) seed(3) engine(mata)
+powerape power curve -- equivalence claim, probit (APE), nsim = 300 per point
+  fit: Mata engine (Fisher scoring)
+
+         n     alpha    power     mcse   failed  separated
+       500    0.0500   0.0000   0.0000   0.0000     0.0000
+      1250    0.0500   0.2800   0.0259   0.0000     0.0000
+      2000    0.0500   0.5867   0.0284   0.0000     0.0000
+      2750    0.0500   0.7933   0.0234   0.0000     0.0000
+      3500    0.0500   0.8767   0.0190   0.0000     0.0000
+
+. * <<<
+. keep_r curve
+
+. toc curve
+
+. 
+. * >>> curve-plot
+. matrix C = r(results)
+
+. svmat C, names(col)
+number of observations will be reset to 5
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 5.
+
+. twoway connected power n, yline(0.8, lpattern(dash))                      ///
+>     ytitle("Power") xtitle("Sample size") ylabel(0(0.2)1)
+
+. * <<<
+. pc_graph equivalence-curve
+
+. drop _all
+
+. 
+. tic
+
+. * >>> robust
+. powerape robust d, n(2600) claim(equivalence) sesoi(0.05)                 ///
+>     vary(baseline(0.20 0.50)) gridpoints(3) nsim(300) seed(4) nonmax engine(mata)
+powerape robustness sweep -- equivalence claim, APE, pin = ape
+  n = 2600, nsim = 300 per scenario, 3 scenario(s) over: baseline
+  power range [0.663, 0.900]; worst scenario: row 3
+  fit: Mata engine (Fisher scoring)
+ row     baseline    implied_eff    power     mcse separated
+   1           .2         0.0000   0.9000   0.0173    0.0000
+   2          .35         0.0000   0.7200   0.0259    0.0000
+   3           .5         0.0000   0.6633   0.0273    0.0000
+
+. * <<<
+. keep_r robust
+
+. toc robust
+
+. 
+. tic
+
+. * >>> statement
+. powerape power d, n(2600) claim(equivalence) sesoi(0.05) nsim(500) seed(5)
+powerape -- equivalence claim (CI within +/-0.050)
+  probit, n = 2600, assumed true APE + 0.0000,     90% CI (alpha = .05), nsim = 500
+  fit: probit via engine(stata), effects(closed)
+  power = 0.758 (MCSE 0.019)
+  outcomes: minimum 0.000 | detect-only 0.024 | inconclusive 0.218 | equivalence 0.758 | failed 0.000
+
+. powerape statement
+We conducted a simulation-based power analysis for the average partial effect
+(APE) of treat using the powerape package for Stata (version 0.1.2 (Stata port
+of powerape 1.11.3)), following the confidence-interval approach of Riesthuis
+(2024). The assumed data-generating process was a probit model with focal
+variable treat (binary, prevalence 0.50); parametric covariates age
+(continuous, mean 45, SD 12), with the focal variable and the covariates
+mutually independent; baseline outcome rate 0.300 with the focal at reference;
+nuisance covariates contribute a latent pseudo-R-squared of 0.10. The assumed
+true APE was 0.000 (0.0 percentage points). At a sample size of n = 2600,
+simulated power for the equivalence claim (the 90% confidence interval lying
+within +/-0.050; two one-sided tests at alpha = 5%) was 0.758 (Monte Carlo SE
+0.019; 500 replications). Across replications, the probability of concluding a
+meaningful effect was 0.000, of detection without meaningfulness 0.024, of an
+inconclusive result 0.218, and of equivalence 0.758. Estimation used maximum
+likelihood with delta-method Wald confidence intervals; replications without a
+maximum-likelihood estimate, from a failed fit or from separation (a focal
+cell with no events or no non-events), counted against the claim (0.0% of
+replications).
+
+. * <<<
+. keep_r statement
+
+. toc statement
+
+. 
+. file close res
+
+. file close tim
+
+. log close pc

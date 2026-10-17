@@ -9,6 +9,17 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+# On the website (pkgdown) the examples sit in R | Stata tabs, with the Stata
+# output read from precompute/stata/output/. The package vignette shows R only.
+if (identical(Sys.getenv("IN_PKGDOWN"), "true")) {
+  root <- normalizePath(getwd(), winslash = "/")
+  while (!file.exists(file.path(root, "DESCRIPTION")) && dirname(root) != root)
+    root <- dirname(root)
+  source(file.path(root, "precompute", "helpers.R"))
+} else {
+  tabs_r <- tabs_stata <- tabs_end <- function(...) ""
+  stata_show <- stata_figure <- function(...) invisible(NULL)
+}
 ```
 
 ## The estimand
@@ -36,6 +47,8 @@ For a binary-by-binary design this is exactly a bijection with the four
 counterfactual cell rates: baseline p00, p10 = p00 + main_focal,
 p01 = p00 + main_moderator, p11 = p00 + main_focal + main_moderator + AIE.
 
+`r tabs_r("world")`
+
 ```{r}
 library(powerape)
 
@@ -48,6 +61,14 @@ d <- set_aie(d, target = 0.08, main_focal = 0.10, main_moderator = 0.03)
 d
 ```
 
+`r tabs_stata("world")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("interaction", c("world", "pin"), output = "pin")
+```
+
+`r tabs_end()`
+
 Feasibility is checked at every step (all four cell rates must stay inside
 (0, 1); with continuous variables the AIE plateaus in the interaction
 coefficient), with errors reporting the attainable range.
@@ -57,11 +78,23 @@ coefficient), with errors reporting the attainable range.
 The estimand rides on the DGP, so the usual functions power the AIE
 directly:
 
+`r tabs_r("power")`
+
 ```{r}
 ape_power(d, n = 3000, claim = "detect", nsim = 500, seed = 1)
 ```
 
+`r tabs_stata("power")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("interaction", "power")
+```
+
+`r tabs_end()`
+
 Compare that with how easy an equally sized *main effect* would be:
+
+`r tabs_r("main")`
 
 ```{r}
 d_main <- ape_dgp(model = "probit",
@@ -72,13 +105,31 @@ d_main <- set_ape(d_main, target = 0.08)
 ape_power(d_main, n = 3000, claim = "detect", nsim = 500, seed = 2)
 ```
 
+`r tabs_stata("main")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("interaction", c("main-world", "main-power"), output = "main-power")
+```
+
+`r tabs_end()`
+
 Same 8-point effect, same n -- a fraction of the power. The folk theorem
 that interaction studies need several times the sample is here made exact,
 in the units researchers actually interpret, via `ape_n()`:
 
+`r tabs_r("n")`
+
 ```{r}
 ape_n(d, power = 0.80, claim = "detect", nsim = 500, seed = 3)
 ```
+
+`r tabs_stata("n")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("interaction", "n")
+```
+
+`r tabs_end()`
 
 All claims work for AIEs: power a *meaningful* interaction with
 `claim = "minimum"` and an AIE SESOI, or show treatment-effect homogeneity
@@ -93,6 +144,22 @@ variables in `firstdiff` instead get "+1 unit from the observed value" --
 for a 0/1 dummy that extrapolates treated units to 2, a different estimand.
 When validating a powerape design against `ginteff` on pilot data, declare
 binary variables as factors.
+
+```{r, echo = FALSE, results = "asis"}
+if (identical(Sys.getenv("IN_PKGDOWN"), "true")) {
+  cat("In Stata, `effects(margins)` computes the AIE of every simulated study",
+      "with Radean's (2023) `ginteff` command itself instead of the closed-form",
+      "delta method. On the same seed the two reach the same decision in every",
+      "study; `ginteff` is about ten times slower, so it serves as a check.",
+      "", sep = "\n")
+  cat(tabs_r("ginteff"), "", sep = "\n")
+  cat("The R package computes the AIE with its internal reimplementation,",
+      "unit-tested against `ginteff` for R.", "", sep = "\n")
+  cat(tabs_stata("ginteff"), "", sep = "\n")
+  stata_show("interaction", c("closed25", "ginteff"))
+  cat(tabs_end(), "", sep = "\n")
+}
+```
 
 ## References
 

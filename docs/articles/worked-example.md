@@ -1,0 +1,1231 @@
+# Worked example: five designs, from a treatment effect to an instrument
+
+This page takes five study designs through `powerape`, each in R and in
+Stata. The teams are stylized; the questions are the ones a design
+discussion has to answer:
+
+- **Design A.** How many observations does a treatment effect worth
+  acting on need?
+- **Design B.** Can a moderation study find its interaction?
+- **Design C.** What is last year’s pilot worth for next year’s design?
+- **Design D.** How many firms does a firm-year panel need?
+- **Design E.** What does instrumenting the treatment cost?
+
+Each section states the setting, runs the calls that answer the question
+and draws the lesson. The lessons are collected [at the
+end](#the-five-designs-at-a-glance), with what a power analysis of this
+kind should report. Choosing R or Stata on any tab switches the whole
+page.
+
+The R code fixes its seeds, so its numbers reproduce exactly with the
+version of the package named at the end. Stata draws different random
+numbers, so its numbers agree with R’s up to simulation error; the text
+quotes the two side by side. In Stata, a single power call fits every
+simulated study with Stata’s own estimation command (`probit`, or
+`cfprobit` in Design E), and the searches and sweeps use the faster Mata
+engine (see [Get started in
+Stata](https://jespernwulff.github.io/powerape/articles/stata.md)).
+
+## Claims, in one paragraph
+
+Every design is priced for a claim about the confidence interval of the
+effect, stated in probability points (Riesthuis, 2024). The
+**minimum-effect claim** (`minimum`, the default) holds when the lower
+bound of the interval exceeds the smallest effect size of interest (the
+SESOI), so the effect is large enough to matter; **detection**
+(`detect`) holds when the interval excludes zero; **equivalence** holds
+when the interval lies within ±SESOI. Designs A, C and D are priced for
+the minimum-effect claim, B and E for detection. Power is the share of
+simulated studies in which the claim holds, and a required sample size
+is found by search and then confirmed by a run four times as long.
+
+## Design A: a treatment effect worth acting on
+
+A team plans an archival study of a support program for firms. Without
+the program, about 30 percent of firms survive the study window. Firm
+characteristics explain a modest share of the latent variation in
+survival; one standard-normal covariate with a signal of 0.10 stands in
+for them. The program pays for itself if it raises survival by five
+percentage points, and earlier evidence puts its effect near ten. The
+study should be able to conclude that the program is worth its cost: a
+minimum-effect claim with a SESOI of 0.05. This is the design question
+of the [home page](https://jespernwulff.github.io/powerape/index.md),
+with the same seeds, taken all the way through here.
+
+- R
+- Stata
+
+``` r
+
+library(powerape)
+
+dA <- ape_dgp(focal = pa_var("program", "binary", p = 0.5),
+              covariates = list(pa_var("z", "normal")),
+              baseline = 0.30, signal = 0.10)
+dA <- set_ape(dA, target = 0.10)
+dA
+#> powerape DGP -- probit
+#>   focal: program (binary, p = 0.50)
+#>   covariates: z (normal, mean 0.00, sd 1.00) 
+#>   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+#>   true APE pinned at +0.1000 (beta_focal = 0.2857, implied P(Y=1 | focal=1) = 0.400)
+```
+
+``` stata
+powerape dgp a, focal(program, binary p(0.5)) covariates((z, normal))      ///
+    baseline(0.30) signal(0.10)
+powerape setape a, target(0.10)
+```
+
+``` stata-output
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  covariates: z (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  covariates: z (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)
+```
+
+### Power at 1,500 firms
+
+- R
+- Stata
+
+``` r
+
+pA <- ape_power(dA, n = 1500, claim = "minimum", sesoi = 0.05,
+                nsim = 4000, seed = 501)
+pA
+#> powerape -- minimum-effect claim (CI lower bound > 0.050)
+#>   probit, n = 1500, assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 4000
+#>   power = 0.663 (MCSE 0.007)
+#>   outcomes: minimum 0.663 | detect-only 0.323 | inconclusive 0.014 | equivalence 0.000 | failed 0.000
+```
+
+``` stata
+powerape power a, n(1500) claim(minimum) sesoi(0.05) nsim(4000) seed(501)
+```
+
+``` stata-output
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1500, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 4000
+  fit: probit via engine(stata), effects(closed)
+  power = 0.677 (MCSE 0.007)
+  outcomes: minimum 0.677 | detect-only 0.312 | inconclusive 0.011 | equivalence 0.000 | failed 0.000
+```
+
+At 1,500 firms the minimum-effect claim holds in 66 percent of the
+simulated studies (Stata: 68). The outcome table shows where the others
+end: in 32 percent the interval excludes zero but not 0.05. Those
+studies would find that the program works and still could not say that
+it is worth its cost.
+
+### The required sample size
+
+- R
+- Stata
+
+``` r
+
+nA_min <- ape_n(dA, power = 0.80, claim = "minimum", sesoi = 0.05,
+                nsim = 1000, seed = 502)
+nA_det <- ape_n(dA, power = 0.80, claim = "detect", nsim = 1000, seed = 503)
+nA_min
+#> powerape required sample size -- minimum claim
+#>   n = 2091 for 80% target power (confirmed 0.808, MCSE 0.006)
+#>   assumed true APE +0.1000, sesoi 0.050, 90% CI (alpha = 0.05), probit
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+nA_det
+#> powerape required sample size -- detect claim
+#>   n = 663 for 80% target power (confirmed 0.803, MCSE 0.006)
+#>   assumed true APE +0.1000, sesoi -, 95% CI (alpha = 0.05), probit
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+```
+
+``` stata
+powerape n a, power(0.80) claim(minimum) sesoi(0.05) nsim(1000) seed(502)  ///
+    engine(mata)
+local n_min = r(n)
+
+powerape n a, power(0.80) claim(detect) nsim(1000) seed(503) engine(mata)
+```
+
+``` stata-output
+powerape required sample size -- minimum claim
+  n = 2084 for 80% target power (confirmed 0.800, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+powerape required sample size -- detect claim
+  n = 663 for 80% target power (confirmed 0.796, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+```
+
+For 80 percent power the minimum-effect claim needs 2,091 firms and
+detection 663 (Stata: 2,084 and 663; the Stata code keeps its required n
+in a local for the steps that follow). Concluding that the effect
+matters costs 3.2 times the sample of concluding that it exists, so a
+study sized for detection would be about a third of the size its authors
+need for the conclusion they want to draw.
+
+### How much the guesses matter
+
+The baseline rate and the signal are informed guesses. A sweep re-prices
+the design at the required n over baselines from 0.20 to 0.40 and
+signals from 0 to 0.30.
+
+- R
+- Stata
+
+``` r
+
+rA <- ape_robust(dA, n = nA_min$n, claim = "minimum", sesoi = 0.05,
+                 vary = list(baseline = c(0.20, 0.40), signal = c(0, 0.30)),
+                 grid_points = 3, nsim = 600, seed = 504, nmax = FALSE)
+rA
+#> powerape robustness sweep -- minimum claim, APE, pin = ape
+#>   n = 2091, nsim = 600 per scenario, 9 scenario(s) over: baseline, signal
+#>   power range [0.755, 0.902]; worst scenario:
+#>  baseline signal implied_effect power       mcse separated
+#>       0.4      0            0.1 0.755 0.01755824         0
+#>   scenarios:
+#>  baseline signal implied_effect     power       mcse separated
+#>       0.2   0.00            0.1 0.8316667 0.01527510         0
+#>       0.3   0.00            0.1 0.7733333 0.01709234         0
+#>       0.4   0.00            0.1 0.7550000 0.01755824         0
+#>       0.2   0.15            0.1 0.8766667 0.01342400         0
+#>       0.3   0.15            0.1 0.7633333 0.01735202         0
+#>       0.4   0.15            0.1 0.8250000 0.01551209         0
+#>       0.2   0.30            0.1 0.9016667 0.01215620         0
+#>       0.3   0.30            0.1 0.8500000 0.01457738         0
+#>       0.4   0.30            0.1 0.8066667 0.01612222         0
+```
+
+``` stata
+powerape robust a, n(`n_min') claim(minimum) sesoi(0.05)                   ///
+    vary(baseline(0.20 0.40) signal(0 0.30)) gridpoints(3)                 ///
+    nsim(600) seed(504) nonmax engine(mata)
+```
+
+``` stata-output
+powerape robustness sweep -- minimum claim, APE, pin = ape
+  n = 2084, nsim = 600 per scenario, 9 scenario(s) over: baseline, signal
+  power range [0.732, 0.915]; worst scenario: row 3
+  fit: Mata engine (Fisher scoring)
+ row     baseline       signal    implied_eff    power     mcse separated
+   1           .2            0         0.1000   0.8350   0.0152    0.0000
+   2           .3            0         0.1000   0.7983   0.0164    0.0000
+   3           .4            0         0.1000   0.7317   0.0181    0.0000
+   4           .2          .15         0.1000   0.8800   0.0133    0.0000
+   5           .3          .15         0.1000   0.8000   0.0163    0.0000
+   6           .4          .15         0.1000   0.7850   0.0168    0.0000
+   7           .2           .3         0.1000   0.9150   0.0114    0.0000
+   8           .3           .3         0.1000   0.8667   0.0139    0.0000
+   9           .4           .3         0.1000   0.8017   0.0163    0.0000
+```
+
+Across the nine scenarios, power at 2,091 firms runs from 76 to 90
+percent (Stata, at its own 2,084: 73 to 92). The weakest scenario
+combines a baseline of 0.40 with a signal of 0.00, and even there about
+three studies in four reach the conclusion. The design does not hinge on
+getting the baseline or the signal exactly right.
+
+## Design B: a moderation study that could find its interaction
+
+A second team expects the program to work better for family firms. That
+is a claim about an interaction, and the effect size that states it is
+the **average interaction effect (AIE)**: the difference, in probability
+points, between the program’s effect among family firms and its effect
+among the others. The team states four numbers on the probability scale:
+survival of 0.30 for non-family firms without the program, a program
+effect of ten points among them, a difference of three points between
+family and other firms without the program, and an interaction of eight
+points.
+[`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md)
+(in Stata, `powerape setaie`) turns them into a probit whose four cells
+survive at 0.30, 0.40, 0.33 and 0.51. The design has no covariates. A
+second world prices the same eight points as a plain main effect of the
+program.
+
+- R
+- Stata
+
+``` r
+
+dB <- set_ape(ape_dgp(focal = pa_var("program", "binary", p = 0.5),
+                      baseline = 0.30), target = 0.08)
+
+dBi <- ape_dgp(focal = pa_var("program", "binary", p = 0.5),
+               moderator = pa_var("family", "binary", p = 0.5),
+               baseline = 0.30)
+dBi <- set_aie(dBi, target = 0.08, main_focal = 0.10, main_moderator = 0.03)
+dBi
+#> powerape DGP -- probit
+#>   focal: program (binary, p = 0.50)
+#>   moderator: family (binary, p = 0.50) (focal-by-moderator interaction included)
+#>   covariates: none
+#>   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.000
+#>   true AIE pinned at +0.0800 (beta_int = 0.1939)
+#>   main APEs at reference: program +0.100 (beta = 0.2711), family +0.030 (beta = 0.0845)
+```
+
+``` stata
+powerape dgp b, focal(program, binary p(0.5)) baseline(0.30)
+powerape setape b, target(0.08)
+
+powerape dgp bi, focal(program, binary p(0.5))                             ///
+    moderator(family, binary p(0.5)) baseline(0.30)
+powerape setaie bi, target(0.08) mainfocal(0.10) mainmoderator(0.03)
+```
+
+``` stata-output
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  moderator: family (binary, p = 0.50) (focal-by-moderator interaction included)
+  covariates: none
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.000
+  target effect not set yet - run powerape setape or powerape setaie.
+
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  moderator: family (binary, p = 0.50) (focal-by-moderator interaction included)
+  covariates: none
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.000
+  true AIE pinned at + 0.0800 (beta_int =    0.1939)
+  main APEs at reference: program  0.100 (beta =    0.2711), family  0.030 (beta =    0.0845)
+```
+
+- R
+- Stata
+
+``` r
+
+nB  <- ape_n(dB,  power = 0.80, claim = "detect", nsim = 1000, seed = 521)
+nBi <- ape_n(dBi, power = 0.80, claim = "detect", nsim = 1000, seed = 522)
+nB
+#> powerape required sample size -- detect claim
+#>   n = 1092 for 80% target power (confirmed 0.798, MCSE 0.006)
+#>   assumed true APE +0.0800, sesoi -, 95% CI (alpha = 0.05), probit
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+nBi
+#> powerape required sample size -- detect claim
+#>   n = 4514 for 80% target power (confirmed 0.796, MCSE 0.006)
+#>   assumed true AIE +0.0800, sesoi -, 95% CI (alpha = 0.05), probit
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+```
+
+``` stata
+powerape n b, power(0.80) claim(detect) nsim(1000) seed(521) engine(mata)
+
+powerape n bi, power(0.80) claim(detect) nsim(1000) seed(522) engine(mata)
+```
+
+``` stata-output
+powerape required sample size -- detect claim
+  n = 1093 for 80% target power (confirmed 0.797, MCSE 0.006)
+  assumed true APE + 0.0800, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+powerape required sample size -- detect claim
+  n = 4518 for 80% target power (confirmed 0.793, MCSE 0.006)
+  assumed true AIE + 0.0800, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+```
+
+Detecting the eight-point interaction with 80 percent power takes 4,514
+firms; the same eight points as a main effect take 1,092 (Stata: 4,518
+and 1,093). The interaction costs 4.1 times as much. The reason lies in
+the estimand: the AIE is a difference of differences of four cell rates,
+each estimated from about a quarter of the sample. Demanding a
+*meaningful* interaction, a minimum-effect claim with a SESOI of its
+own, raises the requirement again (see [Interaction
+effects](https://jespernwulff.github.io/powerape/articles/interaction-effects.md)).
+
+The null side has a claim of its own. An equivalence claim lets a team
+show that the program’s effect differs between the two kinds of firm by
+less than a margin it can defend, instead of reading a non-significant
+interaction test as evidence that the effect is the same everywhere (see
+[Equivalence](https://jespernwulff.github.io/powerape/articles/equivalence.md)).
+
+## Design C: from last year’s pilot to next year’s design
+
+A third team has a pilot of 900 firms from an earlier wave. The
+pilot-model route builds the next study’s world from a probit fitted to
+the pilot: it resamples the pilot’s covariate rows and keeps the fitted
+nuisance coefficients, but not the program’s coefficient. That one is
+solved again at the design target, because the pilot’s noisy estimate of
+the very effect under study is the one thing a design should not
+inherit. The team targets an effect of eight points and wants to show
+that it exceeds three.
+
+The pilot is simulated here, so that the page runs anywhere. Stata
+cannot draw R’s random numbers, so the Stata tab reads the same 900 rows
+from a file,
+[design-c-pilot.csv](https://github.com/jespernwulff/powerape/blob/main/precompute/stata/design-c-pilot.csv),
+and its probit reproduces R’s coefficients.
+
+- R
+- Stata
+
+``` r
+
+set.seed(31)
+z        <- rnorm(900)
+program  <- rbinom(900, 1, 0.5)
+survived <- rbinom(900, 1, pnorm(-0.55 + 0.35 * program + 0.45 * z))
+pilot    <- data.frame(survived, program, z)
+
+fit <- glm(survived ~ program + z, family = binomial("probit"), data = pilot)
+coef(summary(fit))
+#>               Estimate Std. Error   z value     Pr(>|z|)
+#> (Intercept) -0.5771775 0.06528506 -8.840882 9.496624e-19
+#> program      0.3392172 0.08947999  3.790984 1.500515e-04
+#> z            0.4577795 0.04796170  9.544688 1.365184e-21
+```
+
+``` stata
+import delimited using "design-c-pilot.csv", asdouble encoding(utf-8) clear
+probit survived program z, nolog
+```
+
+``` stata-output
+(3 vars, 900 obs)
+
+Probit regression                                       Number of obs =    900
+                                                        LR chi2(2)    = 117.81
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -529.74347                             Pseudo R2     = 0.1001
+
+------------------------------------------------------------------------------
+    survived | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     program |   .3392172   .0895274     3.79   0.000     .1637467    .5146878
+           z |   .4577792   .0473916     9.66   0.000     .3648933    .5506652
+       _cons |  -.5771774   .0654421    -8.82   0.000    -.7054416   -.4489131
+------------------------------------------------------------------------------
+```
+
+- R
+- Stata
+
+``` r
+
+dC   <- set_ape(ape_dgp_from_fit(fit, focal = "program"), target = 0.08)
+dC25 <- set_ape(ape_dgp_from_fit(fit, focal = "program", baseline = 0.25),
+                target = 0.08)
+dC
+#> powerape DGP -- probit (empirical covariates)
+#>   focal: program (binary, p = 0.50) [resampled jointly with covariates]
+#>   covariates: z 
+#>   pilot rows: 900 (resampled with replacement)
+#>   pilot model: survived ~ program + z (nuisance coefficients lifted; focal coefficient re-solved)
+#>   baseline P(Y=1 | reference) = 0.303, nuisance signal (latent pseudo-R2) = 0.174
+#>   true APE pinned at +0.0800 (beta_focal = 0.2400, implied P(Y=1 | focal=1) = 0.383)
+```
+
+``` stata
+powerape dgp c, fromfit focal(program)
+powerape setape c, target(0.08)
+
+powerape dgp c25, fromfit focal(program) baseline(0.25)
+powerape setape c25, target(0.08)
+```
+
+``` stata-output
+powerape DGP -- probit (empirical covariates)
+  focal: program (binary, p = 0.50) [resampled jointly with covariates]
+  covariates: z
+  pilot rows: 900 (resampled with replacement)
+  pilot model: probit survived program z (nuisance coefficients lifted; focal coefficient re-solved)
+  baseline P(Y=1 | reference) = 0.303, nuisance signal (latent pseudo-R2) = 0.174
+  target effect not set yet - run powerape setape or powerape setaie.
+
+powerape DGP -- probit (empirical covariates)
+  focal: program (binary, p = 0.50) [resampled jointly with covariates]
+  covariates: z
+  pilot rows: 900 (resampled with replacement)
+  pilot model: probit survived program z (nuisance coefficients lifted; focal coefficient re-solved)
+  baseline P(Y=1 | reference) = 0.303, nuisance signal (latent pseudo-R2) = 0.174
+  true APE pinned at + 0.0800 (beta_focal =    0.2400, implied P(Y=1 | focal=1) = 0.383)
+```
+
+- R
+- Stata
+
+``` r
+
+nC   <- ape_n(dC,   power = 0.80, claim = "minimum", sesoi = 0.03,
+              nsim = 1000, seed = 511)
+nC25 <- ape_n(dC25, power = 0.80, claim = "minimum", sesoi = 0.03,
+              nsim = 1000, seed = 512)
+nC
+#> powerape required sample size -- minimum claim
+#>   n = 1986 for 80% target power (confirmed 0.805, MCSE 0.006)
+#>   assumed true APE +0.0800, sesoi 0.030, 90% CI (alpha = 0.05), probit
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+nC25
+#> powerape required sample size -- minimum claim
+#>   n = 1819 for 80% target power (confirmed 0.801, MCSE 0.006)
+#>   assumed true APE +0.0800, sesoi 0.030, 90% CI (alpha = 0.05), probit
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+```
+
+``` stata
+powerape n c, power(0.80) claim(minimum) sesoi(0.03) nsim(1000) seed(511)  ///
+    engine(mata)
+
+powerape n c25, power(0.80) claim(minimum) sesoi(0.03) nsim(1000)          ///
+    seed(512) engine(mata)
+```
+
+``` stata-output
+powerape required sample size -- minimum claim
+  n = 1985 for 80% target power (confirmed 0.794, MCSE 0.006)
+  assumed true APE + 0.0800, sesoi 0.030,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+powerape required sample size -- minimum claim
+  n = 1822 for 80% target power (confirmed 0.806, MCSE 0.006)
+  assumed true APE + 0.0800, sesoi 0.030,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+```
+
+The pilot implies a baseline of 0.303, and at that baseline the design
+needs 1,986 firms (Stata: 1,985). If the next study will run in a
+harsher environment, with a baseline of 0.25 instead, one changed
+argument re-prices the whole design: 1,819 firms (Stata: 1,822).
+Outcomes near a rate of 0.25 are slightly less noisy than near 0.30, so
+the same eight points are a little easier to establish.
+
+Two cautions. This is prospective design for the next study, not
+“observed power” for the pilot, which remains a fallacy (Hoenig &
+Heisey, 2001). And a world built from a pilot inherits the pilot’s
+sampling noise: with fewer than 500 pilot rows, `powerape` warns that
+the design’s context is itself an estimate.
+
+## Design D: a firm-year panel, priced in firms
+
+A fourth team plans a panel: firms observed over four annual waves, an
+adoption event that is constant within the window, and the outcome,
+baseline and covariate signal of Design A. The analysis will be a
+correlated random effects (CRE) probit with Mundlak (1978) means and
+firm-clustered standard errors, so the design is simulated for that
+estimator. Two panel quantities must be stated: **rho**, the share of
+the unexplained latent variation that is stable within firms (0.30, the
+rho of `xtprobit`), and the share of that stable part that tracks the
+firms’ observed averages (one half). Sample sizes now count firms. The
+[Panel
+designs](https://jespernwulff.github.io/powerape/articles/panel-designs.md)
+workflow describes the route in detail.
+
+- R
+- Stata
+
+``` r
+
+dD <- ape_dgp_panel(focal = pa_var("adopt", "binary", p = 0.5, icc = 1),
+                    covariates = list(pa_var("size", "normal", icc = 0.6)),
+                    n_periods = 4, rho = 0.30, cre_share = 0.50,
+                    baseline = 0.30, signal = 0.10)
+dD <- set_ape(dD, target = 0.10)
+dD
+#> powerape DGP -- probit
+#>   focal: adopt (binary, p = 0.50, icc = 1.00)
+#>   covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60) 
+#>   panel: 4 periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/ Mundlak means, unit-clustered SEs
+#>   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+#>   true APE pinned at +0.1000 (beta_focal = 0.3634, implied P(Y=1 | focal=1) = 0.400)
+```
+
+``` stata
+powerape dgp d, panel focal(adopt, binary p(0.5) icc(1))                   ///
+    covariates((size, normal icc(0.6))) nperiods(4) rho(0.30)              ///
+    creshare(0.50) baseline(0.30) signal(0.10)
+powerape setape d, target(0.10)
+```
+
+``` stata-output
+powerape DGP -- probit
+  focal: adopt (binary, p = 0.50, icc = 1.00)
+  covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60)
+  panel: 4 periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/
+    Mundlak means, unit-clustered SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+powerape DGP -- probit
+  focal: adopt (binary, p = 0.50, icc = 1.00)
+  covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60)
+  panel: 4 periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/
+    Mundlak means, unit-clustered SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.3634, implied P(Y=1 | focal=1) = 0.400)
+```
+
+### Panel rows are not independent firms
+
+Three hundred firms over four waves are 1,200 firm-years. The second
+world draws the same 1,200 rows as independent firms.
+
+- R
+- Stata
+
+``` r
+
+pD <- ape_power(dD, n = 300, claim = "minimum", sesoi = 0.05,
+                nsim = 20000, seed = 501)
+pD
+#> powerape -- minimum-effect claim (CI lower bound > 0.050)
+#>   probit, n = 300 units x 4 periods (1200 obs), assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 20000
+#>   power = 0.563 (MCSE 0.004)
+#>   outcomes: minimum 0.563 | detect-only 0.388 | inconclusive 0.050 | equivalence 0.000 | failed 0.000
+```
+
+``` r
+
+dCS <- set_ape(ape_dgp(focal = pa_var("adopt", "binary", p = 0.5),
+                       covariates = list(pa_var("size", "normal")),
+                       baseline = 0.30, signal = 0.10), target = 0.10)
+pCS <- ape_power(dCS, n = 1200, claim = "minimum", sesoi = 0.05,
+                 nsim = 20000, seed = 502)
+pCS
+#> powerape -- minimum-effect claim (CI lower bound > 0.050)
+#>   probit, n = 1200, assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 20000
+#>   power = 0.595 (MCSE 0.003)
+#>   outcomes: minimum 0.595 | detect-only 0.370 | inconclusive 0.035 | equivalence 0.000 | failed 0.000
+```
+
+``` stata
+powerape power d, n(300) claim(minimum) sesoi(0.05) nsim(4000) seed(501)
+
+powerape dgp cs, focal(adopt, binary p(0.5)) covariates((size, normal))    ///
+    baseline(0.30) signal(0.10)
+powerape setape cs, target(0.10)
+
+powerape power cs, n(1200) claim(minimum) sesoi(0.05) nsim(4000) seed(502)
+```
+
+``` stata-output
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 300 units x 4 periods (1200 obs), assumed true APE + 0.1000, 90% CI (alpha = .05),
+    nsim = 4000
+  fit: probit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.554 (MCSE 0.008)
+  outcomes: minimum 0.554 | detect-only 0.390 | inconclusive 0.056 | equivalence 0.001 | failed 0.000
+
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1200, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 4000
+  fit: probit via engine(stata), effects(closed)
+  power = 0.584 (MCSE 0.008)
+  outcomes: minimum 0.584 | detect-only 0.374 | inconclusive 0.042 | equivalence 0.000 | failed 0.000
+```
+
+The panel of 300 firms reaches 56 percent power for the minimum-effect
+claim, the 1,200 independent firms 59 percent, 3 points more (Stata: 55
+and 58 percent, from 4,000 replications each; R uses 20,000 to pin down
+a gap this small, but under `probit` each simulated panel costs Stata
+many times what it costs R’s engine). Two common intuitions both fail
+here. Panel rows are not independent firms: when firms differ in
+unobserved ways, a firm’s repeated rows carry less information than as
+many new firms would. Nor are they nearly redundant, as the design
+effects of cluster-randomized trials would suggest: in this world half
+of the stable firm effect tracks the firms’ observed averages, and the
+Mundlak means absorb that part instead of wasting it. Even with no firm
+heterogeneity at all, the CRE estimator would trail a cross-section of
+the same size, because holding the firm means fixed spends about 1/T of
+the identifying variation: a premium worth paying, since rho is never
+known to be zero.
+
+### Required firms, and what rho does
+
+- R
+- Stata
+
+``` r
+
+nD <- ape_n(dD, power = 0.80, claim = "minimum", sesoi = 0.05,
+            nsim = 1000, seed = 503)
+nD
+#> powerape required sample size -- minimum claim
+#>   n = 572 units (x 4 periods) for 80% target power (confirmed 0.802, MCSE 0.006)
+#>   assumed true APE +0.1000, sesoi 0.050, 90% CI (alpha = 0.05), probit
+#>   search: 3 step(s); confirmed in 1 round(s) at nsim = 4000.
+```
+
+``` r
+
+rD <- ape_robust(dD, n = 300, claim = "minimum", sesoi = 0.05,
+                 vary = list(rho = c(0.1, 0.5)), grid_points = 3,
+                 nsim = 8000, seed = 504, nmax = FALSE)
+rD
+#> powerape robustness sweep -- minimum claim, APE, pin = ape
+#>   n = 300, nsim = 8000 per scenario, 3 scenario(s) over: rho
+#>   power range [0.523, 0.592]; worst scenario:
+#>  rho implied_effect    power        mcse separated
+#>  0.5            0.1 0.523375 0.005584058         0
+#>   scenarios:
+#>  rho implied_effect    power        mcse separated
+#>  0.1            0.1 0.592375 0.005493938         0
+#>  0.3            0.1 0.557750 0.005552758         0
+#>  0.5            0.1 0.523375 0.005584058         0
+```
+
+``` stata
+powerape n d, power(0.80) claim(minimum) sesoi(0.05) nsim(1000) seed(503)  ///
+    engine(mata)
+
+powerape robust d, n(300) claim(minimum) sesoi(0.05) vary(rho(0.1 0.5))    ///
+    gridpoints(3) nsim(8000) seed(504) nonmax engine(mata)
+```
+
+``` stata-output
+powerape required sample size -- minimum claim
+  n = 573 units (x 4 periods) for 80% target power (confirmed 0.804, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+powerape robustness sweep -- minimum claim, APE, pin = ape
+  n = 300, nsim = 8000 per scenario, 3 scenario(s) over: rho
+  power range [0.515, 0.592]; worst scenario: row 3
+  fit: Mata engine (Fisher scoring)
+ row          rho    implied_eff    power     mcse separated
+   1           .1         0.1000   0.5915   0.0055    0.0000
+   2           .3         0.1000   0.5597   0.0056    0.0000
+   3           .5         0.1000   0.5146   0.0056    0.0000
+```
+
+Eighty percent power takes 572 firms, or 2,288 firm-years (Stata: 573
+firms). As rho moves from 0.10 to 0.50, power at 300 firms falls from 59
+to 52 percent (Stata: 59 to 51). Rho, not the number of rows, is the
+quantity a reviewer should probe: once it is non-trivial, firms rather
+than rows buy power, and what a panel’s waves are worth is a property of
+the design that the simulation computes.
+
+### Attrition
+
+Firms drop out. The next two worlds keep each firm from one wave to the
+next with probability 0.85 or 0.70, and the estimator becomes the CRE
+probit for unbalanced panels of Wooldridge (2019): Mundlak means over
+the waves a firm is observed, and indicators for the number of those
+waves.
+
+- R
+- Stata
+
+``` r
+
+retained <- function(r) {
+  d <- ape_dgp_panel(focal = pa_var("adopt", "binary", p = 0.5, icc = 1),
+                     covariates = list(pa_var("size", "normal", icc = 0.6)),
+                     n_periods = 4, retention = r, rho = 0.30,
+                     cre_share = 0.50, baseline = 0.30, signal = 0.10,
+                     n_int = 4e4)
+  set_ape(d, target = 0.10)
+}
+dD85 <- retained(0.85)
+dD70 <- retained(0.70)
+```
+
+``` r
+
+p85 <- ape_power(dD85, n = 300, claim = "minimum", sesoi = 0.05,
+                 nsim = 10000, seed = 71)
+p70 <- ape_power(dD70, n = 300, claim = "minimum", sesoi = 0.05,
+                 nsim = 10000, seed = 71)
+n85 <- ape_n(dD85, power = 0.80, claim = "minimum", sesoi = 0.05,
+             nsim = 800, seed = 72)
+n70 <- ape_n(dD70, power = 0.80, claim = "minimum", sesoi = 0.05,
+             nsim = 800, seed = 72)
+data.frame(retention  = c(1, 0.85, 0.70),
+           waves      = round(c(4, dD85$expected_T, dD70$expected_T), 2),
+           power_300  = round(c(pD$power, p85$power, p70$power), 3),
+           firms      = c(nD$n, n85$n, n70$n),
+           firm_years = round(c(4 * nD$n, n85$n * dD85$expected_T,
+                                n70$n * dD70$expected_T)))
+#>   retention waves power_300 firms firm_years
+#> 1      1.00  4.00     0.563   572       2288
+#> 2      0.85  3.19     0.499   699       2227
+#> 3      0.70  2.53     0.435   843       2135
+```
+
+``` stata
+powerape dgp d85, panel focal(adopt, binary p(0.5) icc(1))                 ///
+    covariates((size, normal icc(0.6))) nperiods(4) retention(0.85)        ///
+    rho(0.30) creshare(0.50) baseline(0.30) signal(0.10) nint(40000)
+powerape setape d85, target(0.10)
+powerape dgp d70, panel focal(adopt, binary p(0.5) icc(1))                 ///
+    covariates((size, normal icc(0.6))) nperiods(4) retention(0.70)        ///
+    rho(0.30) creshare(0.50) baseline(0.30) signal(0.10) nint(40000)
+powerape setape d70, target(0.10)
+
+powerape power d85, n(300) claim(minimum) sesoi(0.05) nsim(2000) seed(71)
+
+powerape power d70, n(300) claim(minimum) sesoi(0.05) nsim(2000) seed(71)
+
+powerape n d85, power(0.80) claim(minimum) sesoi(0.05) nsim(800) seed(72)  ///
+    engine(mata)
+
+powerape n d70, power(0.80) claim(minimum) sesoi(0.05) nsim(800) seed(72)  ///
+    engine(mata)
+```
+
+``` stata-output
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 300 units x 1-4 (unbalanced, mean 3.19) periods (~956 obs), assumed true APE +
+    0.1000, 90% CI (alpha = .05), nsim = 2000
+  fit: probit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.485 (MCSE 0.011)
+  outcomes: minimum 0.485 | detect-only 0.404 | inconclusive 0.111 | equivalence 0.000 | failed 0.000
+
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 300 units x 1-4 (unbalanced, mean 2.53) periods (~760 obs), assumed true APE +
+    0.1000, 90% CI (alpha = .05), nsim = 2000
+  fit: probit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.419 (MCSE 0.011)
+  outcomes: minimum 0.419 | detect-only 0.408 | inconclusive 0.173 | equivalence 0.000 | failed 0.000
+
+powerape required sample size -- minimum claim
+  n = 701 units (x 1-4 (unbalanced, mean 3.19) periods) for 80% target power (confirmed 0.796, MCSE 0.007)
+  assumed true APE + 0.1000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 3200.
+
+powerape required sample size -- minimum claim
+  n = 849 units (x 1-4 (unbalanced, mean 2.53) periods) for 80% target power (confirmed 0.797, MCSE 0.007)
+  assumed true APE + 0.1000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 3200.
+```
+
+Retention of 0.85 and 0.70 leaves 3.2 and 2.5 waves per firm on average.
+Power at 300 firms falls from 56 to 50 and 44 percent, and the
+requirement rises from 572 to 699 and 843 firms (Stata: 49 and 42
+percent from 2,000 replications each; 701 and 849 firms). In firm-years
+the three requirements are close, about 2,290, 2,230 and 2,140: what
+attrition removes is rows per firm, and recruitment has to make them up.
+A proposal can budget for its expected retention instead of hoping for
+it.
+
+## Design E: what instrumenting a treatment costs
+
+A fifth team studies a treatment that firms choose for themselves,
+participation in a training program, with a subsidy offer as the
+instrument. The analysis will be a control-function probit (Wooldridge,
+2015): a first-stage probit of participation on the instrument, whose
+generalized residual enters the outcome probit. This is the estimator of
+Stata’s `cfprobit`, and in the Stata tab `cfprobit` fits every simulated
+study of a single power call. Two quantities are new: the correlation
+between the errors of the two equations, which is why the treatment must
+be instrumented at all (`endogeneity`, here 0.4), and the strength of
+the first stage, the instrument’s share of the latent variation in
+participation (`iv_strength`, here 0.2). A second world is the same
+design with an exogenous treatment. The [IV
+designs](https://jespernwulff.github.io/powerape/articles/iv-designs.md)
+workflow describes the route in detail.
+
+- R
+- Stata
+
+``` r
+
+dE <- ape_dgp_iv(focal = pa_var("training", "binary", p = 0.4),
+                 covariates = list(pa_var("size", "normal")),
+                 instruments = pa_var("subsidy", "binary", p = 0.5),
+                 endogeneity = 0.4, iv_strength = 0.2,
+                 baseline = 0.30, signal = 0.10)
+dE <- set_ape(dE, target = 0.10)
+
+dEx <- set_ape(ape_dgp(focal = pa_var("training", "binary", p = 0.4),
+                       covariates = list(pa_var("size", "normal")),
+                       baseline = 0.30, signal = 0.10), target = 0.10)
+dE
+#> powerape DGP -- probit
+#>   focal: training (binary, p = 0.40)
+#>   covariates: size (normal, mean 0.00, sd 1.00) 
+#>   iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40, first-stage strength = 0.20; control-function probit, stacked robust SEs
+#>   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+#>   true APE pinned at +0.1000 (beta_focal = 0.2857, implied P(Y=1 | focal=1) = 0.400)
+```
+
+``` stata
+powerape dgp e, iv focal(training, binary p(0.4)) covariates((size, normal)) ///
+    instruments((subsidy, binary p(0.5))) endogeneity(0.4) ivstrength(0.2)   ///
+    baseline(0.30) signal(0.10)
+powerape setape e, target(0.10)
+
+powerape dgp ex, focal(training, binary p(0.4)) covariates((size, normal))  ///
+    baseline(0.30) signal(0.10)
+powerape setape ex, target(0.10)
+```
+
+``` stata-output
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40,
+    first-stage strength = 0.20; control-function probit, stacked robust SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40,
+    first-stage strength = 0.20; control-function probit, stacked robust SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)
+```
+
+### Power at 1,200 observations
+
+- R
+- Stata
+
+``` r
+
+pEx <- ape_power(dEx, n = 1200, claim = "detect", nsim = 2000, seed = 601)
+pE  <- ape_power(dE,  n = 1200, claim = "detect", nsim = 2000, seed = 602)
+pEx
+#> powerape -- detection claim (CI excludes 0, directional)
+#>   probit, n = 1200, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 2000
+#>   power = 0.959 (MCSE 0.004)
+#>   outcomes: detect 0.959 | inconclusive 0.041 | failed 0.000
+pE
+#> powerape -- detection claim (CI excludes 0, directional)
+#>   probit, n = 1200, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 2000, stacked robust SEs
+#>   power = 0.224 (MCSE 0.009)
+#>   outcomes: detect 0.224 | inconclusive 0.776 | failed 0.000
+```
+
+``` stata
+powerape power ex, n(1200) claim(detect) nsim(2000) seed(601)
+
+powerape power e, n(1200) claim(detect) nsim(2000) seed(602)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 1200, assumed true APE + 0.1000,     95% CI (alpha = .05), nsim = 2000
+  fit: probit via engine(stata), effects(closed)
+  power = 0.962 (MCSE 0.004)
+  outcomes: detect 0.962 | inconclusive 0.038 | failed 0.000
+
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 1200, assumed true APE + 0.1000,     95% CI (alpha = .05), nsim = 2000, stacked robust SEs
+  fit: cfprobit via engine(stata), effects(closed)
+  power = 0.215 (MCSE 0.009)
+  outcomes: detect 0.215 | inconclusive 0.784 | failed 0.000
+```
+
+At 1,200 observations the exogenous design detects the ten-point APE
+with 96 percent power, the instrumented design with 22 percent (Stata:
+96 and 22). Nothing about the effect changed, only the share of the
+variation the estimator is allowed to use. The control function
+identifies the effect mainly from the instrumented share, so its
+standard error exceeds the exogenous one by roughly the square root of
+1/`iv_strength`, about 2.2 here, and the endogeneity assumed in this
+world pushes the surcharge higher still.
+
+### The required sample size
+
+- R
+- Stata
+
+``` r
+
+nE  <- ape_n(dE, power = 0.80, claim = "detect", nsim = 2000,
+             nsim_confirm = 16000, seed = 603)
+nEx <- ape_n(dEx, power = 0.80, claim = "detect", nsim = 1000, seed = 606)
+nE
+#> powerape required sample size -- detect claim
+#>   n = 6813 for 80% target power (confirmed 0.809, MCSE 0.003)
+#>   assumed true APE +0.1000, sesoi -, 95% CI (alpha = 0.05), probit, stacked robust SEs
+#>   search: 2 step(s); confirmed in 2 round(s) at nsim = 16000.
+nEx
+#> powerape required sample size -- detect claim
+#>   n = 699 for 80% target power (confirmed 0.795, MCSE 0.006)
+#>   assumed true APE +0.1000, sesoi -, 95% CI (alpha = 0.05), probit
+#>   search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+```
+
+``` stata
+powerape n e, power(0.80) claim(detect) nsim(2000) nsimconfirm(16000)      ///
+    seed(603) engine(mata)
+
+powerape n ex, power(0.80) claim(detect) nsim(1000) seed(606) engine(mata)
+```
+
+``` stata-output
+powerape required sample size -- detect claim
+  n = 6750 for 80% target power (confirmed 0.803, MCSE 0.003)
+  assumed true APE + 0.1000, sesoi -,     95% CI (alpha =    .05), probit, stacked robust SEs
+  fit: Mata engine (Fisher scoring; control-function probit)
+  search: 2 step(s); confirmed in 2 round(s) at nsim = 16000.
+
+powerape required sample size -- detect claim
+  n = 732 for 80% target power (confirmed 0.819, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 2 round(s) at nsim = 4000.
+```
+
+Detection with 80 percent power takes 699 observations when the
+treatment is exogenous and 6,813 under the control function (Stata: 732
+and 6,750), a factor of 9.7. At this scale power rises slowly with n, so
+a few hundred observations either way sit within simulation error of 80
+percent: the instrumented search uses 2,000 replications per step and
+confirms its answer with 16,000.
+
+### Instrument strength, and an instrumented interaction
+
+- R
+- Stata
+
+``` r
+
+rE <- ape_robust(dE, n = 1200, claim = "detect",
+                 vary = list(iv_strength = c(0.1, 0.3)), grid_points = 3,
+                 nsim = 800, seed = 604, nmax = FALSE)
+rE
+#> powerape robustness sweep -- detect claim, APE, pin = ape
+#>   n = 1200, nsim = 800 per scenario, 3 scenario(s) over: iv_strength
+#>   power range [0.121, 0.325]; worst scenario:
+#>  iv_strength implied_effect   power      mcse separated
+#>          0.1            0.1 0.12125 0.0115406         0
+#>   scenarios:
+#>  iv_strength implied_effect   power       mcse separated
+#>          0.1            0.1 0.12125 0.01154060         0
+#>          0.2            0.1 0.21250 0.01446305         0
+#>          0.3            0.1 0.32500 0.01655955         0
+```
+
+``` r
+
+dEi <- ape_dgp_iv(focal = pa_var("training", "binary", p = 0.4),
+                  moderator = pa_var("public", "binary", p = 0.5),
+                  covariates = list(pa_var("size", "normal")),
+                  instruments = pa_var("subsidy", "binary", p = 0.5),
+                  endogeneity = 0.4, iv_strength = 0.25,
+                  baseline = 0.30, signal = 0.10)
+dEi <- set_aie(dEi, target = 0.06, main_focal = 0.10, main_moderator = 0.05)
+pEi <- ape_power(dEi, n = 2000, claim = "detect", nsim = 1000, seed = 605)
+pEi
+#> powerape -- detection claim (CI excludes 0, directional)
+#>   probit, n = 2000, assumed true AIE +0.0600, 95% CI (alpha = 0.05), nsim = 1000, stacked robust SEs
+#>   power = 0.103 (MCSE 0.010)
+#>   outcomes: detect 0.103 | inconclusive 0.897 | failed 0.000
+```
+
+``` stata
+powerape robust e, n(1200) claim(detect) vary(ivstrength(0.1 0.3))         ///
+    gridpoints(3) nsim(800) seed(604) nonmax engine(mata)
+
+powerape dgp ei, iv focal(training, binary p(0.4))                         ///
+    moderator(public, binary p(0.5)) covariates((size, normal))            ///
+    instruments((subsidy, binary p(0.5))) endogeneity(0.4)                 ///
+    ivstrength(0.25) baseline(0.30) signal(0.10)
+powerape setaie ei, target(0.06) mainfocal(0.10) mainmoderator(0.05)
+
+powerape power ei, n(2000) claim(detect) nsim(1000) seed(605)
+```
+
+``` stata-output
+powerape robustness sweep -- detect claim, APE, pin = ape
+  n = 1200, nsim = 800 per scenario, 3 scenario(s) over: ivstrength
+  power range [0.138, 0.319]; worst scenario: row 1
+  fit: Mata engine (Fisher scoring; control-function probit)
+ row   ivstrength    implied_eff    power     mcse separated
+   1           .1         0.1000   0.1375   0.0122    0.0000
+   2           .2         0.1000   0.2238   0.0147    0.0000
+   3           .3         0.1000   0.3187   0.0165    0.0000
+
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 2000, assumed true AIE + 0.0600,     95% CI (alpha = .05), nsim = 1000, stacked robust SEs
+  fit: cfprobit via engine(stata), effects(closed)
+  power = 0.104 (MCSE 0.010)
+  outcomes: detect 0.104 | inconclusive 0.896 | failed 0.000
+```
+
+Holding the effect fixed, power at 1,200 observations runs from 12 to 32
+percent as the instrument’s share moves from 0.10 to 0.30 (Stata: 14 to
+32): first-stage strength is the elicitation that matters most. A
+moderated version in the spirit of Design B, a six-point AIE between
+public and private firms with an instrument share of 0.25, reaches only
+10 percent power at 2,000 observations (Stata: 10), because it pays both
+surcharges at once. A study sized for a plain probit that turns to
+instruments at review time has not gained a robustness check; it has
+lost the study. Budget for the estimator the analysis will report: a few
+minutes of simulation show the cost before the data are collected.
+
+## The five designs at a glance
+
+| Design | Question | Required n, R | Required n, Stata | Lesson |
+|:---|:---|:---|:---|:---|
+| A | How many firms for an effect worth acting on? | 2,091 vs. 663 | 2,084 vs. 663 | A meaningful conclusion costs about three times the sample of mere detection. |
+| B | Can the moderation study find its interaction? | 4,514 vs. 1,092 | 4,518 vs. 1,093 | The same eight points cost about four times as much as an interaction as they do as a main effect. |
+| C | What is last year’s pilot worth? | 1,986 vs. 1,819 | 1,985 vs. 1,822 | The pilot contributes its world, never its effect; one changed argument re-prices the design. |
+| D | How many firms for a firm-year panel? | 572; 699 and 843 | 573; 701 and 849 | Sample size counts firms, rho is the elicitation that matters, and attrition costs firms, not firm-years. |
+| E | What does instrumenting the treatment cost? | 6,813 vs. 699 | 6,750 vs. 732 | Instrumenting multiplies the requirement almost tenfold; budget for the estimator the analysis will report. |
+
+Required sample sizes for 80 percent power, for each design’s own claim:
+the minimum-effect claim in A, C and D, detection in B and E. A: minimum
+effect vs. detection. B: the AIE vs. the same effect as a main effect.
+C: the pilot’s baseline vs. a baseline of 0.25. D: firms in the balanced
+panel, then with retention of 0.85 and 0.70. E: the control function
+vs. an exogenous treatment. Each is a seeded estimate accepted by the
+confirmation run; other seeds move it by a few percent without changing
+any comparison above.
+
+## What to report
+
+A design paragraph in a proposal or a preregistration should let a
+reader re-run the analysis and judge its assumptions. It reports:
+
+- the estimand and its units: the APE or the AIE, in probability points,
+  with the model and link;
+- the SESOI, with its substantive justification;
+- the claim, its error rate and the interval level it implies, and how
+  the error rate was chosen;
+- the planning value, the effect at which power was computed, and why;
+- the assumed world and its source: baseline rate, covariates and their
+  dependence, nuisance signal, panel or first-stage quantities where
+  they apply; parametric guesses, pilot rows or a pilot model;
+- that the target is feasible in that world;
+- power at the chosen n with its Monte Carlo standard error, and the
+  full outcome table;
+- the robustness range: what was swept, the range of power and the worst
+  case, and n_max where relevant;
+- the software and its version, the seed and the number of replications.
+
+[`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+(in Stata, `powerape statement`) writes the estimand, world, claim and
+power items as a paragraph; the feasibility check, the robustness range
+and the seeds come from the same session. For Design A at its required
+n:
+
+- R
+- Stata
+
+``` r
+
+sA <- ape_power(dA, n = nA_min$n, claim = "minimum", sesoi = 0.05,
+                nsim = 4000, seed = 20260821)
+power_statement(sA)
+#> We conducted a simulation-based power analysis for the average partial effect
+#> (APE) of program using the powerape package (version 1.11.3), following the
+#> confidence-interval approach of Riesthuis (2024). The assumed data-generating
+#> process was a probit model with focal variable program (binary, prevalence
+#> 0.50); parametric covariates z (continuous, mean 0, SD 1), with the focal
+#> variable and the covariates mutually independent; baseline outcome rate 0.300
+#> with the focal at reference; nuisance covariates contribute a latent
+#> pseudo-R-squared of 0.10. The assumed true APE was 0.100 (10.0 percentage
+#> points). At a sample size of n = 2091, simulated power for the minimum-effect
+#> claim (the 90% confidence interval's lower bound exceeding the smallest
+#> effect size of interest, 0.050; a one-sided test at alpha = 5%) was 0.804
+#> (Monte Carlo SE 0.006; 4000 replications). Across replications, the
+#> probability of concluding a meaningful effect was 0.804, of detection without
+#> meaningfulness 0.194, of an inconclusive result 0.001, and of equivalence
+#> 0.000. Estimation used maximum likelihood with delta-method Wald confidence
+#> intervals; replications without a maximum-likelihood estimate, from a failed
+#> fit or from separation (a focal cell with no events or no non-events),
+#> counted against the claim (0.0% of replications).
+```
+
+``` stata
+powerape power a, n(`n_min') claim(minimum) sesoi(0.05) nsim(4000)         ///
+    seed(20260821)
+
+powerape statement
+```
+
+``` stata-output
+We conducted a simulation-based power analysis for the average partial effect
+(APE) of program using the powerape package for Stata (version 0.1.2 (Stata
+port of powerape 1.11.3)), following the confidence-interval approach of
+Riesthuis (2024). The assumed data-generating process was a probit model with
+focal variable program (binary, prevalence 0.50); parametric covariates z
+(continuous, mean 0, SD 1), with the focal variable and the covariates
+mutually independent; baseline outcome rate 0.300 with the focal at reference;
+nuisance covariates contribute a latent pseudo-R-squared of 0.10. The assumed
+true APE was 0.100 (10.0 percentage points). At a sample size of n = 2084,
+simulated power for the minimum-effect claim (the 90% confidence interval's
+lower bound exceeding the smallest effect size of interest, 0.050; a one-sided
+test at alpha = 5%) was 0.806 (Monte Carlo SE 0.006; 4000 replications).
+Across replications, the probability of concluding a meaningful effect was
+0.806, of detection without meaningfulness 0.193, of an inconclusive result
+0.002, and of equivalence 0.000. Estimation used maximum likelihood with
+delta-method Wald confidence intervals; replications without a
+maximum-likelihood estimate, from a failed fit or from separation (a focal
+cell with no events or no non-events), counted against the claim (0.0% of
+replications).
+```
+
+## Notes on reproducibility
+
+- The R output on this page comes from `powerape` 1.11.3, the Stata
+  output from the Stata command 0.1.2 (StataNow 19.5). Every call shows
+  its seed and its number of replications, so with the same versions the
+  R numbers reproduce exactly.
+- R and Stata draw different random numbers, so their numbers agree up
+  to simulation error, not digit for digit.
+- A required sample size is confirmed by a run with four times the
+  search’s replications (16,000 in Design E’s instrumented search), and
+  the search never trims n after an overshoot. A required n therefore
+  inherits the noise of the power estimates near the target, and the two
+  languages can land a few percent apart: for Design E’s exogenous
+  comparison, R stops at 699 and Stata at 732, where its confirmation
+  run found a power of .82.
+- In Stata, the single power calls fit every simulated study with
+  Stata’s own commands: `probit` (with `vce(cluster)` on the panel
+  route) and `cfprobit` on the IV route. That is slower: the 4,000
+  simulated panels of Design D’s first power call took 14 minutes this
+  way, on a machine that was busy with other jobs. The searches and
+  sweeps use the Mata engine, which follows the R package’s conventions
+  and is 10 to 30 times faster; the two engines agree up to simulation
+  error (see [How powerape is
+  validated](https://jespernwulff.github.io/powerape/articles/validation.md)).
+- The Stata code uses the R code’s numbers of replications throughout,
+  except in Design D’s single power calls: 4,000 and 2,000 replications
+  where R uses 20,000 and 10,000: under `probit` each simulated panel
+  costs Stata many times what it costs R’s engine, so the Stata run
+  keeps these counts down.
+- The Stata runs behind this page are in the package’s repository, in
+  [precompute/stata](https://github.com/jespernwulff/powerape/tree/main/precompute/stata)
+  (`worked-example-a.do` to `worked-example-e.do`).
+
+## References
+
+Hoenig, J. M., & Heisey, D. M. (2001). The abuse of power: The pervasive
+fallacy of power calculations for data analysis. *The American
+Statistician*, 55(1), 19–24.
+<https://doi.org/10.1198/000313001300339897>
+
+Mundlak, Y. (1978). On the pooling of time series and cross section
+data. *Econometrica*, 46(1), 69–85. <https://doi.org/10.2307/1913646>
+
+Riesthuis, P. (2024). Simulation-based power analyses for the smallest
+effect size of interest: A confidence-interval approach for
+minimum-effect and equivalence testing. *Advances in Methods and
+Practices in Psychological Science*, 7(2).
+<https://doi.org/10.1177/25152459241240722>
+
+Wooldridge, J. M. (2015). Control function methods in applied
+econometrics. *Journal of Human Resources*, 50(2), 420–445.
+<https://doi.org/10.3368/jhr.50.2.420>
+
+Wooldridge, J. M. (2019). Correlated random effects models with
+unbalanced panels. *Journal of Econometrics*, 211(1), 137–150.
+<https://doi.org/10.1016/j.jeconom.2018.12.010>

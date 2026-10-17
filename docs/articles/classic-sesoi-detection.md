@@ -8,6 +8,9 @@ the smallest thing I care about, I still detect it with 80%
 probability”. In `powerape` this is `claim = "detect"` with the target
 set to the SESOI:
 
+- R
+- Stata
+
 ``` r
 
 library(powerape)
@@ -25,6 +28,21 @@ ape_power(d, n = 5000, claim = "detect", sesoi = 0.05,
 #>   outcomes: minimum 0.052 | detect-only 0.888 | inconclusive 0.000 | equivalence 0.060 | failed 0.000
 ```
 
+``` stata
+powerape dgp d, focal(treat, binary p(0.5)) baseline(0.30)
+powerape setape d, target(0.05)
+
+powerape power d, n(5000) claim(detect) sesoi(0.05) nsim(600) seed(1)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 5000, assumed true APE + 0.0500,     95% CI (alpha = .05), nsim = 600
+  fit: probit via engine(stata), effects(closed)
+  power = 0.962 (MCSE 0.008)
+  outcomes: minimum 0.053 | detect-only 0.890 | inconclusive 0.000 | equivalence 0.057 | failed 0.000
+```
+
 Note what the outcome distribution shows: even with ample detection
 power, essentially **no study can claim the effect is meaningfully
 large** (`minimum` outcome near zero), because when the truth sits at
@@ -37,11 +55,25 @@ Asking for minimum-effect power *at* the SESOI is statistically
 degenerate, and `powerape` refuses with an explanation rather than
 returning a useless number:
 
+- R
+- Stata
+
 ``` r
 
 ape_power(d, n = 5000, claim = "minimum", sesoi = 0.05)
 #> Error:
 #> ! Assumed true APE (0.0500 in magnitude) does not exceed the SESOI (0.0500). On or below the null boundary of the minimum-effect test the claim succeeds with probability ~5.0% (the test size) at ANY sample size, so no n delivers meaningful power. Either assume a planning value above the SESOI, or run the classic SESOI analysis instead: claim = "detect" with the target set to the SESOI.
+```
+
+``` stata
+capture noisily powerape power d, n(5000) claim(minimum) sesoi(0.05)
+```
+
+``` stata-output
+Assumed true APE ( 0.0500 in magnitude) does not exceed the SESOI ( 0.0500). On or below the null
+  boundary of the minimum-effect test the claim succeeds with probability ~5.0% (the test size) at
+  ANY sample size, so no n delivers meaningful power. Either assume a planning value above the
+  SESOI, or run the classic SESOI analysis instead: claim(detect) with the target set to the SESOI.
 ```
 
 On the null boundary of the minimum-effect test, the claim succeeds with
@@ -53,6 +85,9 @@ test) at *any* sample size.
 Either stay with detection at truth = SESOI (this vignette), or assume a
 planning value **above** the SESOI and power the minimum-effect claim.
 The second buys a stronger conclusion and costs more observations:
+
+- R
+- Stata
 
 ``` r
 
@@ -73,6 +108,30 @@ ape_n(d8, power = 0.80, claim = "minimum", sesoi = 0.05,
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
 ```
 
+``` stata
+* detection power for truth = SESOI = 0.05
+powerape n d, power(0.80) claim(detect) nsim(500) seed(2) engine(mata)
+
+* minimum-effect power for truth = 0.08 against SESOI = 0.05
+powerape setape d, target(0.08)
+
+powerape n d, power(0.80) claim(minimum) sesoi(0.05) nsim(500) seed(3) engine(mata)
+```
+
+``` stata-output
+powerape required sample size -- detect claim
+  n = 2749 for 80% target power (confirmed 0.796, MCSE 0.009)
+  assumed true APE + 0.0500, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
+
+powerape required sample size -- minimum claim
+  n = 6123 for 80% target power (confirmed 0.797, MCSE 0.009)
+  assumed true APE + 0.0800, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
+```
+
 The gap between those two n’s is the price of concluding “meaningfully
 large” instead of “not zero”. Making that price visible – in APE units,
 before data collection – is precisely what a SESOI-based design
@@ -84,6 +143,9 @@ A useful sanity check of the whole simulation pipeline: at a true APE of
 zero, directional detection should fire at half the nominal two-sided
 rate.
 
+- R
+- Stata
+
 ``` r
 
 d0 <- set_ape(d, target = 0)
@@ -92,4 +154,18 @@ ape_power(d0, n = 2000, claim = "detect", nsim = 600, seed = 4)
 #>   probit, n = 2000, assumed true APE +0.0000, 95% CI (alpha = 0.05), nsim = 600
 #>   power = 0.022 (MCSE 0.006)
 #>   outcomes: detect 0.022 | inconclusive 0.978 | failed 0.000
+```
+
+``` stata
+powerape setape d, target(0)
+
+powerape power d, n(2000) claim(detect) nsim(600) seed(4)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 2000, assumed true APE + 0.0000,     95% CI (alpha = .05), nsim = 600
+  fit: probit via engine(stata), effects(closed)
+  power = 0.023 (MCSE 0.006)
+  outcomes: detect 0.023 | inconclusive 0.977 | failed 0.000
 ```

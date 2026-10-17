@@ -9,7 +9,13 @@ articles:
   justified-alpha: justified-alpha.html
   minimum-effect: minimum-effect.html
   panel-designs: panel-designs.html
-last_built: 2026-10-14T21:05Z
+  articles/r-and-stata: r-and-stata.html
+  articles/stata-help: stata-help.html
+  articles/stata-news: stata-news.html
+  articles/stata: stata.html
+  articles/validation: validation.html
+  articles/worked-example: worked-example.html
+last_built: 2026-10-17T17:45Z
 urls:
   reference: https://jespernwulff.github.io/powerape/reference
   article: https://jespernwulff.github.io/powerape/articles

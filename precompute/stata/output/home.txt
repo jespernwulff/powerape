@@ -1,0 +1,62 @@
+
+. 
+end of do-file
+
+. 
+. * >>> world
+. powerape dgp program, focal(program, binary p(0.5)) covariates((z, normal)) ///
+>     baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  covariates: z (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape program, target(0.10)
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  covariates: z (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)
+
+. * <<<
+. 
+. tic
+
+. * >>> n-minimum
+. powerape n program, power(0.80) claim(minimum) sesoi(0.05)               ///
+>     nsim(1000) seed(502) engine(mata)
+powerape required sample size -- minimum claim
+  n = 2084 for 80% target power (confirmed 0.800, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+. * <<<
+. keep_r n_minimum
+
+. toc n_minimum
+
+. 
+. tic
+
+. * >>> n-detect
+. powerape n program, power(0.80) claim(detect)                            ///
+>     nsim(1000) seed(503) engine(mata)
+powerape required sample size -- detect claim
+  n = 663 for 80% target power (confirmed 0.796, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+. * <<<
+. keep_r n_detect
+
+. toc n_detect
+
+. 
+. file close res
+
+. file close tim
+
+. log close pc

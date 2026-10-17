@@ -1,0 +1,231 @@
+
+. 
+end of do-file
+
+. 
+. * >>> world
+. powerape dgp d, focal(program, binary p(0.5)) covariates((z, normal))     ///
+>     baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  covariates: z (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape d, target(0.10)
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  covariates: z (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)
+
+. * <<<
+. 
+. tic
+
+. * >>> default
+. powerape power d, n(2000) claim(minimum) sesoi(0.05) nsim(400) seed(1)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 2000, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 400
+  fit: probit via engine(stata), effects(closed)
+  power = 0.767 (MCSE 0.021)
+  outcomes: minimum 0.767 | detect-only 0.230 | inconclusive 0.003 | equivalence 0.000 | failed 0.000
+
+. powerape power d, n(2000) claim(minimum) sesoi(0.05) alpha(0.01) nsim(400) seed(1)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 2000, assumed true APE + 0.1000,     98% CI (alpha = .01), nsim = 400
+  fit: probit via engine(stata), effects(closed)
+  power = 0.522 (MCSE 0.025)
+  outcomes: minimum 0.522 | detect-only 0.468 | inconclusive 0.010 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r default
+
+. toc default
+
+. 
+. * >>> rule
+. * alphaN's rule alphaN(n, BF = 3) (Wulff & Taylor, 2024) as an expression in @n
+. display chi2tail(1, ln(500) + 2*ln(3)), chi2tail(1, ln(2000) + 2*ln(3)), ///
+>     chi2tail(1, ln(8000) + 2*ln(3))
+.00372787 .0017469 .00082487
+
+. * <<<
+. 
+. tic
+
+. * >>> rule-n
+. powerape n d, power(0.80) claim(minimum) sesoi(0.05)                     ///
+>     alpharule(chi2tail(1, ln(@n) + 2*ln(3)))                              ///
+>     nsim(300) seed(2) noconfirm engine(mata)
+powerape required sample size -- minimum claim
+  n = 5189 for 80% target power (achieved 0.763, MCSE 0.025)
+  assumed true APE + 0.1000, sesoi 0.050,  99.79% CI (alpha =   .001 by sample-size rule), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirm with powerape power at a larger nsim.
+
+. * <<<
+. keep_r rule_n
+
+. toc rule_n
+
+. 
+. tic
+
+. * >>> rule-power
+. powerape power d, n(5000) claim(minimum) sesoi(0.05)                      ///
+>     alpharule(chi2tail(1, ln(@n) + 2*ln(3))) nsim(400) seed(3)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 5000, assumed true APE + 0.1000,  99.79% CI (alpha =  .0011 by sample-size rule), nsim = 400
+  fit: probit via engine(stata), effects(closed)
+  power = 0.802 (MCSE 0.020)
+  outcomes: minimum 0.802 | detect-only 0.198 | inconclusive 0.000 | equivalence 0.000 | failed 0.000
+
+. powerape statement
+We conducted a simulation-based power analysis for the average partial effect
+(APE) of program using the powerape package for Stata (version 0.1.2 (Stata
+port of powerape 1.11.3)), following the confidence-interval approach of
+Riesthuis (2024). The assumed data-generating process was a probit model with
+focal variable program (binary, prevalence 0.50); parametric covariates z
+(continuous, mean 0, SD 1), with the focal variable and the covariates
+mutually independent; baseline outcome rate 0.300 with the focal at reference;
+nuisance covariates contribute a latent pseudo-R-squared of 0.10. The assumed
+true APE was 0.100 (10.0 percentage points). At a sample size of n = 5000,
+simulated power for the minimum-effect claim (the 99.79% confidence interval's
+lower bound exceeding the smallest effect size of interest, 0.050; a one-sided
+test at alpha = .106%, set as a function of the sample size) was 0.802 (Monte
+Carlo SE 0.020; 400 replications). Across replications, the probability of
+concluding a meaningful effect was 0.802, of detection without meaningfulness
+0.198, of an inconclusive result 0.000, and of equivalence 0.000. Estimation
+used maximum likelihood with delta-method Wald confidence intervals;
+replications without a maximum-likelihood estimate, from a failed fit or from
+separation (a focal cell with no events or no non-events), counted against the
+claim (0.0% of replications).
+
+. * <<<
+. keep_r rule_power
+
+. toc rule_power
+
+. 
+. tic
+
+. * >>> costs
+. powerape power d, n(2000) claim(minimum) sesoi(0.05) nsim(1000) seed(4) name(pw)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 2000, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 1000
+  fit: probit via engine(stata), effects(closed)
+  power = 0.796 (MCSE 0.013)
+  outcomes: minimum 0.796 | detect-only 0.202 | inconclusive 0.002 | equivalence 0.000 | failed 0.000
+
+. powerape powerat pw, alpha(0.005 0.01 0.025 0.05 0.10)
+power at other error rates (re-thresholding the stored draws of pw)
+    alpha      conf    power     mcse
+   0.0050    0.9900   0.4560   0.0158
+   0.0100    0.9800   0.5450   0.0157
+   0.0250    0.9500   0.6930   0.0146
+   0.0500    0.9000   0.7960   0.0127
+   0.1000    0.8000   0.8920   0.0098
+
+. powerape alpha pw, cost(4) prior(1)
+powerape justified alpha -- minimum-effect claim (CI lower bound > 0.050), n = 2000, nsim = 1000
+  objective: minimize the weighted combined error rate (Type I cost x4, prior odds H1:H0 = 1)
+  alpha* = 0.0420 -> power 0.774 (MCSE 0.013), beta 0.226, weighted combined error 0.0788
+  at alpha = 0.05: power 0.796, weighted combined error 0.0808
+  flat range: alpha in [0.0235, 0.0500] is indistinguishable from the optimum at this nsim
+  cap 0.050 not binding (unconstrained optimum 0.0420)
+
+. * <<<
+. keep_r costs
+
+. toc costs
+
+. 
+. * >>> costs-plot
+. local opt = r(alpha)
+
+. local lo  = r(range_lo)
+
+. local hi  = r(range_hi)
+
+. matrix G = r(grid)
+
+. svmat G, names(col)
+number of observations will be reset to 1079
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 1,079.
+
+. twoway line wcer alpha, xline(`opt') xline(`lo' `hi', lpattern(dash))     ///
+>     ytitle("Weighted combined error rate") xtitle("Alpha")
+
+. * <<<
+. pc_graph justified-alpha-costs
+
+. drop _all
+
+. 
+. * >>> equal-costs
+. powerape alpha pw, cost(1) prior(1)
+powerape justified alpha -- minimum-effect claim (CI lower bound > 0.050), n = 2000, nsim = 1000
+  objective: minimize the weighted combined error rate (Type I cost x1, prior odds H1:H0 = 1)
+  alpha* = 0.0490 -> power 0.795 (MCSE 0.013), beta 0.205, weighted combined error 0.1270
+  at alpha = 0.05: power 0.796, weighted combined error 0.1270
+  flat range: alpha in [0.0425, 0.0500] is indistinguishable from the optimum at this nsim
+  cap 0.050 BINDS: unconstrained optimum alpha = 0.1140 (weighted combined error 0.1020);
+    raising alpha above the conventional level needs its own justification (Maier & Lakens, 2022).
+
+. * <<<
+. 
+. * >>> frontier
+. powerape frontier, cost(4) power(0.80)
+frontier alpha (detect claim, cost 4, power 0.80, prior 1) =   0.0274
+
+. powerape frontier, cost(1) power(0.80) claim(minimum)
+frontier alpha (minimum claim, cost 1, power 0.80, prior 1) =   0.2000
+
+. * <<<
+. 
+. tic
+
+. * >>> size
+. powerape alpha pw, cost(4) prior(1) size nsimsize(500) seed(5)
+powerape justified alpha -- minimum-effect claim (CI lower bound > 0.050), n = 2000, nsim = 1000
+  objective: minimize the weighted combined error rate (Type I cost x4, prior odds H1:H0 = 1)
+  alpha* = 0.0420 -> power 0.774 (MCSE 0.013), beta 0.226, weighted combined error 0.0788
+  at alpha = 0.05: power 0.796, weighted combined error 0.0808
+  flat range: alpha in [0.0235, 0.0500] is indistinguishable from the optimum at this nsim
+  cap 0.050 not binding (unconstrained optimum 0.0420)
+  realized size at the claim boundary (true APE = 0.050): 0.0380 (MCSE 0.0086, nsim 500)
+
+. powerape statement _lastalpha
+We chose the error rate for the minimum-effect claim (the 91.6% confidence
+interval's lower bound exceeding the smallest effect size of interest, 0.050;
+a one-sided test at alpha = 4.2%) by minimizing the weighted combined Type I
+and Type II error rate (Maier & Lakens, 2022; Mudge et al., 2012), weighting a
+Type I error 4 times a Type II error and taking prior odds of 1 for the
+planning value (APE = 0.100) against the claim boundary, using the powerape
+package for Stata (version 0.1.2 (Stata port of powerape 1.11.3)). The assumed
+data-generating process was a probit model with focal variable program
+(binary, prevalence 0.50); parametric covariates z (continuous, mean 0, SD 1),
+with the focal variable and the covariates mutually independent; baseline
+outcome rate 0.300 with the focal at reference; nuisance covariates contribute
+a latent pseudo-R-squared of 0.10. At n = 2000 the optimum within the
+conventional cap of alpha = .05 was alpha = 0.0420: simulated power 0.774
+(Monte Carlo SE 0.013; 1000 replications), a Type II error rate of 0.226, and
+a weighted combined error rate of 0.0788 versus 0.0808 at alpha = 0.05; error
+rates between 0.0235 and 0.0500 are indistinguishable from the optimum at this
+precision. A verification simulation at the claim boundary (true APE = 0.050;
+500 replications) gave a realized error rate of 0.0380 (Monte Carlo SE 0.0086)
+at the chosen alpha.
+
+. * <<<
+. keep_r size
+
+. toc size
+
+. 
+. file close res
+
+. file close tim
+
+. log close pc

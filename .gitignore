@@ -5,3 +5,5 @@
 *.Rproj
 Rplots.pdf
 tests/testthat/_problems/
+precompute/cache/
+precompute/stata/*.log

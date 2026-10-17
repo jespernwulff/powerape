@@ -1,0 +1,5 @@
+label	seconds
+recipe	     29.6
+n_detect	     11.8
+n_minimum	     25.1
+size	     16.0

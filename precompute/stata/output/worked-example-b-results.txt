@@ -1,0 +1,3 @@
+label	power	mcse	n	mde	alpha	nmax	nsim
+n_ape	         .79675	 .0063627713596	           1093	              .	            .05	              .	           1000
+n_aie	           .793	  .006406071339	           4518	              .	            .05	              .	           1000

@@ -1,6 +1,91 @@
 url: https://jespernwulff.github.io/powerape/
+
 template:
   bootstrap: 5
+  bslib:
+    primary: "#1e2f5c"
+    link-color: "#1e3f8a"
+    base_font: {google: "IBM Plex Sans"}
+    heading_font: {google: "IBM Plex Sans"}
+    code_font: {google: "IBM Plex Mono"}
+    headings-font-weight: 600
+    border-radius: 0.3rem
+
+home:
+  title: powerape
+  description: >
+    Power analysis when the effect size is an average partial effect (APE) or
+    an average interaction effect (AIE) of a probit or logit model. An R
+    package and a Stata command.
+  links:
+  - text: Stata command on GitHub
+    href: https://github.com/jespernwulff/powerape-stata
+  - text: Report a bug (Stata)
+    href: https://github.com/jespernwulff/powerape-stata/issues
+  sidebar:
+    structure: [links, license, citation, authors]
+
+navbar:
+  bg: primary
+  type: dark
+  structure:
+    left: [start, example, workflows, guides, reference, news]
+    right: [search, source]
+  components:
+    start:
+      text: Get started
+      menu:
+      - text: In R
+        href: articles/minimum-effect.html
+      - text: In Stata
+        href: articles/stata.html
+    example:
+      text: Worked example
+      href: articles/worked-example.html
+    workflows:
+      text: Workflows
+      menu:
+      - text: The classic SESOI analysis
+        href: articles/classic-sesoi-detection.html
+      - text: Equivalence
+        href: articles/equivalence.html
+      - text: Interaction effects (AIE)
+        href: articles/interaction-effects.html
+      - text: Panel designs
+        href: articles/panel-designs.html
+      - text: IV designs
+        href: articles/iv-designs.html
+      - text: Justified alpha
+        href: articles/justified-alpha.html
+    guides:
+      text: Guides
+      menu:
+      - text: R and Stata side by side
+        href: articles/r-and-stata.html
+      - text: How powerape is validated
+        href: articles/validation.html
+    reference:
+      text: Reference
+      menu:
+      - text: R functions
+        href: reference/index.html
+      - text: Stata help file
+        href: articles/stata-help.html
+    news:
+      text: News
+      menu:
+      - text: R package
+        href: news/index.html
+      - text: Stata command
+        href: articles/stata-news.html
+    source:
+      icon: fab fa-github fa-lg
+      aria-label: Source code on GitHub
+      menu:
+      - text: R package
+        href: https://github.com/jespernwulff/powerape
+      - text: Stata command
+        href: https://github.com/jespernwulff/powerape-stata
 
 reference:
 - title: Specify the world
@@ -38,13 +123,39 @@ reference:
   - power_statement
 
 articles:
-- title: Workflows
-  navbar: ~
+- title: Get started
+  desc: Install powerape and run a first power analysis, in R or in Stata.
   contents:
   - minimum-effect
+  - articles/stata
+- title: Worked example
+  desc: >
+    Five study designs taken through both languages, from a treatment effect
+    worth acting on to an instrumented treatment.
+  contents:
+  - articles/worked-example
+- title: Workflows
+  desc: >
+    One design question per article, with the R code and the Stata code side
+    by side.
+  contents:
   - classic-sesoi-detection
   - equivalence
   - interaction-effects
   - panel-designs
   - iv-designs
   - justified-alpha
+- title: Guides
+  desc: How the two implementations correspond, and how both are checked.
+  contents:
+  - articles/r-and-stata
+  - articles/validation
+- title: Stata reference
+  contents:
+  - articles/stata-help
+  - articles/stata-news
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with

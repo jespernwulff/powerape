@@ -1,0 +1,312 @@
+---
+title: "Get started with powerape in Stata"
+description: >
+  Install the command, run a first power analysis for an average partial
+  effect, and read its output: the six steps of the R article, in the same
+  world.
+---
+
+```{r helpers, include = FALSE}
+root <- normalizePath(getwd(), winslash = "/")
+while (!file.exists(file.path(root, "DESCRIPTION")) && dirname(root) != root)
+  root <- dirname(root)
+source(file.path(root, "precompute", "helpers.R"))
+st   <- stata_results("getting-started")
+secs <- stata_seconds("getting-started")
+```
+
+In a probit or logit model the coefficient is not the quantity anyone
+interprets. Conclusions are stated in probability points: the treatment
+raises take-up by ten percentage points. That quantity is the **average
+partial effect (APE)**, and it depends on all coefficients and on the
+covariate distribution, so power tools that work in coefficient units cannot
+say how many observations are needed to detect it. `powerape` states the
+effect in APE units and simulates the whole study: it draws covariates and
+outcomes, fits the model, computes the APE with a delta-method confidence
+interval, and checks a **claim** on that interval (Riesthuis, 2024):
+
+* `minimum`: the lower bound of the interval exceeds the smallest effect size
+  of interest (SESOI), so the effect is meaningfully large. This is the
+  default claim.
+* `detect`: the interval excludes zero.
+* `equivalence`: the interval lies inside (−SESOI, +SESOI), so the effect is
+  too small to matter.
+
+The Stata command `powerape` is a port of the R package of the same name and
+is documented side by side with it on this site. This page takes the six
+steps of the R article [Powering the minimum-effect claim](minimum-effect.html)
+through Stata, in the same world, and then shows what is specific to Stata:
+who fits the simulated studies, and how to start from pilot data.
+
+## Installation
+
+<div class="wrap-code">
+
+```stata
+net install powerape, from("https://raw.githubusercontent.com/jespernwulff/powerape-stata/main/")
+mata: mata mlib index
+powerape version
+```
+
+</div>
+
+`net install` copies the command, its help file and its Mata library;
+`mata: mata mlib index` makes the new library known to the running Stata
+session (needed once, right after installing); `powerape version` checks
+that the command and the library belong together. To update, add `replace`
+to `net install`. `net get powerape, from(...)` with the same address copies
+two files into the current folder: `showcase.do`, a guided tour of every
+subcommand, and `build.do`, which recompiles the Mata library.
+
+Stata 16 or later is required. The control-function route for endogenous
+treatments uses `cfprobit` (Stata 18 or later), and computing interaction
+effects with `ginteff` itself, an option, needs that command from the Stata
+Journal (`net install st0711, from(http://www.stata-journal.com/software/sj23-2)`).
+The command has been tested on StataNow 19.5. After installation,
+`help powerape` opens the help file, which is also
+[on this site](stata-help.html).
+
+## Step 1: describe the world
+
+One command describes the data-generating process (DGP) the study will
+sample from and stores it under a name, the way `estimates store` stores
+results. Here: a probit model, a binary treatment given to half the sample,
+two covariates, an outcome rate of 0.30 without treatment, and covariates
+that explain 15% of the latent variation.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "world")
+```
+
+Each variable is written as `(name, type options)`: `binary p()` or `normal
+mean() sd()`. The nuisance side is set on two friendly scales, the
+**baseline outcome rate** (`baseline()`) and the covariates' **latent
+pseudo-R²** (`signal()`), and `powerape` solves for the coefficients that
+produce them. `correlation()` sets the latent correlation among the focal
+variable and the covariates. A pilot data set or a fitted pilot model can
+take the place of these guesses; see [Pilot data](#pilot-data) below.
+
+## Step 2: pin the true APE
+
+Suppose prior evidence suggests a true effect of ten percentage points, and
+effects below five points would not justify the program: the planning value
+is 0.10 and the SESOI is 0.05.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "pin")
+```
+
+`powerape setape` solves for the coefficient of the treatment that makes the
+true APE exactly 0.10, given everything else, and refuses with an
+explanation when the target cannot exist (an APE of +0.40 at a baseline rate
+of 0.85, say). For interaction designs `powerape setaie` pins the average
+interaction effect instead; see [Interaction effects](interaction-effects.html).
+
+## Step 3: power for the claim
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "power")
+```
+
+In each of the `r num(st["power", "nsim"], 0)` replications `powerape` drew
+a sample of `r num(st["power", "n"], 0)` observations, fitted it, and asked
+whether the 90 percent confidence interval of the APE lies above the SESOI
+(a one-sided test at the 5 percent level). It did in
+`r num(100 * st["power", "power"], 1)` percent of them. The line beginning
+`fit:` says who fitted the simulated studies: Stata's own `probit`, with the
+APE and its standard error computed from `e(b)` and `e(V)` exactly as
+`margins` computes them.
+
+Read the **outcome distribution**, not only the power. About a third of the
+studies would show an effect different from zero but could not claim that it
+clears the SESOI ("detect-only"): exactly the inconclusive result that a
+power analysis for detection alone hides. The R article finds the same split
+in the same world, up to simulation error.
+
+### Stored results
+
+Every subcommand stores its results in `r()`.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "stored")
+```
+
+Results also stay available by name: `powerape list` shows the stored DGPs
+and results, and the option `name()` keeps a result under a name of your
+choice (see [Justified alpha](justified-alpha.html) for a use).
+
+## Step 4: required sample size and the power curve
+
+`powerape n` searches for the sample size that reaches the target power, then
+confirms it with a high-precision run and moves it upward, never down, if the
+confirmation falls short.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "n")
+```
+
+A search runs thousands of simulated studies (here the confirmation stage
+alone ran 2,000), so this call uses the Mata engine, `engine(mata)`, a
+self-contained port of the R package's fitting routine that is many times
+faster than calling `probit`. [Engines](#engines-who-fits-the-simulated-studies)
+below explains the choice. The search took
+`r num(secs[["n"]], 0)` seconds.
+
+A power curve evaluates a list of sample sizes on the same footing.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "curve")
+```
+
+`r(results)` holds the curve as a matrix, ready to plot:
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "curve-plot", output = FALSE)
+stata_figure("getting-started-curve.svg",
+             alt = "Power of the minimum-effect claim at sample sizes from 500 to 3,000, rising from about 0.3 to about 0.9 and crossing 0.8 near 2,100.",
+             caption = "Power of the minimum-effect claim against the sample size, with the 80 percent target.")
+```
+
+## When n is fixed: the minimum detectable effect
+
+Often the sample is given: the archive has the firms it has. `powerape mde`
+turns the question around and finds the smallest true APE that the claim
+reaches with 80 percent power, with the same confirmation stage as
+`powerape n`.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "mde")
+```
+
+With `r num(st["mde", "n"], 0)` observations, the study can show an effect
+to be meaningfully above 0.05 if the true effect is about
+`r num(st["mde", "mde"], 3)` or larger.
+
+## Step 5: how fragile is this to the contextual guesses?
+
+The baseline rate and the covariate signal are guesses. `powerape robust`
+repeats the analysis over a grid of them and reports the worst case (Hancock
+& Feng, 2026). By default the APE is re-pinned in every scenario
+(`pin(ape)`), so only the precision of the estimate varies.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "robust")
+```
+
+Dropping `nonmax` adds **n_max**, the largest required sample size across
+the scenarios, at 90 percent power by default (`nmaxpower()`): the sample
+size that insures the design against the guesses. `mode(mde)` reports the
+minimum detectable effect per scenario instead of power.
+
+## Step 6: the citable paragraph
+
+`powerape statement` writes the last result as a methods paragraph for a
+grant application or a preregistration.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "statement")
+```
+
+## Engines: who fits the simulated studies
+
+The simulation draws the data in Mata. Fitting each simulated study can be
+left to Stata or done in Mata:
+
+* `engine(stata)`, the default, writes every simulated study to a temporary
+  frame and fits it with Stata's own `probit` or `logit`, with
+  `vce(cluster)` for panels and `cfprobit` for endogenous treatments. The
+  effects are computed from `e(b)` and `e(V)` by the closed-form delta
+  method that `margins` uses.
+* `engine(mata)` fits each study with a Mata port of the R package's
+  routine (Fisher scoring, expected information).
+
+On the same seed both engines draw the same studies, so they can be compared
+directly:
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "engine-mata")
+```
+
+The power is the same, `r num(st["engine_mata", "power"], 3)`. The outcome
+split differs by one study of `r num(st["engine_mata", "nsim"], 0)`, because
+`probit` computes standard errors from the observed information and the Mata
+engine from the expected information, which moves an interval that sits
+right at a boundary. The Mata engine took
+`r num(secs[["engine_mata"]], 1)` seconds, `probit`
+`r num(secs[["power"]], 1)`. Use the Mata engine for searches, curves and
+sweeps, and confirm the final design with Stata's estimator.
+
+`effects(margins)` goes one step further and computes every APE with
+`margins` itself (or with `ginteff` for interaction effects). On the same
+seed it reproduces the closed-form results exactly:
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", c("effects-closed", "effects-margins"))
+```
+
+It is also slower (`r num(secs[["effects_margins"]], 1)` against
+`r num(secs[["effects_closed"]], 1)` seconds for these 100 replications), so
+its use is as a check. `engine()` and `effects()` given on one command apply
+to that command only; `powerape engine` shows and sets the defaults for the
+session:
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "session")
+```
+
+## Pilot data
+
+When pilot data are available, the covariates can come from them instead of
+from parametric guesses. Here is a small simulated pilot:
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "pilot-data", output = FALSE)
+```
+
+`empirical` resamples whole rows of the pilot data in memory and calibrates
+the outcome model to the stated baseline rate and signal. A listed focal
+variable is resampled jointly with the covariates; one specified as
+`(name, binary p())` is drawn independently of them instead.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "pilot-empirical")
+```
+
+`fromfit` takes the world from a fitted `probit` or `logit` model: the
+nuisance coefficients and the pilot rows come from the fit, and `setape`
+re-solves the focal coefficient for the planning value. `baseline()` can
+override the pilot's outcome rate.
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("getting-started", "pilot-fromfit")
+```
+
+The R functions for the two routes are `ape_dgp_empirical()` and
+`ape_dgp_from_fit()`. Panel data and endogenous treatments have their own
+routes, `panel` and `iv`; see [Panel designs](panel-designs.html) and
+[IV designs](iv-designs.html).
+
+## Where next
+
+- The **workflows** take one design question each, with the R and the Stata
+  code side by side: [the classic SESOI analysis](classic-sesoi-detection.html),
+  [equivalence](equivalence.html), [interaction effects](interaction-effects.html),
+  [panel designs](panel-designs.html), [IV designs](iv-designs.html) and
+  [justified alpha](justified-alpha.html).
+- The [help file](stata-help.html) documents every subcommand, option and
+  stored result.
+- [R and Stata side by side](r-and-stata.html) matches the R functions to
+  the Stata subcommands.
+- `net get powerape` copies `showcase.do`, a commented tour of every
+  subcommand that runs in five to ten minutes.
+
+## References
+
+Hancock, G. R., & Feng, Y. (2026). nmax and the quest to restore caution,
+integrity, and practicality to the sample size planning process.
+*Psychological Methods*, *31*(1), 174--199. <https://doi.org/10.1037/met0000776>
+
+Riesthuis, P. (2024). Simulation-based power analyses for the smallest
+effect size of interest: A confidence-interval approach for minimum-effect
+and equivalence testing. *Advances in Methods and Practices in Psychological
+Science*, 7(2). <https://doi.org/10.1177/25152459241240722>

@@ -8,6 +8,11 @@
 **Power analysis for average partial effects (APEs) and average interaction
 effects (AIEs) from probit and logit models.**
 
+**Documentation, getting-started guides and workflows, in R and Stata:
+<https://jespernwulff.github.io/powerape/>**. The
+[Stata command of the same name](https://github.com/jespernwulff/powerape-stata)
+implements the same procedure.
+
 In nonlinear models the coefficient is not the quantity anyone interprets —
 conclusions are stated in probability points, i.e. the APE. But the APE
 depends on *all* coefficients and the covariate distribution, so
@@ -41,6 +46,13 @@ MDE grid (see `vignette("justified-alpha")`).
 ```r
 # install.packages("remotes")
 remotes::install_github("jespernwulff/powerape")
+```
+
+In Stata (16 or later):
+
+```stata
+net install powerape, from("https://raw.githubusercontent.com/jespernwulff/powerape-stata/main/")
+mata: mata mlib index
 ```
 
 ## Quick start
@@ -161,4 +173,6 @@ Seven vignettes cover the workflows:
 `vignette("minimum-effect")`, `vignette("classic-sesoi-detection")`,
 `vignette("equivalence")`, `vignette("interaction-effects")`,
 `vignette("panel-designs")`, `vignette("iv-designs")`, and
-`vignette("justified-alpha")`.
+`vignette("justified-alpha")`. On the
+[website](https://jespernwulff.github.io/powerape/) the same workflows show
+the R and the Stata code side by side.

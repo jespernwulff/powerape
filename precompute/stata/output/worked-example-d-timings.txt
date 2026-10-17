@@ -1,0 +1,9 @@
+label	seconds
+power	    834.8
+cs_power	    322.9
+n	     91.2
+rho	    807.2
+power_85	    150.9
+power_70	    234.5
+n_85	     99.0
+n_70	     99.8

@@ -1,0 +1,322 @@
+# Stata help file
+
+This is the help file that `help powerape` opens in Stata, converted to
+plain text. For a guided introduction see [Get started in
+Stata](https://jespernwulff.github.io/powerape/articles/stata.md); for
+the corresponding R functions see [R and Stata side by
+side](https://jespernwulff.github.io/powerape/articles/r-and-stata.md).
+
+``` stata-help
+Title
+
+    powerape -- Power analysis for average partial effects (APE) and average interaction
+                  effects (AIE)
+
+Syntax
+
+    Describe the world (a data-generating process, DGP) and store it under a name:
+
+        powerape dgp name, focal(varspec) baseline(#) [moderator(varspec)
+                 covariates(varspecs) correlation(#|matname) signal(#) gamma(numlist)
+                 model(probit|logit) nint(#) seedint(#) replace nodisplay]
+
+        powerape dgp name [if] [in], empirical focal(varname|varspec) baseline(#)
+                 [covariates(varlist) signal(#) gamma(numlist) model(probit|logit) ...]
+
+        powerape dgp name, fromfit focal(varname) [baseline(#) ...]        (after probit
+                 or logit)
+
+        powerape dgp name, panel focal(varspec) nperiods(numlist) baseline(#)
+                 [pperiods(numlist) retention(#) rho(#) creshare(#) moderator(varspec)
+                 covariates(varspecs) correlation() signal(#) ...]
+
+        powerape dgp name, iv focal(varspec) instruments(varspecs) endogeneity(#)
+                 ivstrength(#) baseline(#) [moderator(varspec) covariates(varspecs)
+                 correlation() signal(#) ...]
+
+    Pin the effect in effect-size units (the inversion step):
+
+        powerape setape name, target(#)
+
+        powerape setaie name, target(#) mainfocal(#) mainmoderator(#)
+
+    Power, curves, required sample size, minimum detectable effect, robustness:
+
+        powerape power name, n(#) [sim_options]
+
+        powerape curve name, n(numlist) [sim_options]
+
+        powerape n name [, power(#) nrange(# #) maxiter(#) noconfirm nsimconfirm(#)
+                 sim_options]
+
+        powerape mde name, n(#) [power(#) direction(positive|negative) mainfocal(#)
+                 mainmoderator(#) maxiter(#) noconfirm nsimconfirm(#) sim_options]
+
+        powerape robust name, n(#) vary(input(values) ...) [pin(ape|coefficients)
+                 mode(power|mde) power(#) gridpoints(#) nonmax nmaxpower(#) direction()
+                 sim_options]
+
+    Reporting and justified error rates:
+
+        powerape statement [resname]
+
+        powerape alpha [resname] [, cost(#) prior(#) error(minimize|balance) cap(#) size
+                 nsimsize(#) seed(#) name(resname)]
+
+        powerape powerat [resname], alpha(numlist)
+
+        powerape frontier [, cost(#) power(#) prior(#) claim(detect|minimum)]
+
+    Housekeeping:
+
+        powerape describe name | trueape name | trueaie name | list | drop name|_all |
+                 engine [, engine(stata|mata) effects(closed|margins)] | version
+
+    sim_options                 Description
+    --------------------------------------------------------------------------------------
+      claim(minimum|detect|equivalence)
+                                  claim to power; default minimum (detect for mde)
+      sesoi(#)                  smallest effect size of interest, in APE units
+      alpha(#)                  the claim's error rate; default 0.05
+      alpharule(exp)            sample-size rule: a Stata expression in @n, e.g.
+                                  alpharule(0.05*sqrt(1000/@n))
+      conf(#)                   interval level override for the claim
+      nsim(#)                   replications (power 1000, curve 1000, n 1500, mde 1000,
+                                  robust 800)
+      seed(#)                   seed; the ambient RNG state is restored afterwards
+      se(model|robust)          model-based or heteroskedasticity-robust SEs
+                                  (cross-sectional routes)
+      separation(fail|keep)     scoring of replications with a separated identifying cell
+      engine(stata|mata)        who fits the simulated studies (see Engines) for this
+                                  command only; default stata, or the session default set
+                                  by powerape engine
+      effects(closed|margins)   closed-form delta-method effects or margins/ginteff per
+                                  replication, for this command only; default closed, or
+                                  the session default
+      name(resname)             store the result under resname (default _last)
+      nodraws                   do not keep the per-replication draws (power only)
+      nodisplay                 suppress output
+    --------------------------------------------------------------------------------------
+
+Description
+
+    powerape is a Stata port of the R package powerape (version 1.11.3):  simulation-based
+    power analysis in which the effect size of interest is the average partial effect
+    (APE) or the average interaction effect (AIE) of a probit or logit model. Targets are
+    stated in probability points; the package calibrates the data-generating process
+    (baseline rate plus nuisance signal), inverts the target into coefficients, checks
+    feasibility, and computes power for three confidence-interval claims (Riesthuis,
+    2024): detect (the interval excludes zero in the hypothesized direction), minimum (the
+    lower bound exceeds the SESOI) and equivalence (the interval lies within +/- SESOI).
+    It provides power curves, required sample sizes with a high-precision confirmation
+    stage, minimum detectable effects, robustness sweeps with the insurance-premium n_max
+    (Hancock and Feng, 2025), citable power statements, and justified error rates (a
+    sample-size rule, or the error-cost optimum of Maier and Lakens, 2022).
+
+    Routes: parametric covariates with Gaussian-copula dependence; covariates resampled
+    from pilot data in memory (empirical); a fitted probit or logit pilot model (fromfit);
+    correlated random effects panel probit with Mundlak means, unit-clustered SEs and
+    unbalanced panels (panel); and an endogenous focal variable estimated by
+    control-function probit, the estimator of Stata's cfprobit (iv).
+
+    Every simulated study is, by default, fit by Stata's own estimation commands (probit,
+    logit, cfprobit; see Engines).
+
+Variable specifications
+
+    A varspec is name, [binary p(#) | normal mean(#) sd(#)] [icc(#)].  The type is
+    inferred when omitted: p() means binary, otherwise normal (default mean 0, sd 1).
+    icc() is the within-unit persistence on the latent scale and matters only for panel
+    DGPs (icc(1) = time-constant). Several variables are given as parenthesized specs:
+    covariates((age, normal mean(45) sd(12)) (female, binary p(0.55))).
+
+Subcommands
+
+    dgp describes the world. baseline() is the average P(Y=1) with the focal (and
+        moderator) at their reference values (0 for binary, the mean for continuous);
+        signal() is the nuisance covariates' share of the latent-index variance at unit
+        error variance (the McKelvey-Zavoina R-squared under probit; a weaker world under
+        logit, see the R documentation of ape_dgp); gamma() gives explicit nuisance
+        coefficients instead; correlation() is a scalar exchangeable Gaussian-copula
+        correlation or a matrix over (focal, moderator, covariates). The panel route is
+        probit-only; nperiods() is a scalar (balanced) or a vector of lengths with
+        pperiods() probabilities, or a scalar with retention() for monotone attrition;
+        rho() is the latent unit-effect share and creshare() the fraction loaded on the
+        Mundlak means. The IV route takes endogeneity() (the error correlation) and
+        ivstrength() (the instruments' share of the focal's (latent) variance); a binary
+        focal gets a probit first stage, a continuous one a linear first stage.
+
+    setape / setaie solve the focal (and interaction) coefficients so the true APE / AIE
+        equals target(); setaie anchors the two main effects by their
+        conditional-at-reference APEs.  Infeasible targets are refused with the attainable
+        range.
+
+    power simulates power at n() and prints the outcome distribution (minimum /
+        detect-only / inconclusive / equivalence / failed).  curve does so over a grid. n
+        searches the required sample size for power() (default 0.90) and confirms it at
+        nsimconfirm() (default 4 x nsim), never trimming n on overshoot. mde searches the
+        smallest effect that reaches power() (default 0.80) at a fixed n (for equivalence:
+        the tightest margin at the pinned truth). robust re-runs the analysis over a
+        factorial grid of contextual inputs (baseline, signal, correlation; rho,
+        retention; endogeneity, ivstrength) and reports the worst scenario and n_max. For
+        panel DGPs n() counts units. Sweeps over empirical and fromfit DGPs recalibrate
+        from the pilot rows stored in the DGP (the data need not be in memory);
+        parametric, panel and IV DGPs are rebuilt from their options. The engine
+        subcommands hold and restore the user's e() around the simulated fits.
+
+    statement prints a citable methods paragraph for the last (or named) power, n, mde or
+        alpha result.  alpha chooses the error rate on the stored draws of a power result
+        (weighted combined error rate; cap 0.05); powerat re-thresholds those draws at
+        other error rates; frontier is the closed-form level at the detectability
+        frontier.
+
+    version prints the version of the ado-file and of the Mata library lpowerape.mlib with
+        their locations and warns when they differ (a stale library after an update); it
+        stores r(version), r(ado_version), r(mlib_version) and r(match). engine without
+        options shows the session defaults; with options it sets them.  engine() or
+        effects() given on a simulation command apply to that command only and leave the
+        session defaults unchanged.
+
+Engines
+
+    engine(stata) (the default) writes every simulated study to a temporary frame and fits
+    it with probit or logit (vce(robust) for se(robust), vce(cluster) on the panel route,
+    asis for separation(keep)) or with cfprobit on the IV route. With effects(closed) the
+    APE/AIE and its delta-method standard error are then computed in Mata from e(b) and
+    e(V) by closed-form Jacobians; these equal margins, dydx() and ginteff to numerical
+    precision (validation tier B). With effects(margins) the effects come from margins /
+    ginteff themselves, which is several times slower.  On the IV route the APE is
+    margins, dydx() after cfprobit, and the AIE is the difference of margins, dydx(focal)
+    at(moderator=(0 1)):  the focal-by-moderator term is entered in factor form (1.d#c.m,
+    the same fit as c.d#c.m) so that margins can differentiate the focal, and the control
+    function is held at its estimated value, as in cfprobit's average structural function.
+    (Setting the endogenous focal through at() instead would let the control function move
+    and is not the AIE.) Both agree with the closed forms to 1e-7 (validation tier B).
+    Inference follows Stata's conventions (observed information, Stata's small-sample
+    factors).
+
+    engine(mata) is a self-contained Mata engine that reproduces the R package's
+    conventions (Fisher scoring with expected information, HC0 and G/(G-1) cluster
+    sandwiches, the stacked control-function covariance). It is about 10-30 times faster
+    and is the right choice for long searches and sweeps; the two engines agree within
+    Monte Carlo error (tiers A and D).
+
+    Every simulation command (power, curve, n, mde, robust) prints a line fit: that names
+    who fitted the simulated studies, for example fit: probit via engine(stata),
+    effects(closed), fit: probit, vce(cluster) via engine(stata), effects(closed) on the
+    panel route, fit: cfprobit via engine(stata), effects(margins) on the IV route, or
+    fit: Mata engine (Fisher scoring); asis appears under separation(keep). The same text
+    is stored in r(fit), with its parts in r(engine) and r(effects). powerape engine
+    without options shows the session default.
+
+Separation and sparse cells
+
+    A simulated study may contain an identifying cell (a level of a binary focal variable,
+    or a focal-by-moderator cell) with no events or no non-events, where the
+    maximum-likelihood effect does not exist. By default such replications count as failed
+    (separation(fail)), as Stata's probit refuses the fit; separation(keep) retains them
+    with their degenerate Wald intervals (R's glm behaviour). engine(mata) keeps the
+    Fisher-scoring fit; engine(stata) fits with asis and keeps the separated coefficient,
+    whose variance row Stata sets to zero (its standard error prints as missing), so the
+    delta-method interval collapses onto the identified cells, which is the same limit:
+    for a binary focal with an empty arm the estimate is minus the other arm's event rate,
+    with that arm's binomial standard error. Terms omitted for collinearity still count as
+    failures under either engine. The share with separation and the average smallest cell
+    count are reported and warned about (more than 1% separated, or fewer than 10 events
+    in the smallest cell).
+
+Stored results
+
+    powerape power stores in r(): scalars r(power), r(mcse), r(n), r(nsim), r(alpha),
+    r(conf), r(sesoi), r(target), r(separated), r(min_cell), r(n_failed); macros r(claim),
+    r(estimand), r(model), r(se), r(separation), r(dgp), r(name), and r(fit), r(engine),
+    r(effects) (who fitted the simulated studies, as on the fit: line of the output);
+    matrix r(outcomes). curve adds r(results); n adds r(goal), r(confirmed),
+    r(nsim_confirm), r(history); mde adds r(mde), r(is_margin), r(direction); robust
+    stores r(scenarios), r(worst), r(nmax), r(nmax_power), r(nmax_scenario),
+    r(nmax_candidates), r(fit), r(engine), r(effects); alpha stores r(alpha), r(power),
+    r(beta), r(wcer), r(range_lo), r(range_hi), r(capped), r(alpha_uncapped), r(size) and
+    r(grid); dgp, setape, setaie and describe store r(beta0), r(beta_focal), r(beta_mod),
+    r(beta_int), r(target), r(p1), r(gamma); statement stores r(statement).
+
+Examples
+
+        . powerape dgp d1, focal(treat, binary p(0.5)) covariates((age, normal mean(45)
+            sd(12))) baseline(0.30) signal(0.15)
+        . powerape setape d1, target(0.05)
+        . powerape power d1, n(2000) claim(minimum) sesoi(0.02) nsim(1000) seed(1)
+        . powerape statement
+        . powerape n d1, power(0.8) claim(detect) seed(2) engine(mata)
+        . powerape mde d1, n(1500) claim(detect) seed(3) engine(mata)
+        . powerape robust d1, n(1500) claim(detect) vary(baseline(0.2 0.4) signal(0 0.3))
+            seed(4) engine(mata)
+
+        . powerape dgp d2, focal(treat, binary p(0.5)) moderator(female, binary p(0.55))
+            baseline(0.30)
+        . powerape setaie d2, target(0.04) mainfocal(0.10) mainmoderator(0.05)
+        . powerape power d2, n(4000) claim(detect) effects(margins)
+
+        . probit y treat age female
+        . powerape dgp f1, fromfit focal(treat)
+        . powerape setape f1, target(0.10)
+
+        . powerape dgp p1, panel focal(treat, binary p(0.5) icc(1)) covariates((size,
+            normal icc(0.6))) nperiods(4) rho(0.3) creshare(0.5) baseline(0.30)
+            signal(0.10)
+        . powerape setape p1, target(0.08)
+        . powerape power p1, n(150) claim(detect)
+
+        . powerape dgp i1, iv focal(training, binary p(0.4)) covariates((size, normal))
+            instruments((subsidy, binary p(0.5))) endogeneity(0.4) ivstrength(0.2)
+            baseline(0.30) signal(0.10)
+        . powerape setape i1, target(0.10)
+        . powerape power i1, n(1500) claim(detect)
+
+Installation and requirements
+
+    Install from the distribution directory (or a URL that serves it) with net install
+    powerape, from(path); then run mata: mata mlib index once, so that the Mata library
+    lpowerape.mlib is found, and powerape version to check that the ado-file and the
+    library match. net get powerape, from(path) copies build.do (the .mata sources are
+    installed with the package). In this project the alternative is adopath ++
+    ".../powerape-stata/ado" followed by mata: mata mlib index.
+
+    Requirements: Stata 16 or later (frames). The default engine(stata) on the IV route
+    calls cfprobit (Stata 18 or later); engine(mata) covers every route on Stata 16 or
+    later; effects(margins) for the AIE calls the community-contributed ginteff (Radean).
+    The package was tested on StataNow 19.5 (update 14 Oct 2026) only. The shipped Mata
+    library was compiled by StataNow 19.5; a library compiled by a newer Stata may not
+    load in an older one, so on Stata 16-18 rebuild it by running build.do (it finds the
+    installed sources on the adopath and replaces lpowerape.mlib in place) and then mata:
+    mata mlib index.
+
+Validation
+
+    The port is validated against the R package in four tiers (see
+    powerape-stata/validation/RESULTS.md): exact finite-sample power by binomial
+    enumeration; fixed-data parity of every estimator with R's internals and with
+    probit/logit + margins, ginteff and cfprobit; calibration and inversion constants; and
+    stochastic agreement of power, required n, MDE, robustness sweeps and justified alpha
+    on matched designs. Version 0.1.1 adds the effects(margins) IV AIE and the Stata
+    engine's separation(keep) to tiers A and B. Version 0.1.2 (also 2026-10-16) adds the
+    fit: line and r(fit), r(engine), r(effects), a print-only change that leaves every
+    validated number unchanged, and includes the fix by which a per-command engine() or
+    effects() no longer alters the session default.
+
+References
+
+    Hancock, G. R., and Feng, Y. 2025. Power analysis under uncertainty about contextual
+        parameters. Psychological Methods.
+    Maier, M., and Lakens, D. 2022. Justify your alpha: A primer on two practical
+        approaches. Advances in Methods and Practices in Psychological Science 5(2).
+    Riesthuis, P. 2024. Simulation-based power analyses for the smallest effect size of
+        interest. Advances in Methods and Practices in Psychological Science 7.
+    Wooldridge, J. M. 2019. Correlated random effects models with unbalanced panels.
+        Journal of Econometrics 211: 137-150.
+    Wulff, J. N. powerape: Power analysis for average partial effects. R package version
+        1.11.3. https://github.com/jespernwulff/powerape
+
+Author
+
+    Stata port of Jesper Wulff's R package powerape; Aarhus University.
+```

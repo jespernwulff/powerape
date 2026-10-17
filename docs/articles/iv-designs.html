@@ -13,15 +13,18 @@
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/IBM_Plex_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/IBM_Plex_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="IV designs: endogenous focal variables via control functions">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="IV designs: endogenous focal variables via control functions">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
@@ -34,26 +37,58 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/minimum-effect.html">Powering the minimum-effect claim</a></li>
-    <li><a class="dropdown-item" href="../articles/classic-sesoi-detection.html">The classic SESOI power analysis, and what it cannot tell you</a></li>
-    <li><a class="dropdown-item" href="../articles/equivalence.html">Powering for equivalence: showing an effect is too small to matter</a></li>
-    <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
-    <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
-    <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
-    <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justifying the error rate: alpha by sample size, or by error costs</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-get-started" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Get started</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-get-started">
+<li><a class="dropdown-item" href="../articles/minimum-effect.html">In R</a></li>
+    <li><a class="dropdown-item" href="../articles/stata.html">In Stata</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/worked-example.html">Worked example</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-workflows" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Workflows</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-workflows">
+<li><a class="dropdown-item" href="../articles/classic-sesoi-detection.html">The classic SESOI analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
+    <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
+    <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
+    <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-guides" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Guides</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-guides">
+<li><a class="dropdown-item" href="../articles/r-and-stata.html">R and Stata side by side</a></li>
+    <li><a class="dropdown-item" href="../articles/validation.html">How powerape is validated</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-reference" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Reference</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-reference">
+<li><a class="dropdown-item" href="../reference/index.html">R functions</a></li>
+    <li><a class="dropdown-item" href="../articles/stata-help.html">Stata help file</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-news">
+<li><a class="dropdown-item" href="../news/index.html">R package</a></li>
+    <li><a class="dropdown-item" href="../articles/stata-news.html">Stata command</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jespernwulff/powerape/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Source code on GitHub"><span class="fa fab fa-github fa-lg"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-">
+<li><a class="external-link dropdown-item" href="https://github.com/jespernwulff/powerape">R package</a></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/jespernwulff/powerape-stata">Stata command</a></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -112,6 +147,21 @@ variance for a binary focal) the instruments explain. This is the
 first-stage strength you would defend with an F statistic in the
 paper.</li>
 </ul>
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="world-r-tab" data-bs-toggle="tab" data-bs-target="#world-r" type="button" role="tab" aria-controls="world-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="world-stata-tab" data-bs-toggle="tab" data-bs-target="#world-stata" type="button" role="tab" aria-controls="world-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="world-r" class="tab-pane active" role="tabpanel" aria-labelledby="world-r-tab">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jespernwulff.github.io/powerape/">powerape</a></span><span class="op">)</span></span>
 <span></span>
@@ -132,21 +182,79 @@ paper.</li>
 <span><span class="co">#&gt;   iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40, first-stage strength = 0.20; control-function probit, stacked robust SEs</span></span>
 <span><span class="co">#&gt;   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100</span></span>
 <span><span class="co">#&gt;   true APE pinned at +0.1000 (beta_focal = 0.2857, implied P(Y=1 | focal=1) = 0.400)</span></span></code></pre></div>
+</div>
+<div id="world-stata" class="tab-pane" role="tabpanel" aria-labelledby="world-stata-tab">
+<div class="sourceCode" id="cb2"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>powerape dgp <span class="kw">d</span>, iv focal(training, binary <span class="kw">p</span>(0.4)) covariates((<span class="kw">size</span>, <span class="fu">normal</span>)) <span class="co">///</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>    instruments((subsidy, binary <span class="kw">p</span>(0.5))) endogeneity(0.4) ivstrength(0.2)   <span class="co">///</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>    baseline(0.30) signal(0.10)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>powerape setape <span class="kw">d</span>, target(0.10)</span></code></pre></div>
+<pre class="stata-output"><code>powerape DGP -- probit
+  focal: training (binary, p = 0.40)
+  covariates: size (normal, mean 0.00, sd 1.00)
+  iv: endogenous focal (probit first stage; instruments: subsidy); endogeneity rho = 0.40,
+    first-stage strength = 0.20; control-function probit, stacked robust SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)</code></pre>
+</div>
+</div>
+</div>
 <p>A continuous focal (<code>pa_var("rd", "normal", ...)</code>) gets a
 linear first stage instead; the pinning step is identical.</p>
 </div>
 <div class="section level2">
 <h2 id="step-2-power-and-the-iv-price">Step 2: power – and the IV price<a class="anchor" aria-label="anchor" href="#step-2-power-and-the-iv-price"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="power-r-tab" data-bs-toggle="tab" data-bs-target="#power-r" type="button" role="tab" aria-controls="power-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="power-stata-tab" data-bs-toggle="tab" data-bs-target="#power-stata" type="button" role="tab" aria-controls="power-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="power-r" class="tab-pane active" role="tabpanel" aria-labelledby="power-r-tab">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">1200</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">400</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
 <span><span class="co">#&gt;   probit, n = 1200, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 400, stacked robust SEs</span></span>
 <span><span class="co">#&gt;   power = 0.210 (MCSE 0.020)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.210 | inconclusive 0.790 | failed 0.000</span></span></code></pre></div>
+</div>
+<div id="power-stata" class="tab-pane" role="tabpanel" aria-labelledby="power-stata-tab">
+<div class="sourceCode" id="cb5"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>powerape power <span class="kw">d</span>, n(1200) claim(detect) nsim(400) <span class="dv">seed</span>(1)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 1200, assumed true APE + 0.1000,     95% CI (alpha = .05), nsim = 400, stacked robust SEs
+  fit: cfprobit via engine(stata), effects(closed)
+  power = 0.250 (MCSE 0.022)
+  outcomes: detect 0.250 | inconclusive 0.750 | failed 0.000</code></pre>
+</div>
+</div>
+</div>
 <p>Compare that with the same world <em>without</em> endogeneity,
 estimated by plain probit:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="exog-r-tab" data-bs-toggle="tab" data-bs-target="#exog-r" type="button" role="tab" aria-controls="exog-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="exog-stata-tab" data-bs-toggle="tab" data-bs-target="#exog-stata" type="button" role="tab" aria-controls="exog-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="exog-r" class="tab-pane active" role="tabpanel" aria-labelledby="exog-r-tab">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp.html">ape_dgp</a></span><span class="op">(</span></span>
 <span>  focal      <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"training"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"size"</span>, <span class="st">"normal"</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -159,6 +267,21 @@ estimated by plain probit:</p>
 <span><span class="co">#&gt;   probit, n = 1200, assumed true APE +0.1000, 95% CI (alpha = 0.05), nsim = 400</span></span>
 <span><span class="co">#&gt;   power = 0.955 (MCSE 0.010)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.955 | inconclusive 0.045 | failed 0.000</span></span></code></pre></div>
+</div>
+<div id="exog-stata" class="tab-pane" role="tabpanel" aria-labelledby="exog-stata-tab">
+<div class="sourceCode" id="cb8"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>powerape dgp <span class="kw">ds</span>, focal(training, binary <span class="kw">p</span>(0.4)) covariates((<span class="kw">size</span>, <span class="fu">normal</span>)) <span class="co">///</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>    baseline(0.30) signal(0.10)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>powerape setape <span class="kw">ds</span>, target(0.10)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>powerape power <span class="kw">ds</span>, n(1200) claim(detect) nsim(400) <span class="dv">seed</span>(2)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 1200, assumed true APE + 0.1000,     95% CI (alpha = .05), nsim = 400
+  fit: probit via engine(stata), effects(closed)
+  power = 0.970 (MCSE 0.009)
+  outcomes: detect 0.970 | inconclusive 0.030 | failed 0.000</code></pre>
+</div>
+</div>
+</div>
 <p>The gap is <strong>the IV price</strong>: the CF estimator identifies
 the effect from the instrumented variation only, so its standard error
 is larger by roughly <code>sqrt(1 / iv_strength)</code> – the familiar
@@ -168,7 +291,22 @@ mechanically, badly underpowered. This pair of calls prices that in
 advance.</p>
 <p>Since <code>endogeneity</code> and <code>iv_strength</code> are
 guesses, sweep them:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="robust-r-tab" data-bs-toggle="tab" data-bs-target="#robust-r" type="button" role="tab" aria-controls="robust-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="robust-stata-tab" data-bs-toggle="tab" data-bs-target="#robust-stata" type="button" role="tab" aria-controls="robust-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="robust-r" class="tab-pane active" role="tabpanel" aria-labelledby="robust-r-tab">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_robust.html">ape_robust</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">1200</span>, claim <span class="op">=</span> <span class="st">"detect"</span>,</span>
 <span>           vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>iv_strength <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span>, grid_points <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>           nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">3</span>, nmax <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -183,6 +321,21 @@ guesses, sweep them:</p>
 <span><span class="co">#&gt;          0.2            0.1 0.2200000 0.02391652         0</span></span>
 <span><span class="co">#&gt;          0.3            0.1 0.3533333 0.02759764         0</span></span></code></pre></div>
 </div>
+<div id="robust-stata" class="tab-pane" role="tabpanel" aria-labelledby="robust-stata-tab">
+<div class="sourceCode" id="cb11"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>powerape <span class="kw">robust</span> <span class="kw">d</span>, n(1200) claim(detect) vary(ivstrength(0.1 0.3)) gridpoints(3) <span class="co">///</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>    nsim(300) <span class="dv">seed</span>(3) nonmax engine(<span class="kw">mata</span>)</span></code></pre></div>
+<pre class="stata-output"><code>powerape robustness sweep -- detect claim, APE, pin = ape
+  n = 1200, nsim = 300 per scenario, 3 scenario(s) over: ivstrength
+  power range [0.133, 0.340]; worst scenario: row 1
+  fit: Mata engine (Fisher scoring; control-function probit)
+ row   ivstrength    implied_eff    power     mcse separated
+   1           .1         0.1000   0.1333   0.0196    0.0000
+   2           .2         0.1000   0.2033   0.0232    0.0000
+   3           .3         0.1000   0.3400   0.0273    0.0000</code></pre>
+</div>
+</div>
+</div>
+</div>
 <div class="section level2">
 <h2 id="endogenous-interactions">Endogenous interactions<a class="anchor" aria-label="anchor" href="#endogenous-interactions"></a>
 </h2>
@@ -193,7 +346,22 @@ function, and the control-function-by-moderator interaction (Stata:
 <code>interact()</code> + <code>mainonly()</code>), and the first stage
 includes the moderator <strong>and the instrument-by-moderator
 interactions</strong> – as instruments must in interaction models.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="aie-r-tab" data-bs-toggle="tab" data-bs-target="#aie-r" type="button" role="tab" aria-controls="aie-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="aie-stata-tab" data-bs-toggle="tab" data-bs-target="#aie-stata" type="button" role="tab" aria-controls="aie-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="aie-r" class="tab-pane active" role="tabpanel" aria-labelledby="aie-r-tab">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">di</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp_iv.html">ape_dgp_iv</a></span><span class="op">(</span></span>
 <span>  focal       <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"training"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span>,</span>
 <span>  moderator   <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"public"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
@@ -210,6 +378,23 @@ interactions</strong> – as instruments must in interaction models.</p>
 <span><span class="co">#&gt;   probit, n = 2000, assumed true AIE +0.0600, 95% CI (alpha = 0.05), nsim = 250, stacked robust SEs</span></span>
 <span><span class="co">#&gt;   power = 0.064 (MCSE 0.015)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.064 | inconclusive 0.936 | failed 0.000</span></span></code></pre></div>
+</div>
+<div id="aie-stata" class="tab-pane" role="tabpanel" aria-labelledby="aie-stata-tab">
+<div class="sourceCode" id="cb14"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>powerape dgp <span class="kw">di</span>, iv focal(training, binary <span class="kw">p</span>(0.4))                       <span class="co">///</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>    moderator(<span class="kw">public</span>, binary <span class="kw">p</span>(0.5)) covariates((<span class="kw">size</span>, <span class="fu">normal</span>))           <span class="co">///</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>    instruments((subsidy, binary <span class="kw">p</span>(0.5))) endogeneity(0.4)                <span class="co">///</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>    ivstrength(0.25) baseline(0.30) signal(0.10)</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>powerape setaie <span class="kw">di</span>, target(0.06) mainfocal(0.10) mainmoderator(0.05)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>powerape power <span class="kw">di</span>, n(2000) claim(detect) nsim(250) <span class="dv">seed</span>(4)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 2000, assumed true AIE + 0.0600,     95% CI (alpha = .05), nsim = 250, stacked robust SEs
+  fit: cfprobit via engine(stata), effects(closed)
+  power = 0.084 (MCSE 0.018)
+  outcomes: detect 0.084 | inconclusive 0.916 | failed 0.000</code></pre>
+</div>
+</div>
+</div>
 <p>The interaction tax and the IV price compound. Interaction claims
 from instrumented designs need very large samples, and it is far better
 to learn that at the design stage than from a null result.</p>
@@ -222,12 +407,13 @@ to learn that at the design stage than from a null result.</p>
 probit, Poisson): coefficients and stacked SEs to ~1e-7 (robust and
 clustered), and the <code>margins</code> ASF effects exactly, including
 the interaction design run with Stata’s own syntax. One caveat we
-discovered in the process: for <em>fractional</em> first stages, Stata’s
-<code>margins</code> rebuilds the control function with a binary-outcome
-formula that ignores the fractional value – an internal inconsistency
-with its own estimator, reproduced to 7 decimals in our validation
-battery. powerape uses the estimation-consistent generalized
-residuals.</p>
+discovered in the process: before the October 14, 2026 update of
+StataNow 19.5, Stata’s <code>margins</code> rebuilt the control function
+for <em>fractional</em> first stages with a binary-outcome formula that
+ignores the fractional value – an internal inconsistency with its own
+estimator, reproduced to 7 decimals in our validation battery and fixed
+by StataCorp in that update. powerape uses the estimation-consistent
+generalized residuals, as Stata’s <code>margins</code> now does.</p>
 <p>Current scope: one endogenous focal variable; linear and probit first
 stages in the DGP route (fractional probit and Poisson are supported at
 the estimator level); binary exogenous moderators for AIE designs;

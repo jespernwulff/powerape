@@ -4,3 +4,6 @@
 ^pkgdown$
 ^\.github$
 ^\.gitignore$
+^precompute$
+^vignettes/articles$
+^man/figures/home-curves\.png$

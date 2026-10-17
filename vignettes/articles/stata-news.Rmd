@@ -1,0 +1,55 @@
+---
+title: "News: the Stata command"
+description: >
+  Versions of the Stata command powerape. The R package's changes are under
+  News, R package.
+---
+
+The Stata command is a port of the R package and follows its releases; the
+version it ports is named in `powerape version` and in every power
+statement. The changes of the R package are listed in its
+[news](../news/index.html).
+
+## powerape for Stata 0.1.3 (2026-10-17)
+
+* Panel designs calibrate about as fast as in the R package. A panel
+  `powerape dgp`, `setape`, `setaie`, `trueape` or `trueaie` at the default
+  `nint(1e5)` took about a minute and now takes one to three seconds, so
+  robustness sweeps over panel scenarios and `mde` searches, which
+  recalibrate at every step, take seconds instead of minutes. Every result
+  is bit-identical to 0.1.2.
+* The validation scripts run from a clone of the repository and are part of
+  it; see [How powerape is validated](validation.html).
+
+## powerape for Stata 0.1.2 (2026-10-16)
+
+* Every simulation command (`power`, `curve`, `n`, `mde`, `robust`) prints a
+  line beginning `fit:` that names who fitted the simulated studies, for
+  example `probit via engine(stata), effects(closed)`,
+  `cfprobit via engine(stata), effects(margins)` or
+  `Mata engine (Fisher scoring)`, and stores it in `r(fit)`, `r(engine)` and
+  `r(effects)`.
+* `engine()` and `effects()` given on a single command now apply to that
+  command only. Before, they also changed the session default that
+  `powerape engine` sets.
+
+## powerape for Stata 0.1.1 (2026-10-16)
+
+* Installation with `net install` (`powerape.pkg`, `stata.toc`), and
+  `powerape version`, which checks that the command and its Mata library
+  belong together.
+* Declared for Stata 16 or later (frames). The control-function route under
+  the default engine uses `cfprobit` (Stata 18 or later).
+* `separation(keep)` under `engine(stata)`: replications with an empty
+  identifying cell are fitted with `asis` and kept, as R's `glm` keeps them.
+* `effects(margins)` for the interaction effect on the control-function
+  route: `margins, dydx() at()` after `cfprobit`, with the control function
+  held fixed.
+
+## powerape for Stata 0.1.0 (2026-10-15)
+
+* First release: a port of the R package powerape 1.11.3 with every route
+  (parametric, pilot data, fitted pilot model, panel, control function),
+  estimand (APE and AIE), claim and search of the R package. Validated
+  against the R package in four tiers; see
+  [How powerape is validated](validation.html).

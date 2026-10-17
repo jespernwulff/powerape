@@ -1,0 +1,147 @@
+
+. 
+end of do-file
+
+. 
+. * >>> world
+. powerape dgp a, focal(program, binary p(0.5)) covariates((z, normal))      ///
+>     baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  covariates: z (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape a, target(0.10)
+powerape DGP -- probit
+  focal: program (binary, p = 0.50)
+  covariates: z (normal, mean 0.00, sd 1.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.2857, implied P(Y=1 | focal=1) = 0.400)
+
+. * <<<
+. 
+. tic
+
+. * >>> power
+. powerape power a, n(1500) claim(minimum) sesoi(0.05) nsim(4000) seed(501)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1500, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 4000
+  fit: probit via engine(stata), effects(closed)
+  power = 0.677 (MCSE 0.007)
+  outcomes: minimum 0.677 | detect-only 0.312 | inconclusive 0.011 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r power
+
+. toc power
+
+. 
+. tic
+
+. * >>> n-minimum
+. powerape n a, power(0.80) claim(minimum) sesoi(0.05) nsim(1000) seed(502)  ///
+>     engine(mata)
+powerape required sample size -- minimum claim
+  n = 2084 for 80% target power (confirmed 0.800, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+. local n_min = r(n)
+
+. * <<<
+. keep_r n_minimum
+
+. toc n_minimum
+
+. 
+. tic
+
+. * >>> n-detect
+. powerape n a, power(0.80) claim(detect) nsim(1000) seed(503) engine(mata)
+powerape required sample size -- detect claim
+  n = 663 for 80% target power (confirmed 0.796, MCSE 0.006)
+  assumed true APE + 0.1000, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+. * <<<
+. keep_r n_detect
+
+. toc n_detect
+
+. 
+. tic
+
+. * >>> robust
+. powerape robust a, n(`n_min') claim(minimum) sesoi(0.05)                   ///
+>     vary(baseline(0.20 0.40) signal(0 0.30)) gridpoints(3)                 ///
+>     nsim(600) seed(504) nonmax engine(mata)
+powerape robustness sweep -- minimum claim, APE, pin = ape
+  n = 2084, nsim = 600 per scenario, 9 scenario(s) over: baseline, signal
+  power range [0.732, 0.915]; worst scenario: row 3
+  fit: Mata engine (Fisher scoring)
+ row     baseline       signal    implied_eff    power     mcse separated
+   1           .2            0         0.1000   0.8350   0.0152    0.0000
+   2           .3            0         0.1000   0.7983   0.0164    0.0000
+   3           .4            0         0.1000   0.7317   0.0181    0.0000
+   4           .2          .15         0.1000   0.8800   0.0133    0.0000
+   5           .3          .15         0.1000   0.8000   0.0163    0.0000
+   6           .4          .15         0.1000   0.7850   0.0168    0.0000
+   7           .2           .3         0.1000   0.9150   0.0114    0.0000
+   8           .3           .3         0.1000   0.8667   0.0139    0.0000
+   9           .4           .3         0.1000   0.8017   0.0163    0.0000
+
+. * <<<
+. keep_range robust
+
+. toc robust
+
+. 
+. tic
+
+. * >>> statement-power
+. powerape power a, n(`n_min') claim(minimum) sesoi(0.05) nsim(4000)         ///
+>     seed(20260821)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 2084, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 4000
+  fit: probit via engine(stata), effects(closed)
+  power = 0.806 (MCSE 0.006)
+  outcomes: minimum 0.806 | detect-only 0.193 | inconclusive 0.002 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r statement
+
+. toc statement
+
+. 
+. * >>> statement
+. powerape statement
+We conducted a simulation-based power analysis for the average partial effect
+(APE) of program using the powerape package for Stata (version 0.1.2 (Stata
+port of powerape 1.11.3)), following the confidence-interval approach of
+Riesthuis (2024). The assumed data-generating process was a probit model with
+focal variable program (binary, prevalence 0.50); parametric covariates z
+(continuous, mean 0, SD 1), with the focal variable and the covariates
+mutually independent; baseline outcome rate 0.300 with the focal at reference;
+nuisance covariates contribute a latent pseudo-R-squared of 0.10. The assumed
+true APE was 0.100 (10.0 percentage points). At a sample size of n = 2084,
+simulated power for the minimum-effect claim (the 90% confidence interval's
+lower bound exceeding the smallest effect size of interest, 0.050; a one-sided
+test at alpha = 5%) was 0.806 (Monte Carlo SE 0.006; 4000 replications).
+Across replications, the probability of concluding a meaningful effect was
+0.806, of detection without meaningfulness 0.193, of an inconclusive result
+0.002, and of equivalence 0.000. Estimation used maximum likelihood with
+delta-method Wald confidence intervals; replications without a
+maximum-likelihood estimate, from a failed fit or from separation (a focal
+cell with no events or no non-events), counted against the claim (0.0% of
+replications).
+
+. * <<<
+. 
+. file close res
+
+. file close tim
+
+. log close pc

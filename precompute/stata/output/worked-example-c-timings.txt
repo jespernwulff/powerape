@@ -1,0 +1,3 @@
+label	seconds
+n	     82.7
+n_25	     80.3

@@ -10,6 +10,17 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
                       fig.width = 6, fig.height = 4)
+# On the website (pkgdown) the examples sit in R | Stata tabs, with the Stata
+# output read from precompute/stata/output/. The package vignette shows R only.
+if (identical(Sys.getenv("IN_PKGDOWN"), "true")) {
+  root <- normalizePath(getwd(), winslash = "/")
+  while (!file.exists(file.path(root, "DESCRIPTION")) && dirname(root) != root)
+    root <- dirname(root)
+  source(file.path(root, "precompute", "helpers.R"))
+} else {
+  tabs_r <- tabs_stata <- tabs_end <- function(...) ""
+  stata_show <- stata_figure <- function(...) invisible(NULL)
+}
 ```
 
 ## Why a panel module?
@@ -47,6 +58,8 @@ argument (`ape_power()`, `ape_curve()`, `ape_n()`, `ape_robust()`) counts
 
 ## Step 1: describe the panel world
 
+`r tabs_r("world")`
+
 ```{r}
 library(powerape)
 
@@ -62,6 +75,14 @@ d <- ape_dgp_panel(
 )
 d
 ```
+
+`r tabs_stata("world")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", "world")
+```
+
+`r tabs_end()`
 
 Three knobs are panel-specific, and each is a quantity you can defend in a
 grant application:
@@ -81,9 +102,19 @@ values in (0, 1) mix unit-level and wave-level variation.
 
 ## Step 2: pin the APE
 
+`r tabs_r("pin")`
+
 ```{r}
 d <- set_ape(d, target = 0.10)
 ```
+
+`r tabs_stata("pin")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", "pin", output = FALSE)
+```
+
+`r tabs_end()`
 
 Identical to the cross-sectional workflow -- the inversion solves the
 focal coefficient so the true ASF-APE is exactly 0.10, integrating the
@@ -92,10 +123,20 @@ infeasible.
 
 ## Step 3: power, in units
 
+`r tabs_r("power")`
+
 ```{r}
 ape_power(d, n = 300, claim = "minimum", sesoi = 0.05,
           nsim = 400, seed = 1)
 ```
+
+`r tabs_stata("power")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", "power")
+```
+
+`r tabs_end()`
 
 `n = 300` means 300 units observed for 4 periods -- 1,200 unit-period
 observations, fitted by pooled probit with Mundlak means and
@@ -106,10 +147,20 @@ For archival panels the units are usually *given*, and the honest
 question inverts: what is the smallest APE this panel can reliably
 demonstrate? `ape_mde()` answers it with n still counted in units:
 
+`r tabs_r("mde")`
+
 ```{r}
 ape_mde(d, n = 400, claim = "minimum", sesoi = 0.05,
         nsim = 400, seed = 9)
 ```
+
+`r tabs_stata("mde")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", "mde")
+```
+
+`r tabs_end()`
 
 ## Panels are not free observations
 
@@ -118,6 +169,8 @@ than T-fold information: the outcome is correlated within units, so the
 effective sample is closer to the number of clusters than to the number
 of rows. Compare the panel above with a cross-section of the same *total*
 size:
+
+`r tabs_r("cs")`
 
 ```{r}
 cs <- ape_dgp(
@@ -131,6 +184,14 @@ cs <- set_ape(cs, target = 0.10)
 ape_power(cs, n = 1200, claim = "minimum", sesoi = 0.05,
           nsim = 400, seed = 2)
 ```
+
+`r tabs_stata("cs")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", c("cs-world", "cs-power"), output = "cs-power")
+```
+
+`r tabs_end()`
 
 How the two compare is a *computable property of the design*, not a rule
 of thumb. Here — with half of the firm heterogeneity loading on
@@ -146,11 +207,21 @@ Since `rho` is usually a guess, sweep it -- with `pin = "ape"` the true
 effect is re-pinned in every scenario, so only the precision channel
 moves:
 
+`r tabs_r("rho")`
+
 ```{r}
 ape_robust(d, n = 300, claim = "minimum", sesoi = 0.05,
            vary = list(rho = c(0.1, 0.5)), grid_points = 3,
            nsim = 300, seed = 3, nmax = FALSE)
 ```
+
+`r tabs_stata("rho")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", "rho")
+```
+
+`r tabs_end()`
 
 ## Unbalanced panels and attrition (Wooldridge, 2019)
 
@@ -161,6 +232,8 @@ estimating model adds period-count cohort indicators. `powerape` prices
 exactly that estimator. Describe the imbalance either as an explicit
 distribution of panel lengths or, more naturally for a proposal, as a
 per-wave **retention rate**:
+
+`r tabs_r("unbalanced")`
 
 ```{r}
 da <- ape_dgp_panel(
@@ -178,15 +251,33 @@ da <- set_ape(da, target = 0.10)
 da
 ```
 
+`r tabs_stata("unbalanced")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", c("unbalanced-world", "unbalanced-pin"), output = "unbalanced-pin")
+```
+
+`r tabs_end()`
+
 `n` still counts units; the printout reports the expected panel length
 and total observations. Attrition costs real power -- sweep the
 retention guess to price it:
+
+`r tabs_r("retention")`
 
 ```{r}
 ape_robust(da, n = 300, claim = "minimum", sesoi = 0.05,
            vary = list(retention = c(0.7, 1)), grid_points = 3,
            nsim = 300, seed = 5, nmax = FALSE)
 ```
+
+`r tabs_stata("retention")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", "retention")
+```
+
+`r tabs_end()`
 
 Two facts are worth knowing at the design stage. The sweep above
 prices the first: the lower the retention, the lower the power, and the
@@ -210,6 +301,8 @@ probabilities -- and for panel DGPs it is defined on the same ASF as the
 APE: unit effects integrated out, Mundlak means held fixed. It is the
 same population quantity a cross-sectional AIE design targets.
 
+`r tabs_r("aie")`
+
 ```{r}
 di <- ape_dgp_panel(
   model      = "probit",
@@ -226,6 +319,14 @@ di <- set_aie(di, target = 0.06, main_focal = 0.10, main_moderator = 0.05)
 di
 ```
 
+`r tabs_stata("aie")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", c("aie-world", "aie-pin"), output = "aie-pin")
+```
+
+`r tabs_end()`
+
 The three anchors are the familiar ones: the two conditional-at-reference
 main-effect APEs plus the target AIE. One panel-specific detail is
 handled for you: whenever the interaction term varies within units, the
@@ -235,9 +336,19 @@ of a product is not the product of the means).
 Interactions are expensive, and panels make them more so -- the
 interaction tax and the clustering penalty compound:
 
+`r tabs_r("aie-power")`
+
 ```{r}
 ape_power(di, n = 400, claim = "detect", nsim = 250, seed = 4)
 ```
+
+`r tabs_stata("aie-power")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("panel", "aie-power")
+```
+
+`r tabs_end()`
 
 Even 400 units (1,600 observations) leave detection power low for a
 6-point AIE. Budget accordingly -- `ape_n()` with a larger `nsim` gives

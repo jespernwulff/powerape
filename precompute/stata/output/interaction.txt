@@ -1,0 +1,132 @@
+
+. 
+end of do-file
+
+. 
+. * >>> world
+. powerape dgp d, focal(treat, binary p(0.5)) moderator(female, binary p(0.55)) ///
+>     covariates((age, normal mean(45) sd(12))) baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50)
+  moderator: female (binary, p = 0.55) (focal-by-moderator interaction included)
+  covariates: age (normal, mean 45.00, sd 12.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. * <<<
+. 
+. * >>> pin
+. powerape setaie d, target(0.08) mainfocal(0.10) mainmoderator(0.03)
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50)
+  moderator: female (binary, p = 0.55) (focal-by-moderator interaction included)
+  covariates: age (normal, mean 45.00, sd 12.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true AIE pinned at + 0.0800 (beta_int =    0.2044)
+  main APEs at reference: treat  0.100 (beta =    0.2857), female  0.030 (beta =    0.0891)
+
+. * <<<
+. 
+. tic
+
+. * >>> power
+. powerape power d, n(3000) claim(detect) nsim(500) seed(1)
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 3000, assumed true AIE + 0.0800,     95% CI (alpha = .05), nsim = 500
+  fit: probit via engine(stata), effects(closed)
+  power = 0.640 (MCSE 0.021)
+  outcomes: detect 0.640 | inconclusive 0.360 | failed 0.000
+
+. * <<<
+. keep_r power
+
+. toc power
+
+. 
+. * >>> main-world
+. powerape dgp d_main, focal(treat, binary p(0.5))                          ///
+>     covariates((age, normal mean(45) sd(12))) baseline(0.30) signal(0.10)
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50)
+  covariates: age (normal, mean 45.00, sd 12.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape d_main, target(0.08)
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50)
+  covariates: age (normal, mean 45.00, sd 12.00)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.0800 (beta_focal =    0.2308, implied P(Y=1 | focal=1) = 0.380)
+
+. * <<<
+. 
+. tic
+
+. * >>> main-power
+. powerape power d_main, n(3000) claim(detect) nsim(500) seed(2)
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 3000, assumed true APE + 0.0800,     95% CI (alpha = .05), nsim = 500
+  fit: probit via engine(stata), effects(closed)
+  power = 0.992 (MCSE 0.004)
+  outcomes: detect 0.992 | inconclusive 0.008 | failed 0.000
+
+. * <<<
+. keep_r main_power
+
+. toc main_power
+
+. 
+. tic
+
+. * >>> n
+. powerape n d, power(0.80) claim(detect) nsim(500) seed(3) engine(mata)
+powerape required sample size -- detect claim
+  n = 4279 for 80% target power (confirmed 0.798, MCSE 0.009)
+  assumed true AIE + 0.0800, sesoi -,     95% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
+
+. * <<<
+. keep_r n
+
+. toc n
+
+. 
+. tic
+
+. * >>> closed25
+. powerape power d, n(3000) claim(detect) nsim(25) seed(1)
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 3000, assumed true AIE + 0.0800,     95% CI (alpha = .05), nsim = 25
+  fit: probit via engine(stata), effects(closed)
+  power = 0.760 (MCSE 0.085)
+  outcomes: detect 0.760 | inconclusive 0.240 | failed 0.000
+
+. * <<<
+. keep_r closed25
+
+. toc closed25
+
+. 
+. tic
+
+. * >>> ginteff
+. powerape power d, n(3000) claim(detect) nsim(25) seed(1) effects(margins)
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 3000, assumed true AIE + 0.0800,     95% CI (alpha = .05), nsim = 25
+  fit: probit via engine(stata), effects(margins)
+  power = 0.760 (MCSE 0.085)
+  outcomes: detect 0.760 | inconclusive 0.240 | failed 0.000
+
+. * <<<
+. keep_r ginteff
+
+. toc ginteff
+
+. 
+. file close res
+
+. file close tim
+
+. log close pc

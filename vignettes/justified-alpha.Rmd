@@ -11,6 +11,17 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
                       fig.width = 6, fig.height = 4)
 has_alphaN <- requireNamespace("alphaN", quietly = TRUE)
+# On the website (pkgdown) the examples sit in R | Stata tabs, with the Stata
+# output read from precompute/stata/output/. The package vignette shows R only.
+if (identical(Sys.getenv("IN_PKGDOWN"), "true")) {
+  root <- normalizePath(getwd(), winslash = "/")
+  while (!file.exists(file.path(root, "DESCRIPTION")) && dirname(root) != root)
+    root <- dirname(root)
+  source(file.path(root, "precompute", "helpers.R"))
+} else {
+  tabs_r <- tabs_stata <- tabs_end <- function(...) ""
+  stata_show <- stata_figure <- function(...) invisible(NULL)
+}
 ```
 
 ## The default, and the argument
@@ -20,6 +31,8 @@ literature uses: detection is the two-sided test read off the 95%
 interval, the minimum-effect claim a one-sided test and equivalence a
 TOST, both read off the 90% interval. The level is an argument of every
 power function, so a stricter convention is one keyword away:
+
+`r tabs_r("default")`
 
 ```{r}
 library(powerape)
@@ -34,6 +47,14 @@ ape_power(d, n = 2000, claim = "minimum", sesoi = 0.05, nsim = 400, seed = 1)
 ape_power(d, n = 2000, claim = "minimum", sesoi = 0.05, alpha = 0.01,
           nsim = 400, seed = 1)
 ```
+
+`r tabs_stata("default")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("justified-alpha", c("world", "default"), output = "default")
+```
+
+`r tabs_end()`
 
 Maier and Lakens (2022) give two reasons not to stop at the default.
 First, with a fixed budget of observations the error rate that
@@ -54,6 +75,8 @@ Taylor (2024) in the alphaN package, where `BF = 1` is the largest
 level that avoids Lindley's paradox and `BF = 3` asks a significant
 result to carry moderate evidence.
 
+`r tabs_r("rule")`
+
 ```{r, eval = has_alphaN}
 rule <- function(n) alphaN::alphaN(n, BF = 3)
 rule(c(500, 2000, 8000))
@@ -62,10 +85,20 @@ ape_n(d, power = 0.80, claim = "minimum", sesoi = 0.05, alpha = rule,
       nsim = 300, seed = 2, confirm = FALSE)
 ```
 
+`r tabs_stata("rule")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("justified-alpha", c("rule", "rule-n"))
+```
+
+`r tabs_end()`
+
 The requirement rises well above the fixed-.05 answer (about 2,100 for
 this design), because the level keeps tightening as the search moves
 to larger *n*. The returned object stores the rule and the level it
 produced at the chosen *n*, and `power_statement()` says so.
+
+`r tabs_r("rule-power")`
 
 ```{r, eval = has_alphaN}
 pw_rule <- ape_power(d, n = 5000, claim = "minimum", sesoi = 0.05,
@@ -73,6 +106,14 @@ pw_rule <- ape_power(d, n = 5000, claim = "minimum", sesoi = 0.05,
 pw_rule
 power_statement(pw_rule)
 ```
+
+`r tabs_stata("rule-power")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("justified-alpha", "rule-power")
+```
+
+`r tabs_end()`
 
 ## Alpha from error costs
 
@@ -88,6 +129,8 @@ the estimate and standard error of every replication, and power at any
 level is a re-threshold of those draws. `power_at()` exposes the curve;
 `ape_alpha()` minimizes or balances it.
 
+`r tabs_r("costs")`
+
 ```{r}
 pw <- ape_power(d, n = 2000, claim = "minimum", sesoi = 0.05,
                 nsim = 1000, seed = 4)
@@ -97,6 +140,16 @@ ja <- ape_alpha(pw, cost = 4, prior = 1)      # Cohen's 4:1 weighting
 ja
 plot(ja)
 ```
+
+`r tabs_stata("costs")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("justified-alpha", c("costs", "costs-plot"), output = "costs")
+stata_figure("justified-alpha-costs.svg",
+             alt = "The weighted combined error rate against alpha, with the optimum and the range of levels indistinguishable from it.")
+```
+
+`r tabs_end()`
 
 Two things to notice. The objective is flat around its optimum, so the
 result reports the range of levels that cannot be told apart from the
@@ -108,9 +161,19 @@ costs, the function says so rather than returning it, following Maier
 and Lakens's advice that raising alpha needs a justification of its own
 and that journals may accept only lowering.
 
+`r tabs_r("equal")`
+
 ```{r}
 ape_alpha(pw, cost = 1, prior = 1)
 ```
+
+`r tabs_stata("equal")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("justified-alpha", "equal-costs")
+```
+
+`r tabs_end()`
 
 Balancing instead of minimizing asks for `cost * alpha = prior * beta`;
 at a design's required *n* for 80% power, Cohen's 4:1 weighting returns
@@ -128,18 +191,42 @@ first-order condition loses both *n* and the standard error, so one
 level prices every sample size, and `alpha_frontier()` returns it in
 closed form.
 
+`r tabs_r("frontier")`
+
 ```{r}
 alpha_frontier(cost = 4, power = 0.80)                    # two-sided, 0.0274
 alpha_frontier(cost = 1, power = 0.80, claim = "minimum") # exactly 1 - power
 ```
 
+`r tabs_stata("frontier")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("justified-alpha", "frontier")
+```
+
+`r tabs_end()`
+
 Passing it as `alpha` re-prices an MDE analysis (or a grid of them)
 under the justified level:
+
+`r tabs_r("frontier-mde")`
 
 ```{r, eval = FALSE}
 ape_mde(d, n = 3000, claim = "detect",
         alpha = alpha_frontier(cost = 4, power = 0.80), seed = 6)
 ```
+
+`r tabs_stata("frontier-mde")`
+
+```{r, echo = FALSE, results = "asis"}
+if (identical(Sys.getenv("IN_PKGDOWN"), "true"))
+  cat("```stata",
+      "powerape frontier, cost(4) power(0.80)",
+      "powerape mde d, n(3000) claim(detect) alpha(`r(alpha)') seed(6)",
+      "```", "", sep = "\n")
+```
+
+`r tabs_end()`
 
 At equal costs the one-sided frontier level is exactly `1 - power` --
 the frontier is where alpha and beta balance. Unlike `ape_alpha()`,
@@ -158,12 +245,22 @@ standard routes it matches the nominal level within Monte Carlo error;
 on clustered panels with few units it may not, and then the realized
 number is the one to report.
 
+`r tabs_r("size")`
+
 ```{r}
 ja4 <- ape_alpha(pw, cost = 4, prior = 1, size = TRUE, nsim_size = 500,
                  seed = 5)
 ja4
 power_statement(ja4)
 ```
+
+`r tabs_stata("size")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("justified-alpha", "size")
+```
+
+`r tabs_end()`
 
 The statement names the objective, the weights, the level, the flat
 range, the cap, and the verification, ready for a preregistration.

@@ -1,0 +1,389 @@
+
+. 
+end of do-file
+
+. 
+. * ---- The six steps -----------------------------------------------------------
+. 
+. * >>> world
+. powerape dgp d, focal(treat, binary p(0.5))                              ///
+>     covariates((age, normal mean(45) sd(12)) (female, binary p(0.55)))   ///
+>     correlation(0.2) baseline(0.30) signal(0.15)
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50)
+  covariates: age (normal, mean 45.00, sd 12.00), female (binary, p = 0.55)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.150
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. * <<<
+. 
+. * >>> pin
+. powerape setape d, target(0.10)
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50)
+  covariates: age (normal, mean 45.00, sd 12.00), female (binary, p = 0.55)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.150
+  true APE pinned at + 0.1000 (beta_focal =    0.2943, implied P(Y=1 | focal=1) = 0.400)
+
+. * <<<
+. 
+. tic
+
+. * >>> power
+. powerape power d, n(1500) claim(minimum) sesoi(0.05) nsim(500) seed(1)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1500, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 500
+  fit: probit via engine(stata), effects(closed)
+  power = 0.652 (MCSE 0.021)
+  outcomes: minimum 0.652 | detect-only 0.338 | inconclusive 0.010 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r power
+
+. 
+. * >>> stored
+. return list
+
+scalars:
+          r(is_margin) =  0
+                r(mde) =  .
+       r(nsim_confirm) =  .
+          r(confirmed) =  0
+               r(goal) =  .
+           r(n_failed) =  0
+           r(min_cell) =  206.746
+          r(separated) =  0
+             r(target) =  .1
+              r(sesoi) =  .05
+               r(conf) =  .9
+              r(alpha) =  .05
+               r(nsim) =  500
+                  r(n) =  1500
+               r(mcse) =  .0213023942316351
+              r(power) =  .652
+
+macros:
+                r(fit) : "probit via engine(stata), effects(closed)"
+            r(effects) : "closed"
+             r(engine) : "stata"
+                r(dgp) : "d"
+         r(separation) : "fail"
+                 r(se) : "model"
+              r(model) : "probit"
+           r(estimand) : "ape"
+              r(claim) : "minimum"
+               r(kind) : "power"
+               r(name) : "_last"
+
+matrices:
+           r(outcomes) :  1 x 5
+
+. * <<<
+. toc power
+
+. 
+. tic
+
+. * >>> n
+. powerape n d, power(0.80) claim(minimum) sesoi(0.05) nsim(500) seed(2) engine(mata)
+powerape required sample size -- minimum claim
+  n = 2103 for 80% target power (confirmed 0.808, MCSE 0.009)
+  assumed true APE + 0.1000, sesoi 0.050,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
+
+. * <<<
+. keep_r n
+
+. toc n
+
+. 
+. tic
+
+. * >>> curve
+. powerape curve d, n(500(500)3000) claim(minimum) sesoi(0.05)             ///
+>     nsim(300) seed(3) engine(mata)
+powerape power curve -- minimum claim, probit (APE), nsim = 300 per point
+  fit: Mata engine (Fisher scoring)
+
+         n     alpha    power     mcse   failed  separated
+       500    0.0500   0.3267   0.0271   0.0000     0.0000
+      1000    0.0500   0.5267   0.0288   0.0000     0.0000
+      1500    0.0500   0.6667   0.0272   0.0000     0.0000
+      2000    0.0500   0.7567   0.0248   0.0000     0.0000
+      2500    0.0500   0.8700   0.0194   0.0000     0.0000
+      3000    0.0500   0.8800   0.0188   0.0000     0.0000
+
+. * <<<
+. keep_r curve
+
+. toc curve
+
+. 
+. * >>> curve-plot
+. matrix C = r(results)
+
+. svmat C, names(col)
+number of observations will be reset to 6
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 6.
+
+. twoway connected power n, yline(0.8, lpattern(dash))                      ///
+>     ytitle("Power") xtitle("Sample size") ylabel(0(0.2)1)
+
+. * <<<
+. pc_graph getting-started-curve
+
+. drop _all
+
+. 
+. tic
+
+. * >>> mde
+. powerape mde d, n(1500) claim(minimum) sesoi(0.05) nsim(500) seed(6) engine(mata)
+powerape minimum detectable APE -- minimum claim
+  MDE =    0.1094 at n = 1500 for 80% target power (confirmed 0.797, MCSE 0.009)
+  smallest effect demonstrably above sesoi 0.050
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 2000.
+
+. * <<<
+. keep_r mde
+
+. toc mde
+
+. 
+. tic
+
+. * >>> robust
+. powerape robust d, n(2200) claim(minimum) sesoi(0.05)                    ///
+>     vary(baseline(0.20 0.40)) gridpoints(3) nsim(300) seed(4) nonmax engine(mata)
+powerape robustness sweep -- minimum claim, APE, pin = ape
+  n = 2200, nsim = 300 per scenario, 3 scenario(s) over: baseline
+  power range [0.793, 0.870]; worst scenario: row 3
+  fit: Mata engine (Fisher scoring)
+ row     baseline    implied_eff    power     mcse separated
+   1           .2         0.1000   0.8700   0.0194    0.0000
+   2           .3         0.1000   0.8100   0.0226    0.0000
+   3           .4         0.1000   0.7933   0.0234    0.0000
+
+. * <<<
+. keep_r robust
+
+. toc robust
+
+. 
+. tic
+
+. * >>> statement
+. powerape power d, n(2200) claim(minimum) sesoi(0.05) nsim(500) seed(5)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 2200, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 500
+  fit: probit via engine(stata), effects(closed)
+  power = 0.816 (MCSE 0.017)
+  outcomes: minimum 0.816 | detect-only 0.180 | inconclusive 0.004 | equivalence 0.000 | failed 0.000
+
+. powerape statement
+We conducted a simulation-based power analysis for the average partial effect
+(APE) of treat using the powerape package for Stata (version 0.1.2 (Stata port
+of powerape 1.11.3)), following the confidence-interval approach of Riesthuis
+(2024). The assumed data-generating process was a probit model with focal
+variable treat (binary, prevalence 0.50); parametric covariates age
+(continuous, mean 45, SD 12), female (binary, prevalence 0.55), with an
+exchangeable latent (Gaussian-copula) correlation of 0.20 among the focal
+variable and the covariates; baseline outcome rate 0.300 with the focal at
+reference; nuisance covariates contribute a latent pseudo-R-squared of 0.15.
+The assumed true APE was 0.100 (10.0 percentage points). At a sample size of n
+= 2200, simulated power for the minimum-effect claim (the 90% confidence
+interval's lower bound exceeding the smallest effect size of interest, 0.050;
+a one-sided test at alpha = 5%) was 0.816 (Monte Carlo SE 0.017; 500
+replications). Across replications, the probability of concluding a meaningful
+effect was 0.816, of detection without meaningfulness 0.180, of an
+inconclusive result 0.004, and of equivalence 0.000. Estimation used maximum
+likelihood with delta-method Wald confidence intervals; replications without a
+maximum-likelihood estimate, from a failed fit or from separation (a focal
+cell with no events or no non-events), counted against the claim (0.0% of
+replications).
+
+. * <<<
+. keep_r statement
+
+. toc statement
+
+. 
+. * ---- Engines -------------------------------------------------------------------
+. 
+. tic
+
+. * >>> engine-mata
+. powerape power d, n(1500) claim(minimum) sesoi(0.05) nsim(500) seed(1) engine(mata)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1500, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 500
+  fit: Mata engine (Fisher scoring)
+  power = 0.652 (MCSE 0.021)
+  outcomes: minimum 0.652 | detect-only 0.340 | inconclusive 0.008 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r engine_mata
+
+. toc engine_mata
+
+. 
+. tic
+
+. * >>> effects-closed
+. powerape power d, n(1500) claim(minimum) sesoi(0.05) nsim(100) seed(7)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1500, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 100
+  fit: probit via engine(stata), effects(closed)
+  power = 0.720 (MCSE 0.045)
+  outcomes: minimum 0.720 | detect-only 0.260 | inconclusive 0.020 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r effects_closed
+
+. toc effects_closed
+
+. 
+. tic
+
+. * >>> effects-margins
+. powerape power d, n(1500) claim(minimum) sesoi(0.05) nsim(100) seed(7)   ///
+>     effects(margins)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1500, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 100
+  fit: probit via engine(stata), effects(margins)
+  power = 0.720 (MCSE 0.045)
+  outcomes: minimum 0.720 | detect-only 0.260 | inconclusive 0.020 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r effects_margins
+
+. toc effects_margins
+
+. 
+. * >>> session
+. powerape engine
+engine(stata) effects(closed)
+
+. powerape engine, engine(mata)
+engine(mata) effects(closed) set as the session default
+
+. powerape engine, engine(stata) effects(closed)
+engine(stata) effects(closed) set as the session default
+
+. * <<<
+. 
+. * ---- Pilot data ------------------------------------------------------------------
+. 
+. * >>> pilot-data
+. set seed 20261016
+
+. set obs 500
+Number of observations (_N) was 0, now 500.
+
+. generate treat  = runiform() < .5
+
+. generate age    = rnormal(45, 12)
+
+. generate female = runiform() < .55
+
+. generate y      = runiform() < normal(-0.9 + 0.3*treat + 0.01*age + 0.2*female)
+
+. * <<<
+. 
+. tic
+
+. * >>> pilot-empirical
+. powerape dgp pilot_rows, empirical focal(treat) covariates(age female)    ///
+>     baseline(0.30) signal(0.15)
+powerape DGP -- probit (empirical covariates)
+  focal: treat (binary, p = 0.49) [resampled jointly with covariates]
+  covariates: age, female
+  pilot rows: 500 (resampled with replacement)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.150
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape pilot_rows, target(0.10)
+powerape DGP -- probit (empirical covariates)
+  focal: treat (binary, p = 0.49) [resampled jointly with covariates]
+  covariates: age, female
+  pilot rows: 500 (resampled with replacement)
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.150
+  true APE pinned at + 0.1000 (beta_focal =    0.2940, implied P(Y=1 | focal=1) = 0.400)
+
+. powerape power pilot_rows, n(1500) claim(minimum) sesoi(0.05) nsim(500) seed(11)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1500, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 500
+  fit: probit via engine(stata), effects(closed)
+  power = 0.656 (MCSE 0.021)
+  outcomes: minimum 0.656 | detect-only 0.330 | inconclusive 0.014 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r pilot_empirical
+
+. toc pilot_empirical
+
+. 
+. tic
+
+. * >>> pilot-fromfit
+. probit y treat age female, nolog
+
+Probit regression                                       Number of obs =    500
+                                                        LR chi2(3)    =  14.74
+                                                        Prob > chi2   = 0.0021
+Log likelihood = -332.77504                             Pseudo R2     = 0.0217
+
+------------------------------------------------------------------------------
+           y | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   .3269278   .1142048     2.86   0.004     .1030904    .5507652
+         age |   .0132259   .0051028     2.59   0.010     .0032246    .0232272
+      female |   .0701507   .1152546     0.61   0.543    -.1557442    .2960455
+       _cons |   -1.00213   .2559281    -3.92   0.000     -1.50374   -.5005203
+------------------------------------------------------------------------------
+
+. powerape dgp pilot_fit, fromfit focal(treat)
+powerape DGP -- probit (empirical covariates)
+  focal: treat (binary, p = 0.49) [resampled jointly with covariates]
+  covariates: age, female
+  pilot rows: 500 (resampled with replacement)
+  pilot model: probit y treat age female (nuisance coefficients lifted; focal coefficient re-solved)
+  baseline P(Y=1 | reference) = 0.358, nuisance signal (latent pseudo-R2) = 0.024
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape pilot_fit, target(0.10)
+powerape DGP -- probit (empirical covariates)
+  focal: treat (binary, p = 0.49) [resampled jointly with covariates]
+  covariates: age, female
+  pilot rows: 500 (resampled with replacement)
+  pilot model: probit y treat age female (nuisance coefficients lifted; focal coefficient re-solved)
+  baseline P(Y=1 | reference) = 0.358, nuisance signal (latent pseudo-R2) = 0.024
+  true APE pinned at + 0.1000 (beta_focal =    0.2614, implied P(Y=1 | focal=1) = 0.458)
+
+. powerape power pilot_fit, n(1500) claim(minimum) sesoi(0.05) nsim(500) seed(12)
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1500, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 500
+  fit: probit via engine(stata), effects(closed)
+  power = 0.616 (MCSE 0.022)
+  outcomes: minimum 0.616 | detect-only 0.362 | inconclusive 0.022 | equivalence 0.000 | failed 0.000
+
+. * <<<
+. keep_r pilot_fromfit
+
+. toc pilot_fromfit
+
+. 
+. * >>> list
+. powerape list
+DGPs: d, pilot_fit, pilot_rows
+results: _last
+
+. * <<<
+. 
+. file close res
+
+. file close tim
+
+. log close pc

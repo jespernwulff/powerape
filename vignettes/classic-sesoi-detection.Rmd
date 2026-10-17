@@ -9,6 +9,17 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+# On the website (pkgdown) the examples sit in R | Stata tabs, with the Stata
+# output read from precompute/stata/output/. The package vignette shows R only.
+if (identical(Sys.getenv("IN_PKGDOWN"), "true")) {
+  root <- normalizePath(getwd(), winslash = "/")
+  while (!file.exists(file.path(root, "DESCRIPTION")) && dirname(root) != root)
+    root <- dirname(root)
+  source(file.path(root, "precompute", "helpers.R"))
+} else {
+  tabs_r <- tabs_stata <- tabs_end <- function(...) ""
+  stata_show <- stata_figure <- function(...) invisible(NULL)
+}
 ```
 
 ## The classic recipe
@@ -17,6 +28,8 @@ The most common SESOI power analysis powers a *null-hypothesis test* at a
 true effect equal to the SESOI: "if the effect is exactly as small as the
 smallest thing I care about, I still detect it with 80% probability". In
 `powerape` this is `claim = "detect"` with the target set to the SESOI:
+
+`r tabs_r("recipe")`
 
 ```{r}
 library(powerape)
@@ -30,6 +43,14 @@ ape_power(d, n = 5000, claim = "detect", sesoi = 0.05,
           nsim = 600, seed = 1)
 ```
 
+`r tabs_stata("recipe")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("classic-sesoi", c("world", "recipe"), output = "recipe")
+```
+
+`r tabs_end()`
+
 Note what the outcome distribution shows: even with ample detection power,
 essentially **no study can claim the effect is meaningfully large**
 (`minimum` outcome near zero), because when the truth sits at the SESOI the
@@ -42,9 +63,19 @@ Asking for minimum-effect power *at* the SESOI is statistically degenerate,
 and `powerape` refuses with an explanation rather than returning a useless
 number:
 
+`r tabs_r("wall")`
+
 ```{r, error = TRUE}
 ape_power(d, n = 5000, claim = "minimum", sesoi = 0.05)
 ```
+
+`r tabs_stata("wall")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("classic-sesoi", "wall")
+```
+
+`r tabs_end()`
 
 On the null boundary of the minimum-effect test, the claim succeeds with
 probability equal to the test size (5% for the one-sided minimum-effect test) at *any*
@@ -56,6 +87,8 @@ Either stay with detection at truth = SESOI (this vignette), or assume a
 planning value **above** the SESOI and power the minimum-effect claim.
 The second buys a stronger conclusion and costs more observations:
 
+`r tabs_r("moves")`
+
 ```{r}
 ## detection power for truth = SESOI = 0.05
 ape_n(d, power = 0.80, claim = "detect", nsim = 500, seed = 2)
@@ -65,6 +98,15 @@ d8 <- set_ape(d, target = 0.08)
 ape_n(d8, power = 0.80, claim = "minimum", sesoi = 0.05,
       nsim = 500, seed = 3)
 ```
+
+`r tabs_stata("moves")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("classic-sesoi", c("n-detect", "pin8", "n-minimum"),
+           output = c("n-detect", "n-minimum"))
+```
+
+`r tabs_end()`
 
 The gap between those two n's is the price of concluding "meaningfully
 large" instead of "not zero". Making that price visible -- in APE units,
@@ -76,7 +118,17 @@ needs.
 A useful sanity check of the whole simulation pipeline: at a true APE of
 zero, directional detection should fire at half the nominal two-sided rate.
 
+`r tabs_r("size")`
+
 ```{r}
 d0 <- set_ape(d, target = 0)
 ape_power(d0, n = 2000, claim = "detect", nsim = 600, seed = 4)
 ```
+
+`r tabs_stata("size")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("classic-sesoi", c("pin0", "size"), output = "size")
+```
+
+`r tabs_end()`

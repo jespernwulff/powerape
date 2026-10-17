@@ -1,0 +1,3 @@
+label	seconds
+n_minimum	     21.3
+n_detect	      7.9

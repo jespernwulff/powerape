@@ -1,0 +1,107 @@
+
+. 
+end of do-file
+
+. 
+. * >>> pilot
+. import delimited using "design-c-pilot.csv", asdouble encoding(utf-8) clear
+(3 vars, 900 obs)
+
+. probit survived program z, nolog
+
+Probit regression                                       Number of obs =    900
+                                                        LR chi2(2)    = 117.81
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -529.74347                             Pseudo R2     = 0.1001
+
+------------------------------------------------------------------------------
+    survived | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     program |   .3392172   .0895274     3.79   0.000     .1637467    .5146878
+           z |   .4577792   .0473916     9.66   0.000     .3648933    .5506652
+       _cons |  -.5771774   .0654421    -8.82   0.000    -.7054416   -.4489131
+------------------------------------------------------------------------------
+
+. * <<<
+. 
+. * >>> world
+. powerape dgp c, fromfit focal(program)
+powerape DGP -- probit (empirical covariates)
+  focal: program (binary, p = 0.50) [resampled jointly with covariates]
+  covariates: z
+  pilot rows: 900 (resampled with replacement)
+  pilot model: probit survived program z (nuisance coefficients lifted; focal coefficient re-solved)
+  baseline P(Y=1 | reference) = 0.303, nuisance signal (latent pseudo-R2) = 0.174
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape c, target(0.08)
+powerape DGP -- probit (empirical covariates)
+  focal: program (binary, p = 0.50) [resampled jointly with covariates]
+  covariates: z
+  pilot rows: 900 (resampled with replacement)
+  pilot model: probit survived program z (nuisance coefficients lifted; focal coefficient re-solved)
+  baseline P(Y=1 | reference) = 0.303, nuisance signal (latent pseudo-R2) = 0.174
+  true APE pinned at + 0.0800 (beta_focal =    0.2400, implied P(Y=1 | focal=1) = 0.383)
+
+. * <<<
+. 
+. * >>> world-25
+. powerape dgp c25, fromfit focal(program) baseline(0.25)
+powerape DGP -- probit (empirical covariates)
+  focal: program (binary, p = 0.50) [resampled jointly with covariates]
+  covariates: z
+  pilot rows: 900 (resampled with replacement)
+  pilot model: probit survived program z (nuisance coefficients lifted; focal coefficient re-solved)
+  baseline P(Y=1 | reference) = 0.250, nuisance signal (latent pseudo-R2) = 0.174
+  target effect not set yet - run powerape setape or powerape setaie.
+
+. powerape setape c25, target(0.08)
+powerape DGP -- probit (empirical covariates)
+  focal: program (binary, p = 0.50) [resampled jointly with covariates]
+  covariates: z
+  pilot rows: 900 (resampled with replacement)
+  pilot model: probit survived program z (nuisance coefficients lifted; focal coefficient re-solved)
+  baseline P(Y=1 | reference) = 0.250, nuisance signal (latent pseudo-R2) = 0.174
+  true APE pinned at + 0.0800 (beta_focal =    0.2580, implied P(Y=1 | focal=1) = 0.330)
+
+. * <<<
+. 
+. tic
+
+. * >>> n
+. powerape n c, power(0.80) claim(minimum) sesoi(0.03) nsim(1000) seed(511)  ///
+>     engine(mata)
+powerape required sample size -- minimum claim
+  n = 1985 for 80% target power (confirmed 0.794, MCSE 0.006)
+  assumed true APE + 0.0800, sesoi 0.030,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+. * <<<
+. keep_r n
+
+. toc n
+
+. 
+. tic
+
+. * >>> n-25
+. powerape n c25, power(0.80) claim(minimum) sesoi(0.03) nsim(1000)          ///
+>     seed(512) engine(mata)
+powerape required sample size -- minimum claim
+  n = 1822 for 80% target power (confirmed 0.806, MCSE 0.006)
+  assumed true APE + 0.0800, sesoi 0.030,     90% CI (alpha =    .05), probit
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 4000.
+
+. * <<<
+. keep_r n_25
+
+. toc n_25
+
+. 
+. file close res
+
+. file close tim
+
+. log close pc

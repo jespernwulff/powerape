@@ -1,0 +1,6 @@
+label	power	mcse	n	mde	alpha	nmax	nsim
+power	           .605	  .019957245969	           2000	              .	            .05	              .	            600
+n	          .7995	 .0089526462568	           2705	              .	            .05	              .	            500
+curve	              .	              .	              .	              .	            .05	              .	            300
+robust	              .	              .	              .	              .	              .	              .	              .
+statement	              .	              .	              .	              .	              .	              .	              .

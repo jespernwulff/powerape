@@ -1,0 +1,5 @@
+label	power	mcse	n	mde	alpha	nmax	nsim
+power	            .25	 .0216506350946	           1200	              .	            .05	              .	            400
+exog_power	            .97	 .0085293610546	           1200	              .	            .05	              .	            400
+robust	              .	              .	              .	              .	              .	              .	              .
+aie_power	           .084	 .0175435458218	           2000	              .	            .05	              .	            250

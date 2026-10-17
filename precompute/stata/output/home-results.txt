@@ -1,0 +1,3 @@
+label	power	mcse	n	mde	alpha	nmax	nsim
+n_minimum	         .79975	 .0063275180264	           2084	              .	            .05	              .	           1000
+n_detect	         .79625	 .0063685935947	            663	              .	            .05	              .	           1000

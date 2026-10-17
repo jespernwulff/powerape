@@ -41,6 +41,9 @@ power.
 
 ## Step 1: describe the panel world
 
+- R
+- Stata
+
 ``` r
 
 library(powerape)
@@ -64,6 +67,22 @@ d
 #>   target effect not set yet - call set_ape() or set_aie().
 ```
 
+``` stata
+powerape dgp d, panel focal(treat, binary p(0.5) icc(1))                   ///
+    covariates((size, normal icc(0.6))) nperiods(4) rho(0.30) creshare(0.50) ///
+    baseline(0.30) signal(0.10)
+```
+
+``` stata-output
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50, icc = 1.00)
+  covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60)
+  panel: 4 periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/
+    Mundlak means, unit-clustered SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.
+```
+
 Three knobs are panel-specific, and each is a quantity you can defend in
 a grant application:
 
@@ -82,9 +101,16 @@ values in (0, 1) mix unit-level and wave-level variation.
 
 ## Step 2: pin the APE
 
+- R
+- Stata
+
 ``` r
 
 d <- set_ape(d, target = 0.10)
+```
+
+``` stata
+powerape setape d, target(0.10)
 ```
 
 Identical to the cross-sectional workflow – the inversion solves the
@@ -94,6 +120,9 @@ infeasible.
 
 ## Step 3: power, in units
 
+- R
+- Stata
+
 ``` r
 
 ape_power(d, n = 300, claim = "minimum", sesoi = 0.05,
@@ -102,6 +131,19 @@ ape_power(d, n = 300, claim = "minimum", sesoi = 0.05,
 #>   probit, n = 300 units x 4 periods (1200 obs), assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 400
 #>   power = 0.540 (MCSE 0.025)
 #>   outcomes: minimum 0.540 | detect-only 0.407 | inconclusive 0.052 | equivalence 0.000 | failed 0.000
+```
+
+``` stata
+powerape power d, n(300) claim(minimum) sesoi(0.05) nsim(400) seed(1)
+```
+
+``` stata-output
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 300 units x 4 periods (1200 obs), assumed true APE + 0.1000, 90% CI (alpha = .05),
+    nsim = 400
+  fit: probit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.555 (MCSE 0.025)
+  outcomes: minimum 0.555 | detect-only 0.405 | inconclusive 0.040 | equivalence 0.000 | failed 0.000
 ```
 
 `n = 300` means 300 units observed for 4 periods – 1,200 unit-period
@@ -115,6 +157,9 @@ demonstrate?
 [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
 answers it with n still counted in units:
 
+- R
+- Stata
+
 ``` r
 
 ape_mde(d, n = 400, claim = "minimum", sesoi = 0.05,
@@ -125,6 +170,18 @@ ape_mde(d, n = 400, claim = "minimum", sesoi = 0.05,
 #>   search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.
 ```
 
+``` stata
+powerape mde d, n(400) claim(minimum) sesoi(0.05) nsim(400) seed(9) engine(mata)
+```
+
+``` stata-output
+powerape minimum detectable APE -- minimum claim
+  MDE =    0.1101 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.807, MCSE 0.010)
+  smallest effect demonstrably above sesoi 0.050
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.
+```
+
 ## Panels are not free observations
 
 With a time-constant treatment, T waves of the same units add much less
@@ -132,6 +189,9 @@ than T-fold information: the outcome is correlated within units, so the
 effective sample is closer to the number of clusters than to the number
 of rows. Compare the panel above with a cross-section of the same
 *total* size:
+
+- R
+- Stata
 
 ``` r
 
@@ -151,6 +211,22 @@ ape_power(cs, n = 1200, claim = "minimum", sesoi = 0.05,
 #>   outcomes: minimum 0.593 | detect-only 0.375 | inconclusive 0.032 | equivalence 0.000 | failed 0.000
 ```
 
+``` stata
+powerape dgp cs, focal(treat, binary p(0.5)) covariates((size, normal))   ///
+    baseline(0.30) signal(0.10)
+powerape setape cs, target(0.10)
+
+powerape power cs, n(1200) claim(minimum) sesoi(0.05) nsim(400) seed(2)
+```
+
+``` stata-output
+powerape -- minimum-effect claim (CI lower bound > 0.050)
+  probit, n = 1200, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 400
+  fit: probit via engine(stata), effects(closed)
+  power = 0.635 (MCSE 0.024)
+  outcomes: minimum 0.635 | detect-only 0.325 | inconclusive 0.040 | equivalence 0.000 | failed 0.000
+```
+
 How the two compare is a *computable property of the design*, not a rule
 of thumb. Here — with half of the firm heterogeneity loading on
 observable means that the Mundlak terms absorb — the panel’s rows turn
@@ -164,6 +240,9 @@ are both guessing; this pair of calls replaces the guess.
 Since `rho` is usually a guess, sweep it – with `pin = "ape"` the true
 effect is re-pinned in every scenario, so only the precision channel
 moves:
+
+- R
+- Stata
 
 ``` r
 
@@ -182,6 +261,22 @@ ape_robust(d, n = 300, claim = "minimum", sesoi = 0.05,
 #>  0.5            0.1 0.5366667 0.02878979         0
 ```
 
+``` stata
+powerape robust d, n(300) claim(minimum) sesoi(0.05) vary(rho(0.1 0.5))    ///
+    gridpoints(3) nsim(300) seed(3) nonmax engine(mata)
+```
+
+``` stata-output
+powerape robustness sweep -- minimum claim, APE, pin = ape
+  n = 300, nsim = 300 per scenario, 3 scenario(s) over: rho
+  power range [0.543, 0.607]; worst scenario: row 2
+  fit: Mata engine (Fisher scoring)
+ row          rho    implied_eff    power     mcse separated
+   1           .1         0.1000   0.6067   0.0282    0.0000
+   2           .3         0.1000   0.5433   0.0288    0.0000
+   3           .5         0.1000   0.5500   0.0287    0.0000
+```
+
 ## Unbalanced panels and attrition (Wooldridge, 2019)
 
 Real archival panels are rarely balanced: firms enter late, exit early,
@@ -191,6 +286,9 @@ estimating model adds period-count cohort indicators. `powerape` prices
 exactly that estimator. Describe the imbalance either as an explicit
 distribution of panel lengths or, more naturally for a proposal, as a
 per-wave **retention rate**:
+
+- R
+- Stata
 
 ``` r
 
@@ -215,9 +313,31 @@ da
 #>   true APE pinned at +0.1000 (beta_focal = 0.3611, implied P(Y=1 | focal=1) = 0.400)
 ```
 
+``` stata
+powerape dgp da, panel focal(treat, binary p(0.5) icc(1))                  ///
+    covariates((size, normal icc(0.6))) nperiods(6) retention(0.85)          ///
+    rho(0.30) creshare(0.50) baseline(0.30) signal(0.10)
+
+powerape setape da, target(0.10)
+```
+
+``` stata-output
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50, icc = 1.00)
+  covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60)
+  panel: 1-6 (unbalanced, mean 4.15) periods per unit; rho = 0.30 (latent unit share), cre_share =
+    0.50; CRE probit w/ Mundlak means over observed periods + T-cohort dummies (Wooldridge 2019),
+    unit-clustered SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.3609, implied P(Y=1 | focal=1) = 0.400)
+```
+
 `n` still counts units; the printout reports the expected panel length
 and total observations. Attrition costs real power – sweep the retention
 guess to price it:
+
+- R
+- Stata
 
 ``` r
 
@@ -234,6 +354,22 @@ ape_robust(da, n = 300, claim = "minimum", sesoi = 0.05,
 #>       0.70            0.1 0.4366667 0.02863500         0
 #>       0.85            0.1 0.5233333 0.02883606         0
 #>       1.00            0.1 0.6166667 0.02807068         0
+```
+
+``` stata
+powerape robust da, n(300) claim(minimum) sesoi(0.05) vary(retention(0.7 1)) ///
+    gridpoints(3) nsim(300) seed(5) nonmax engine(mata)
+```
+
+``` stata-output
+powerape robustness sweep -- minimum claim, APE, pin = ape
+  n = 300, nsim = 300 per scenario, 3 scenario(s) over: retention
+  power range [0.510, 0.660]; worst scenario: row 1
+  fit: Mata engine (Fisher scoring)
+ row    retention    implied_eff    power     mcse separated
+   1           .7         0.1000   0.5100   0.0289    0.0000
+   2          .85         0.1000   0.5533   0.0287    0.0000
+   3            1         0.1000   0.6600   0.0273    0.0000
 ```
 
 Two facts are worth knowing at the design stage. The sweep above prices
@@ -256,6 +392,9 @@ interaction effect (AIE)** – the double difference of counterfactual
 cell probabilities – and for panel DGPs it is defined on the same ASF as
 the APE: unit effects integrated out, Mundlak means held fixed. It is
 the same population quantity a cross-sectional AIE design targets.
+
+- R
+- Stata
 
 ``` r
 
@@ -282,6 +421,27 @@ di
 #>   main APEs at reference: treat +0.100 (beta = 0.3564), public +0.050 (beta = 0.1829)
 ```
 
+``` stata
+powerape dgp di, panel focal(treat, binary p(0.5) icc(1))                  ///
+    moderator(public, binary p(0.4) icc(0.7))                              ///
+    covariates((size, normal icc(0.6))) nperiods(4) rho(0.30) creshare(0.50) ///
+    baseline(0.30) signal(0.10)
+
+powerape setaie di, target(0.06) mainfocal(0.10) mainmoderator(0.05)
+```
+
+``` stata-output
+powerape DGP -- probit
+  focal: treat (binary, p = 0.50, icc = 1.00)
+  moderator: public (binary, p = 0.40, icc = 0.70) (focal-by-moderator interaction included)
+  covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60)
+  panel: 4 periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/
+    Mundlak means, unit-clustered SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true AIE pinned at + 0.0600 (beta_int =    0.1829)
+  main APEs at reference: treat  0.100 (beta =    0.3563), public  0.050 (beta =    0.1828)
+```
+
 The three anchors are the familiar ones: the two
 conditional-at-reference main-effect APEs plus the target AIE. One
 panel-specific detail is handled for you: whenever the interaction term
@@ -292,6 +452,9 @@ means).
 Interactions are expensive, and panels make them more so – the
 interaction tax and the clustering penalty compound:
 
+- R
+- Stata
+
 ``` r
 
 ape_power(di, n = 400, claim = "detect", nsim = 250, seed = 4)
@@ -299,6 +462,19 @@ ape_power(di, n = 400, claim = "detect", nsim = 250, seed = 4)
 #>   probit, n = 400 units x 4 periods (1600 obs), assumed true AIE +0.0600, 95% CI (alpha = 0.05), nsim = 250
 #>   power = 0.112 (MCSE 0.020)
 #>   outcomes: detect 0.112 | inconclusive 0.888 | failed 0.000
+```
+
+``` stata
+powerape power di, n(400) claim(detect) nsim(250) seed(4)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 400 units x 4 periods (1600 obs), assumed true AIE + 0.0600, 95% CI (alpha = .05),
+    nsim = 250
+  fit: probit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.172 (MCSE 0.024)
+  outcomes: detect 0.172 | inconclusive 0.828 | failed 0.000
 ```
 
 Even 400 units (1,600 observations) leave detection power low for a

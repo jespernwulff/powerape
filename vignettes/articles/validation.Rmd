@@ -1,0 +1,81 @@
+---
+title: "How powerape is validated"
+description: >
+  The independent implementations and exact results the R package is
+  checked against, and the four tiers in which the Stata command is checked
+  against the R package.
+---
+
+A power analysis is only as good as the simulation behind it, and a
+simulation can be wrong in ways that its own output does not reveal. Both
+implementations of `powerape` are therefore checked against things they did
+not compute themselves: exact results where they exist, and independent
+software where it does not.
+
+## The R package
+
+The engine is anchored against independent implementations and exact
+results:
+
+* **Two proportions.** Without covariates the design reduces to comparing
+  two proportions, and the package reproduces `power.prop.test()` in R and
+  `power twoproportions` in Stata.
+* **The estimators.** On fixed data sets the APE estimates and their
+  delta-method standard errors match `marginaleffects` in R and
+  `margins, dydx()` in Stata to about 1e-6, and the AIE matches `ginteff`
+  exactly.
+* **Exact power.** In the saturated design, simulated power matches exact
+  finite-sample power by enumeration, and the equivalence claim matches
+  TOSTER at its own default error rate.
+* **Panels.** Panel designs match Stata's clustered `margins` (the APE and
+  the AIE's double difference) to all printed digits on fixed panels, the
+  clustered sandwich matches `sandwich::vcovCL()` exactly, and the engine
+  reproduces the Donner-Klar cluster design effect and, for unequal panel
+  lengths, the Eldridge-Ashby-Kerry design effect.
+* **Control functions.** The control-function route reproduces Stata's
+  `cfprobit` across all four first-stage models: coefficients, stacked
+  robust and clustered standard errors, and the `margins` effects, to about
+  1e-6, including the endogenous-interaction design run with Stata's own
+  syntax.
+
+The package's test suite runs these anchors, among many other checks, on
+Linux, Windows and macOS with every change.
+
+## The Stata command
+
+The Stata command is a port, so its first duty is to compute what the R
+package computes. It is checked against the R package, and against Stata's
+own estimators, in four tiers. Both engines are checked throughout:
+`engine(stata)`, which fits every simulated study with `probit`, `logit` or
+`cfprobit`, and `engine(mata)`, the port of the R package's routine.
+
+| Tier | What is compared | Criterion | Result |
+|-----|---------|------|---|
+| A. Exact power | Simulated power against exact finite-sample power by enumeration in the saturated design, for every claim and both conventions for separated samples | within 4 Monte Carlo SEs | 12 of 12 |
+| B. Fixed data | The estimators on eight data sets exported from R: the R package's internals, and Stata's `probit`, `logit`, `margins`, `ginteff` and `cfprobit` | R internals to 1e-6 or better; Stata's estimators to their documented conventions | 171 of 171 |
+| C. Calibration | The calibration and inversion constants (intercepts, coefficients, true effects) of every route | closed forms to 1e-7; integration-based worlds to their integration error | 30 of 30 |
+| D. Simulation | Power, required sample sizes, detectable effects, sweeps and justified alpha in matched designs, at 4,000 replications per row | within 3 combined Monte Carlo SEs; sample sizes also by the confirmation rule | 45 of 45 |
+
+R and Stata draw different random numbers, so Tier D can only show agreement
+within Monte Carlo error; Tiers A to C have no simulation error to hide
+behind. The
+[validation record](https://github.com/jespernwulff/powerape-stata/blob/main/validation/RESULTS.md)
+in the Stata repository lists every comparison with its numbers.
+
+Every tier can be rerun from a clone of the Stata repository. Its
+[validation folder](https://github.com/jespernwulff/powerape-stata/tree/main/validation)
+holds the four scripts, `v_tierA.do` to `v_tierD.do`, with each tier's
+results and log, the fixed data sets and R reference values, and the two R
+scripts that produced them. Started from the root of the clone, as in
+`do validation/v_tierA.do`, a script checks the command in the clone's
+`ado/` folder rather than an installed copy. Tier B takes a minute or two,
+Tier C about three, Tier A about half an hour and Tier D 20 to 40 minutes.
+
+Two differences between the engines are conventions rather than errors, and
+both are documented in the record. Stata's `probit` reports standard errors
+from the observed information and applies small-sample factors to robust and
+clustered ones, whereas the R package uses the expected information and the
+HC0 sandwich; on fixed data the probit standard errors differ by at most
+about 0.00006. And Stata's `asis` fit of a perfectly separated sample stops
+its likelihood search a little before R's `glm` does, which moves the
+estimate in the fifth decimal.

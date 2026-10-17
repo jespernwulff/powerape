@@ -13,15 +13,18 @@
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/IBM_Plex_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/IBM_Plex_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Panel designs: correlated random effects">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="Panel designs: correlated random effects">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
@@ -34,26 +37,58 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/minimum-effect.html">Powering the minimum-effect claim</a></li>
-    <li><a class="dropdown-item" href="../articles/classic-sesoi-detection.html">The classic SESOI power analysis, and what it cannot tell you</a></li>
-    <li><a class="dropdown-item" href="../articles/equivalence.html">Powering for equivalence: showing an effect is too small to matter</a></li>
-    <li><a class="dropdown-item" href="../articles/interaction-effects.html">Power for average interaction effects (AIEs)</a></li>
-    <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs: correlated random effects</a></li>
-    <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs: endogenous focal variables via control functions</a></li>
-    <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justifying the error rate: alpha by sample size, or by error costs</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-get-started" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Get started</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-get-started">
+<li><a class="dropdown-item" href="../articles/minimum-effect.html">In R</a></li>
+    <li><a class="dropdown-item" href="../articles/stata.html">In Stata</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/worked-example.html">Worked example</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-workflows" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Workflows</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-workflows">
+<li><a class="dropdown-item" href="../articles/classic-sesoi-detection.html">The classic SESOI analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
+    <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
+    <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
+    <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-guides" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Guides</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-guides">
+<li><a class="dropdown-item" href="../articles/r-and-stata.html">R and Stata side by side</a></li>
+    <li><a class="dropdown-item" href="../articles/validation.html">How powerape is validated</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-reference" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Reference</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-reference">
+<li><a class="dropdown-item" href="../reference/index.html">R functions</a></li>
+    <li><a class="dropdown-item" href="../articles/stata-help.html">Stata help file</a></li>
+  </ul>
+</li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-news">
+<li><a class="dropdown-item" href="../news/index.html">R package</a></li>
+    <li><a class="dropdown-item" href="../articles/stata-news.html">Stata command</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jespernwulff/powerape/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Source code on GitHub"><span class="fa fab fa-github fa-lg"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-">
+<li><a class="external-link dropdown-item" href="https://github.com/jespernwulff/powerape">R package</a></li>
+    <li><a class="external-link dropdown-item" href="https://github.com/jespernwulff/powerape-stata">Stata command</a></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -113,6 +148,21 @@ observations – clusters are what drive power.</p>
 <div class="section level2">
 <h2 id="step-1-describe-the-panel-world">Step 1: describe the panel world<a class="anchor" aria-label="anchor" href="#step-1-describe-the-panel-world"></a>
 </h2>
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="world-r-tab" data-bs-toggle="tab" data-bs-target="#world-r" type="button" role="tab" aria-controls="world-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="world-stata-tab" data-bs-toggle="tab" data-bs-target="#world-stata" type="button" role="tab" aria-controls="world-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="world-r" class="tab-pane active" role="tabpanel" aria-labelledby="world-r-tab">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jespernwulff.github.io/powerape/">powerape</a></span><span class="op">)</span></span>
 <span></span>
@@ -133,6 +183,21 @@ observations – clusters are what drive power.</p>
 <span><span class="co">#&gt;   panel: 4 periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/ Mundlak means, unit-clustered SEs</span></span>
 <span><span class="co">#&gt;   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100</span></span>
 <span><span class="co">#&gt;   target effect not set yet - call set_ape() or set_aie().</span></span></code></pre></div>
+</div>
+<div id="world-stata" class="tab-pane" role="tabpanel" aria-labelledby="world-stata-tab">
+<div class="sourceCode" id="cb2"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>powerape dgp <span class="kw">d</span>, panel focal(treat, binary <span class="kw">p</span>(0.5) icc(1))                   <span class="co">///</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>    covariates((<span class="kw">size</span>, <span class="fu">normal</span> icc(0.6))) nperiods(4) rho(0.30) creshare(0.50) <span class="co">///</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>    baseline(0.30) signal(0.10)</span></code></pre></div>
+<pre class="stata-output"><code>powerape DGP -- probit
+  focal: treat (binary, p = 0.50, icc = 1.00)
+  covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60)
+  panel: 4 periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/
+    Mundlak means, unit-clustered SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  target effect not set yet - run powerape setape or powerape setaie.</code></pre>
+</div>
+</div>
+</div>
 <p>Three knobs are panel-specific, and each is a quantity you can defend
 in a grant application:</p>
 <ul>
@@ -157,8 +222,29 @@ variation.</p>
 <div class="section level2">
 <h2 id="step-2-pin-the-ape">Step 2: pin the APE<a class="anchor" aria-label="anchor" href="#step-2-pin-the-ape"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="pin-r-tab" data-bs-toggle="tab" data-bs-target="#pin-r" type="button" role="tab" aria-controls="pin-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="pin-stata-tab" data-bs-toggle="tab" data-bs-target="#pin-stata" type="button" role="tab" aria-controls="pin-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="pin-r" class="tab-pane active" role="tabpanel" aria-labelledby="pin-r-tab">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_ape.html">set_ape</a></span><span class="op">(</span><span class="va">d</span>, target <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div id="pin-stata" class="tab-pane" role="tabpanel" aria-labelledby="pin-stata-tab">
+<div class="sourceCode" id="cb5"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>powerape setape <span class="kw">d</span>, target(0.10)</span></code></pre></div>
+</div>
+</div>
+</div>
 <p>Identical to the cross-sectional workflow – the inversion solves the
 focal coefficient so the true ASF-APE is exactly 0.10, integrating the
 unit effects in closed form, and errors informatively if the target is
@@ -167,13 +253,40 @@ infeasible.</p>
 <div class="section level2">
 <h2 id="step-3-power-in-units">Step 3: power, in units<a class="anchor" aria-label="anchor" href="#step-3-power-in-units"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="power-r-tab" data-bs-toggle="tab" data-bs-target="#power-r" type="button" role="tab" aria-controls="power-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="power-stata-tab" data-bs-toggle="tab" data-bs-target="#power-stata" type="button" role="tab" aria-controls="power-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="power-r" class="tab-pane active" role="tabpanel" aria-labelledby="power-r-tab">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">300</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>          nsim <span class="op">=</span> <span class="fl">400</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- minimum-effect claim (CI lower bound &gt; 0.050)</span></span>
 <span><span class="co">#&gt;   probit, n = 300 units x 4 periods (1200 obs), assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 400</span></span>
 <span><span class="co">#&gt;   power = 0.540 (MCSE 0.025)</span></span>
 <span><span class="co">#&gt;   outcomes: minimum 0.540 | detect-only 0.407 | inconclusive 0.052 | equivalence 0.000 | failed 0.000</span></span></code></pre></div>
+</div>
+<div id="power-stata" class="tab-pane" role="tabpanel" aria-labelledby="power-stata-tab">
+<div class="sourceCode" id="cb7"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>powerape power <span class="kw">d</span>, n(300) claim(minimum) sesoi(0.05) nsim(400) <span class="dv">seed</span>(1)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- minimum-effect claim (CI lower bound &gt; 0.050)
+  probit, n = 300 units x 4 periods (1200 obs), assumed true APE + 0.1000, 90% CI (alpha = .05),
+    nsim = 400
+  fit: probit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.555 (MCSE 0.025)
+  outcomes: minimum 0.555 | detect-only 0.405 | inconclusive 0.040 | equivalence 0.000 | failed 0.000</code></pre>
+</div>
+</div>
+</div>
 <p><code>n = 300</code> means 300 units observed for 4 periods – 1,200
 unit-period observations, fitted by pooled probit with Mundlak means and
 unit-clustered SEs in every replication. (Below 30 clusters the package
@@ -182,13 +295,39 @@ warns: cluster-robust inference is not trustworthy there.)</p>
 honest question inverts: what is the smallest APE this panel can
 reliably demonstrate? <code><a href="../reference/ape_mde.html">ape_mde()</a></code> answers it with n still
 counted in units:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="mde-r-tab" data-bs-toggle="tab" data-bs-target="#mde-r" type="button" role="tab" aria-controls="mde-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="mde-stata-tab" data-bs-toggle="tab" data-bs-target="#mde-stata" type="button" role="tab" aria-controls="mde-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="mde-r" class="tab-pane active" role="tabpanel" aria-labelledby="mde-r-tab">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_mde.html">ape_mde</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">400</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>        nsim <span class="op">=</span> <span class="fl">400</span>, seed <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape minimum detectable APE -- minimum claim</span></span>
 <span><span class="co">#&gt;   MDE = 0.1100 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.795, MCSE 0.010)</span></span>
 <span><span class="co">#&gt;   smallest effect demonstrably above sesoi 0.050</span></span>
 <span><span class="co">#&gt;   search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.</span></span></code></pre></div>
+</div>
+<div id="mde-stata" class="tab-pane" role="tabpanel" aria-labelledby="mde-stata-tab">
+<div class="sourceCode" id="cb10"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>powerape mde <span class="kw">d</span>, n(400) claim(minimum) sesoi(0.05) nsim(400) <span class="dv">seed</span>(9) engine(<span class="kw">mata</span>)</span></code></pre></div>
+<pre class="stata-output"><code>powerape minimum detectable APE -- minimum claim
+  MDE =    0.1101 at n = 400 units (x 4 periods) for 80% target power (confirmed 0.807, MCSE 0.010)
+  smallest effect demonstrably above sesoi 0.050
+  fit: Mata engine (Fisher scoring)
+  search: 1 step(s); confirmed in 1 round(s) at nsim = 1600.</code></pre>
+</div>
+</div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="panels-are-not-free-observations">Panels are not free observations<a class="anchor" aria-label="anchor" href="#panels-are-not-free-observations"></a>
@@ -198,7 +337,22 @@ less than T-fold information: the outcome is correlated within units, so
 the effective sample is closer to the number of clusters than to the
 number of rows. Compare the panel above with a cross-section of the same
 <em>total</em> size:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="cs-r-tab" data-bs-toggle="tab" data-bs-target="#cs-r" type="button" role="tab" aria-controls="cs-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="cs-stata-tab" data-bs-toggle="tab" data-bs-target="#cs-stata" type="button" role="tab" aria-controls="cs-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="cs-r" class="tab-pane active" role="tabpanel" aria-labelledby="cs-r-tab">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp.html">ape_dgp</a></span><span class="op">(</span></span>
 <span>  model      <span class="op">=</span> <span class="st">"probit"</span>,</span>
 <span>  focal      <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
@@ -213,6 +367,21 @@ number of rows. Compare the panel above with a cross-section of the same
 <span><span class="co">#&gt;   probit, n = 1200, assumed true APE +0.1000, 90% CI (alpha = 0.05), nsim = 400</span></span>
 <span><span class="co">#&gt;   power = 0.593 (MCSE 0.025)</span></span>
 <span><span class="co">#&gt;   outcomes: minimum 0.593 | detect-only 0.375 | inconclusive 0.032 | equivalence 0.000 | failed 0.000</span></span></code></pre></div>
+</div>
+<div id="cs-stata" class="tab-pane" role="tabpanel" aria-labelledby="cs-stata-tab">
+<div class="sourceCode" id="cb13"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>powerape dgp <span class="kw">cs</span>, focal(treat, binary <span class="kw">p</span>(0.5)) covariates((<span class="kw">size</span>, <span class="fu">normal</span>))   <span class="co">///</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>    baseline(0.30) signal(0.10)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>powerape setape <span class="kw">cs</span>, target(0.10)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>powerape power <span class="kw">cs</span>, n(1200) claim(minimum) sesoi(0.05) nsim(400) <span class="dv">seed</span>(2)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- minimum-effect claim (CI lower bound &gt; 0.050)
+  probit, n = 1200, assumed true APE + 0.1000,     90% CI (alpha = .05), nsim = 400
+  fit: probit via engine(stata), effects(closed)
+  power = 0.635 (MCSE 0.024)
+  outcomes: minimum 0.635 | detect-only 0.325 | inconclusive 0.040 | equivalence 0.000 | failed 0.000</code></pre>
+</div>
+</div>
+</div>
 <p>How the two compare is a <em>computable property of the design</em>,
 not a rule of thumb. Here — with half of the firm heterogeneity loading
 on observable means that the Mundlak terms absorb — the panel’s rows
@@ -226,7 +395,22 @@ pair of calls replaces the guess.</p>
 <p>Since <code>rho</code> is usually a guess, sweep it – with
 <code>pin = "ape"</code> the true effect is re-pinned in every scenario,
 so only the precision channel moves:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="rho-r-tab" data-bs-toggle="tab" data-bs-target="#rho-r" type="button" role="tab" aria-controls="rho-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="rho-stata-tab" data-bs-toggle="tab" data-bs-target="#rho-stata" type="button" role="tab" aria-controls="rho-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="rho-r" class="tab-pane active" role="tabpanel" aria-labelledby="rho-r-tab">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_robust.html">ape_robust</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">300</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>           vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span>, grid_points <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>           nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">3</span>, nmax <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -241,6 +425,21 @@ so only the precision channel moves:</p>
 <span><span class="co">#&gt;  0.3            0.1 0.5066667 0.02886495         0</span></span>
 <span><span class="co">#&gt;  0.5            0.1 0.5366667 0.02878979         0</span></span></code></pre></div>
 </div>
+<div id="rho-stata" class="tab-pane" role="tabpanel" aria-labelledby="rho-stata-tab">
+<div class="sourceCode" id="cb16"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>powerape <span class="kw">robust</span> <span class="kw">d</span>, n(300) claim(minimum) sesoi(0.05) vary(rho(0.1 0.5))    <span class="co">///</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>    gridpoints(3) nsim(300) <span class="dv">seed</span>(3) nonmax engine(<span class="kw">mata</span>)</span></code></pre></div>
+<pre class="stata-output"><code>powerape robustness sweep -- minimum claim, APE, pin = ape
+  n = 300, nsim = 300 per scenario, 3 scenario(s) over: rho
+  power range [0.543, 0.607]; worst scenario: row 2
+  fit: Mata engine (Fisher scoring)
+ row          rho    implied_eff    power     mcse separated
+   1           .1         0.1000   0.6067   0.0282    0.0000
+   2           .3         0.1000   0.5433   0.0288    0.0000
+   3           .5         0.1000   0.5500   0.0287    0.0000</code></pre>
+</div>
+</div>
+</div>
+</div>
 <div class="section level2">
 <h2 id="unbalanced-panels-and-attrition-wooldridge-2019">Unbalanced panels and attrition (Wooldridge, 2019)<a class="anchor" aria-label="anchor" href="#unbalanced-panels-and-attrition-wooldridge-2019"></a>
 </h2>
@@ -252,7 +451,22 @@ and the estimating model adds period-count cohort indicators.
 imbalance either as an explicit distribution of panel lengths or, more
 naturally for a proposal, as a per-wave <strong>retention
 rate</strong>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="unbalanced-r-tab" data-bs-toggle="tab" data-bs-target="#unbalanced-r" type="button" role="tab" aria-controls="unbalanced-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="unbalanced-stata-tab" data-bs-toggle="tab" data-bs-target="#unbalanced-stata" type="button" role="tab" aria-controls="unbalanced-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="unbalanced-r" class="tab-pane active" role="tabpanel" aria-labelledby="unbalanced-r-tab">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">da</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp_panel.html">ape_dgp_panel</a></span><span class="op">(</span></span>
 <span>  model      <span class="op">=</span> <span class="st">"probit"</span>,</span>
 <span>  focal      <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span>, icc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -272,10 +486,43 @@ rate</strong>:</p>
 <span><span class="co">#&gt;   panel: 1-6 (unbalanced, mean 4.15) periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/ Mundlak means over observed periods + T-cohort dummies (Wooldridge 2019), unit-clustered SEs</span></span>
 <span><span class="co">#&gt;   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100</span></span>
 <span><span class="co">#&gt;   true APE pinned at +0.1000 (beta_focal = 0.3611, implied P(Y=1 | focal=1) = 0.400)</span></span></code></pre></div>
+</div>
+<div id="unbalanced-stata" class="tab-pane" role="tabpanel" aria-labelledby="unbalanced-stata-tab">
+<div class="sourceCode" id="cb19"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>powerape dgp da, panel focal(treat, binary <span class="kw">p</span>(0.5) icc(1))                  <span class="co">///</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>    covariates((<span class="kw">size</span>, <span class="fu">normal</span> icc(0.6))) nperiods(6) retention(0.85)          <span class="co">///</span></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>    rho(0.30) creshare(0.50) baseline(0.30) signal(0.10)</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>powerape setape da, target(0.10)</span></code></pre></div>
+<pre class="stata-output"><code>powerape DGP -- probit
+  focal: treat (binary, p = 0.50, icc = 1.00)
+  covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60)
+  panel: 1-6 (unbalanced, mean 4.15) periods per unit; rho = 0.30 (latent unit share), cre_share =
+    0.50; CRE probit w/ Mundlak means over observed periods + T-cohort dummies (Wooldridge 2019),
+    unit-clustered SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true APE pinned at + 0.1000 (beta_focal =    0.3609, implied P(Y=1 | focal=1) = 0.400)</code></pre>
+</div>
+</div>
+</div>
 <p><code>n</code> still counts units; the printout reports the expected
 panel length and total observations. Attrition costs real power – sweep
 the retention guess to price it:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="retention-r-tab" data-bs-toggle="tab" data-bs-target="#retention-r" type="button" role="tab" aria-controls="retention-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="retention-stata-tab" data-bs-toggle="tab" data-bs-target="#retention-stata" type="button" role="tab" aria-controls="retention-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="retention-r" class="tab-pane active" role="tabpanel" aria-labelledby="retention-r-tab">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_robust.html">ape_robust</a></span><span class="op">(</span><span class="va">da</span>, n <span class="op">=</span> <span class="fl">300</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>           vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>retention <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.7</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>, grid_points <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>           nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">5</span>, nmax <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -289,6 +536,21 @@ the retention guess to price it:</p>
 <span><span class="co">#&gt;       0.70            0.1 0.4366667 0.02863500         0</span></span>
 <span><span class="co">#&gt;       0.85            0.1 0.5233333 0.02883606         0</span></span>
 <span><span class="co">#&gt;       1.00            0.1 0.6166667 0.02807068         0</span></span></code></pre></div>
+</div>
+<div id="retention-stata" class="tab-pane" role="tabpanel" aria-labelledby="retention-stata-tab">
+<div class="sourceCode" id="cb22"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>powerape <span class="kw">robust</span> da, n(300) claim(minimum) sesoi(0.05) vary(retention(0.7 1)) <span class="co">///</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>    gridpoints(3) nsim(300) <span class="dv">seed</span>(5) nonmax engine(<span class="kw">mata</span>)</span></code></pre></div>
+<pre class="stata-output"><code>powerape robustness sweep -- minimum claim, APE, pin = ape
+  n = 300, nsim = 300 per scenario, 3 scenario(s) over: retention
+  power range [0.510, 0.660]; worst scenario: row 1
+  fit: Mata engine (Fisher scoring)
+ row    retention    implied_eff    power     mcse separated
+   1           .7         0.1000   0.5100   0.0289    0.0000
+   2          .85         0.1000   0.5533   0.0287    0.0000
+   3            1         0.1000   0.6600   0.0273    0.0000</code></pre>
+</div>
+</div>
+</div>
 <p>Two facts are worth knowing at the design stage. The sweep above
 prices the first: the lower the retention, the lower the power, and the
 cost is material. The second is that unequal panel lengths cost power
@@ -312,7 +574,22 @@ counterfactual cell probabilities – and for panel DGPs it is defined on
 the same ASF as the APE: unit effects integrated out, Mundlak means held
 fixed. It is the same population quantity a cross-sectional AIE design
 targets.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="aie-r-tab" data-bs-toggle="tab" data-bs-target="#aie-r" type="button" role="tab" aria-controls="aie-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="aie-stata-tab" data-bs-toggle="tab" data-bs-target="#aie-stata" type="button" role="tab" aria-controls="aie-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="aie-r" class="tab-pane active" role="tabpanel" aria-labelledby="aie-r-tab">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">di</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp_panel.html">ape_dgp_panel</a></span><span class="op">(</span></span>
 <span>  model      <span class="op">=</span> <span class="st">"probit"</span>,</span>
 <span>  focal      <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"treat"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.5</span>, icc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -334,6 +611,26 @@ targets.</p>
 <span><span class="co">#&gt;   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100</span></span>
 <span><span class="co">#&gt;   true AIE pinned at +0.0600 (beta_int = 0.1830)</span></span>
 <span><span class="co">#&gt;   main APEs at reference: treat +0.100 (beta = 0.3564), public +0.050 (beta = 0.1829)</span></span></code></pre></div>
+</div>
+<div id="aie-stata" class="tab-pane" role="tabpanel" aria-labelledby="aie-stata-tab">
+<div class="sourceCode" id="cb25"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>powerape dgp <span class="kw">di</span>, panel focal(treat, binary <span class="kw">p</span>(0.5) icc(1))                  <span class="co">///</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>    moderator(<span class="kw">public</span>, binary <span class="kw">p</span>(0.4) icc(0.7))                              <span class="co">///</span></span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>    covariates((<span class="kw">size</span>, <span class="fu">normal</span> icc(0.6))) nperiods(4) rho(0.30) creshare(0.50) <span class="co">///</span></span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>    baseline(0.30) signal(0.10)</span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>powerape setaie <span class="kw">di</span>, target(0.06) mainfocal(0.10) mainmoderator(0.05)</span></code></pre></div>
+<pre class="stata-output"><code>powerape DGP -- probit
+  focal: treat (binary, p = 0.50, icc = 1.00)
+  moderator: public (binary, p = 0.40, icc = 0.70) (focal-by-moderator interaction included)
+  covariates: size (normal, mean 0.00, sd 1.00, icc = 0.60)
+  panel: 4 periods per unit; rho = 0.30 (latent unit share), cre_share = 0.50; CRE probit w/
+    Mundlak means, unit-clustered SEs
+  baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.100
+  true AIE pinned at + 0.0600 (beta_int =    0.1829)
+  main APEs at reference: treat  0.100 (beta =    0.3563), public  0.050 (beta =    0.1828)</code></pre>
+</div>
+</div>
+</div>
 <p>The three anchors are the familiar ones: the two
 conditional-at-reference main-effect APEs plus the target AIE. One
 panel-specific detail is handled for you: whenever the interaction term
@@ -342,12 +639,39 @@ varies within units, the estimating model includes the interaction’s
 the means).</p>
 <p>Interactions are expensive, and panels make them more so – the
 interaction tax and the clustering penalty compound:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="aie-power-r-tab" data-bs-toggle="tab" data-bs-target="#aie-power-r" type="button" role="tab" aria-controls="aie-power-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="aie-power-stata-tab" data-bs-toggle="tab" data-bs-target="#aie-power-stata" type="button" role="tab" aria-controls="aie-power-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="aie-power-r" class="tab-pane active" role="tabpanel" aria-labelledby="aie-power-r-tab">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">di</span>, n <span class="op">=</span> <span class="fl">400</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">250</span>, seed <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
 <span><span class="co">#&gt;   probit, n = 400 units x 4 periods (1600 obs), assumed true AIE +0.0600, 95% CI (alpha = 0.05), nsim = 250</span></span>
 <span><span class="co">#&gt;   power = 0.112 (MCSE 0.020)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.112 | inconclusive 0.888 | failed 0.000</span></span></code></pre></div>
+</div>
+<div id="aie-power-stata" class="tab-pane" role="tabpanel" aria-labelledby="aie-power-stata-tab">
+<div class="sourceCode" id="cb28"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>powerape power <span class="kw">di</span>, n(400) claim(detect) nsim(250) <span class="dv">seed</span>(4)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- detection claim (CI excludes 0, directional)
+  probit, n = 400 units x 4 periods (1600 obs), assumed true AIE + 0.0600, 95% CI (alpha = .05),
+    nsim = 250
+  fit: probit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.172 (MCSE 0.024)
+  outcomes: detect 0.172 | inconclusive 0.828 | failed 0.000</code></pre>
+</div>
+</div>
+</div>
 <p>Even 400 units (1,600 observations) leave detection power low for a
 6-point AIE. Budget accordingly – <code><a href="../reference/ape_n.html">ape_n()</a></code> with a larger
 <code>nsim</code> gives the required number of units, and

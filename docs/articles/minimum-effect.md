@@ -22,6 +22,10 @@ interval, and evaluate a **claim** on that interval (Riesthuis, 2024):
 - `"equivalence"` – the CI lies inside (-SESOI, +SESOI): the effect is
   too small to matter.
 
+The Stata command `powerape` takes the same six steps in the same world:
+see [Get started in
+Stata](https://jespernwulff.github.io/powerape/articles/stata.html).
+
 ## Step 1: describe the world
 
 ``` r
@@ -142,7 +146,7 @@ scenario, with the *largest* MDE as the worst case.
 ## Step 5: how fragile is this to the contextual guesses?
 
 The baseline rate and the covariate signal are guesses, and power
-computed from a single guess is fragile (Hancock & Feng, 2025).
+computed from a single guess is fragile (Hancock & Feng, 2026).
 [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
 re-runs the analysis over a scenario grid and reports the worst case;
 with `nmax = TRUE` it also finds **n_max**, the insurance-premium sample
@@ -202,9 +206,9 @@ power_statement(pw)
 
 ## References
 
-- Hancock, G. R., & Feng, Y. (2025). nmax and the quest to restore
+- Hancock, G. R., & Feng, Y. (2026). nmax and the quest to restore
   caution, integrity, and practicality to the sample size planning
-  process. *Psychological Methods*.
+  process. *Psychological Methods*, *31*(1), 174-199.
 - Riesthuis, P. (2024). Simulation-based power analyses for the smallest
   effect size of interest: A confidence-interval approach for
   minimum-effect and equivalence testing. *AMPPS*, 7(2).
