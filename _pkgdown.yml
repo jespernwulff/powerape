@@ -3,8 +3,8 @@ url: https://jespernwulff.github.io/powerape/
 template:
   bootstrap: 5
   bslib:
-    primary: "#1e2f5c"
-    link-color: "#1e3f8a"
+    primary: "#14382a"
+    link-color: "#1f6b4a"
     base_font: {google: "IBM Plex Sans"}
     heading_font: {google: "IBM Plex Sans"}
     code_font: {google: "IBM Plex Mono"}

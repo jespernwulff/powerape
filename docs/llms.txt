@@ -166,6 +166,8 @@ the dashed line marks 80 percent.
 
 ## Where to go from here
 
+### Start here
+
 [Get started in RDescribe the world, pin the APE, and interrogate the
 design in six
 steps.](https://jespernwulff.github.io/powerape/articles/minimum-effect.md)
@@ -175,6 +177,9 @@ data.](https://jespernwulff.github.io/powerape/articles/stata.md)
 [Worked exampleFive designs in both languages, from a treatment effect
 to an
 instrument.](https://jespernwulff.github.io/powerape/articles/worked-example.md)
+
+### Workflows
+
 [The classic SESOI analysisWhat powering detection at the SESOI buys,
 and what it
 cannot.](https://jespernwulff.github.io/powerape/articles/classic-sesoi-detection.md)
@@ -188,8 +193,18 @@ units.](https://jespernwulff.github.io/powerape/articles/panel-designs.md)
 instruments.](https://jespernwulff.github.io/powerape/articles/iv-designs.md)
 [Justified alphaAlpha by sample size or by error costs, from one
 simulation.](https://jespernwulff.github.io/powerape/articles/justified-alpha.md)
-[R and Stata side by sideEvery function and subcommand,
-matched.](https://jespernwulff.github.io/powerape/articles/r-and-stata.md)
+
+### Guides and reference
+
+[R and Stata side by sideEvery function and subcommand, matched, and
+where the two
+differ.](https://jespernwulff.github.io/powerape/articles/r-and-stata.md)
+[How powerape is validatedExact results and independent software for R;
+four tiers of checks for
+Stata.](https://jespernwulff.github.io/powerape/articles/validation.md)
+[Function referenceThe R functions by step of the analysis, with usage,
+arguments and
+examples.](https://jespernwulff.github.io/powerape/reference/index.md)
 
 ## Citation
 

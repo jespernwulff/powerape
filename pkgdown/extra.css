@@ -1,13 +1,21 @@
-/* powerape site: additions to the pkgdown Bootstrap 5 template. The look
-   follows the bootmakr site (https://jespernwulff.github.io/bootmakr/). */
+/* powerape site: additions to the pkgdown Bootstrap 5 template. The
+   structure follows the bootmakr site (https://jespernwulff.github.io/bootmakr/);
+   the colours are the logo's: the deep green of its hexagon, the mint of the
+   hexagon's border, the amber of the power curve and the brown of the ape.
+   Mint and amber are too light for text on white (about 2:1 and 1.5:1) and
+   are used only for lines and surfaces; the text colours are measured
+   against white: links 6.4:1, muted text 6.1:1. */
 
 :root {
-  --pa-navy: #1e2f5c;
-  --pa-maroon: #8a2846;
-  --pa-ink: #1b2130;
-  --pa-muted: #5a6478;
-  --pa-panel: #f5f7fb;
-  --pa-border: #dbe0ea;
+  --pa-green: #14382a;
+  --pa-green-mid: #1f6b4a;
+  --pa-mint: #74c69d;
+  --pa-amber: #ffcf5c;
+  --pa-brown: #7a5236;
+  --pa-ink: #1c2622;
+  --pa-muted: #566660;
+  --pa-panel: #f2f7f4;
+  --pa-border: #d5e3da;
 }
 
 body {
@@ -26,25 +34,29 @@ samp {
 
 /* ---- Navigation bar ------------------------------------------------------ */
 
-/* Light text on the navy bar (the template's own rules assume a light bar). */
+/* Light text on the deep green bar (the template's own rules assume a light
+   bar), the wordmark in the logo's pale mint, and the curve's amber as a
+   line along the bar's bottom edge. The line is an inset shadow, not a
+   border: pkgdown pads the body for the bar's height. */
 .navbar.bg-primary {
-  --bs-navbar-color: rgba(255, 255, 255, 0.82);
+  --bs-navbar-color: rgba(227, 245, 232, 0.85);
   --bs-navbar-hover-color: #fff;
   --bs-navbar-active-color: #fff;
-  --bs-navbar-brand-color: #fff;
+  --bs-navbar-brand-color: #e3f5e8;
   --bs-navbar-brand-hover-color: #fff;
-  --bs-navbar-toggler-border-color: rgba(255, 255, 255, 0.35);
+  --bs-navbar-toggler-border-color: rgba(227, 245, 232, 0.4);
+  box-shadow: inset 0 -3px 0 var(--pa-amber);
 }
 
 .navbar.bg-primary .navbar-brand {
   font-family: "IBM Plex Mono", SFMono-Regular, Menlo, Consolas, monospace;
   font-weight: 600;
-  color: #fff;
+  color: #e3f5e8;
 }
 
 .navbar.bg-primary .nav-link,
 .navbar.bg-primary .navbar-nav > .nav-item > .nav-link {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(227, 245, 232, 0.85);
 }
 
 .navbar.bg-primary .nav-link:hover,
@@ -56,22 +68,41 @@ samp {
 
 .navbar.bg-primary small,
 .navbar.bg-primary .text-muted {
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: rgba(227, 245, 232, 0.7) !important;
 }
 
 .navbar.bg-primary input[type="search"] {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(227, 245, 232, 0.12);
+  border-color: rgba(227, 245, 232, 0.3);
   color: #fff;
 }
 
 .navbar.bg-primary input[type="search"]::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(227, 245, 232, 0.7);
 }
 
 .navbar.bg-primary input[type="search"]:focus {
   background: #fff;
   color: var(--pa-ink);
+}
+
+/* Each item stays on one line. Between 992 and 1200 px the expanded bar
+   held its seven items and the search box with about 50 px too little, and
+   "Worked example" broke in two; tighter item padding and a shorter search
+   box make the room. */
+.navbar .navbar-nav .nav-link {
+  white-space: nowrap;
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .navbar .navbar-nav .nav-link {
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+  }
+
+  .navbar input[type="search"] {
+    width: 9.5rem;
+  }
 }
 
 /* Running text keeps a readable measure; code and tables may run wider. */
@@ -85,11 +116,32 @@ main h2 {
   margin-top: 2.5rem;
 }
 
+main h1,
+main h2 {
+  color: var(--pa-green);
+}
+
 /* ---- Code and output ---------------------------------------------------- */
 
 pre {
   font-size: 0.8125rem;
   line-height: 1.45;
+  background-color: var(--pa-panel);
+  border-color: var(--pa-border);
+}
+
+/* Syntax colours come from pkgdown's arrow theme. Its blue for function
+   names is the one colour there that is not in the palette, so function
+   names take the deep green (12.9:1 on white; the ape's brown, tried first, sat
+   too close to the theme's amber-brown for TRUE and NULL); strings keep the theme's
+   green, numbers its red. */
+pre code span.fu {
+  color: var(--pa-green);
+}
+
+/* The current entry of "On this page" in a mint tint instead of grey. */
+#toc > .nav a.nav-link.active {
+  background-color: rgba(116, 198, 157, 0.22);
 }
 
 /* One-line commands that are meant to be pasted (installation): wrap on
@@ -109,7 +161,7 @@ pre.stata-output,
 pre.stata-help {
   background: #fff;
   border: 1px solid var(--pa-border);
-  border-left: 3px solid var(--pa-navy);
+  border-left: 3px solid var(--pa-green);
   color: var(--pa-ink);
   padding: 0.75rem 1rem;
   overflow-x: auto;
@@ -141,16 +193,16 @@ pre.stata-help code {
 }
 
 .lang-tabs .nav-link:hover {
-  color: var(--pa-navy);
+  color: var(--pa-green-mid);
   border-color: transparent transparent var(--pa-border);
 }
 
 .lang-tabs .nav-link.active {
-  color: var(--pa-navy);
+  color: var(--pa-green);
   font-weight: 600;
   background: #fff;
   border-color: var(--pa-border) var(--pa-border) #fff;
-  border-top: 2px solid var(--pa-navy);
+  border-top: 3px solid var(--pa-amber);
 }
 
 .lang-tabs .tab-content {
@@ -158,6 +210,26 @@ pre.stata-help code {
   border-top: 0;
   border-radius: 0 0 0.3rem 0.3rem;
   padding: 1rem 1rem 0.25rem;
+}
+
+/* pkgdown lays every pane out at once and gives the box the height of the
+   tallest one, so that switching tabs does not move the page. Here a short
+   R pane then sat over blank space whenever the Stata output was longer.
+   The tabs on a page switch together and extra.js keeps the clicked tab in
+   place, so the box can take the height of the pane that shows. */
+.lang-tabs .tab-content {
+  display: block;
+}
+
+.lang-tabs .tab-content > .tab-pane {
+  display: none;
+  visibility: visible;
+  width: auto;
+  margin-right: 0;
+}
+
+.lang-tabs .tab-content > .active {
+  display: block;
 }
 
 .lang-tabs .tab-pane > :last-child {
@@ -211,7 +283,7 @@ main .caption {
   font-weight: 600;
   font-size: 3rem;
   letter-spacing: -0.03em;
-  color: var(--pa-navy);
+  color: var(--pa-green);
   margin-bottom: 0.75rem;
 }
 
@@ -242,7 +314,7 @@ main .caption {
   margin: 0;
   max-width: none;
   padding-top: 0.75rem;
-  border-top: 2px solid var(--pa-navy);
+  border-top: 2px solid var(--pa-mint);
 }
 
 .home-figure {
@@ -257,11 +329,25 @@ main .caption {
   border-radius: 0.3rem;
 }
 
+/* The cards come in three labelled groups (start, workflows, guides). */
+.home-group {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pa-muted);
+  margin: 1.5rem 0 0.6rem;
+}
+
+.home-group .anchor {
+  display: none;
+}
+
 .home-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
-  margin: 1rem 0 0.5rem;
+  margin: 0 0 0.5rem;
 }
 
 /* pandoc wraps the links in a paragraph; let them be the grid items. */
@@ -281,8 +367,8 @@ main .caption {
 
 .home-card:hover,
 .home-card:focus-visible {
-  border-color: var(--pa-navy);
-  box-shadow: inset 0 -2px 0 var(--pa-navy);
+  border-color: var(--pa-mint);
+  box-shadow: inset 0 -3px 0 var(--pa-amber);
   color: inherit;
   text-decoration: none;
 }
@@ -290,7 +376,7 @@ main .caption {
 .home-card-title {
   display: block;
   font-weight: 600;
-  color: var(--pa-navy);
+  color: var(--pa-green);
   margin-bottom: 0.15rem;
 }
 
@@ -319,9 +405,23 @@ main .caption {
   }
 }
 
-@media (min-width: 768px) and (max-width: 1199.98px) {
+@media (max-width: 575.98px) {
+  /* pkgdown shrinks the logo on phones, but its home-page rule (120 px)
+     is more specific and won: beside it the lead ran four words a line. */
+  .template-home img.logo {
+    width: 88px;
+    margin-left: 1rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
   .home-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* a group of three leaves no card alone on its row */
+  .home-cards > p > .home-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }
 

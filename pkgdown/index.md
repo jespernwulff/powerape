@@ -194,17 +194,31 @@ every simulated study can be fitted by `probit`, `logit` or `cfprobit`.
 
 ## Where to go from here
 
+<h3 class="home-group" id="start-here">Start here</h3>
+
 <div class="home-cards">
 <a class="home-card" href="articles/minimum-effect.html"><span class="home-card-title">Get started in R</span><span class="home-card-text">Describe the world, pin the APE, and interrogate the design in six steps.</span></a>
 <a class="home-card" href="articles/stata.html"><span class="home-card-title">Get started in Stata</span><span class="home-card-text">The same six steps with the Stata command, plus engines and pilot data.</span></a>
 <a class="home-card" href="articles/worked-example.html"><span class="home-card-title">Worked example</span><span class="home-card-text">Five designs in both languages, from a treatment effect to an instrument.</span></a>
+</div>
+
+<h3 class="home-group" id="workflows">Workflows</h3>
+
+<div class="home-cards">
 <a class="home-card" href="articles/classic-sesoi-detection.html"><span class="home-card-title">The classic SESOI analysis</span><span class="home-card-text">What powering detection at the SESOI buys, and what it cannot.</span></a>
 <a class="home-card" href="articles/equivalence.html"><span class="home-card-title">Equivalence</span><span class="home-card-text">Showing that an effect is too small to matter.</span></a>
 <a class="home-card" href="articles/interaction-effects.html"><span class="home-card-title">Interaction effects</span><span class="home-card-text">Power for the AIE, and why interactions are expensive.</span></a>
 <a class="home-card" href="articles/panel-designs.html"><span class="home-card-title">Panel designs</span><span class="home-card-text">Correlated random effects probit, with n counted in units.</span></a>
 <a class="home-card" href="articles/iv-designs.html"><span class="home-card-title">IV designs</span><span class="home-card-text">Endogenous treatments by control functions, and the price of instruments.</span></a>
 <a class="home-card" href="articles/justified-alpha.html"><span class="home-card-title">Justified alpha</span><span class="home-card-text">Alpha by sample size or by error costs, from one simulation.</span></a>
-<a class="home-card" href="articles/r-and-stata.html"><span class="home-card-title">R and Stata side by side</span><span class="home-card-text">Every function and subcommand, matched.</span></a>
+</div>
+
+<h3 class="home-group" id="guides-and-reference">Guides and reference</h3>
+
+<div class="home-cards">
+<a class="home-card" href="articles/r-and-stata.html"><span class="home-card-title">R and Stata side by side</span><span class="home-card-text">Every function and subcommand, matched, and where the two differ.</span></a>
+<a class="home-card" href="articles/validation.html"><span class="home-card-title">How powerape is validated</span><span class="home-card-text">Exact results and independent software for R; four tiers of checks for Stata.</span></a>
+<a class="home-card" href="reference/index.html"><span class="home-card-title">Function reference</span><span class="home-card-text">The R functions by step of the analysis, with usage, arguments and examples.</span></a>
 </div>
 
 ## Citation
