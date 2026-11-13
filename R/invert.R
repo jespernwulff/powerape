@@ -84,6 +84,12 @@ solve_interaction <- function(f, target, scale, label) {
 set_ape <- function(dgp, target) {
   stopifnot(inherits(dgp, "powerape_dgp"),
             is.numeric(target), length(target) == 1L, is.finite(target))
+  if (is_did(dgp))
+    stop(paste("This is a difference-in-differences design: pin its effect on",
+               "the treated with set_att()."), call. = FALSE)
+  if (is_aie3(dgp))
+    stop(paste("This DGP has two moderators: pin its three-way interaction",
+               "effect with set_aie3()."), call. = FALSE)
   if (!is.null(dgp$moderator))
     stop("This DGP has a moderator: pin the estimand with set_aie().", call. = FALSE)
   if (identical(dgp$route, "panel")) {
@@ -132,6 +138,10 @@ set_ape <- function(dgp, target) {
 #'   tolerance.
 #' @export
 true_ape <- function(dgp) {
+  if (is_did(dgp))
+    stop("This is a difference-in-differences design: use true_att().", call. = FALSE)
+  if (is_aie3(dgp))
+    stop("This DGP has two moderators: use true_aie3().", call. = FALSE)
   if (!identical(dgp$estimand, "ape"))
     stop("This DGP has no pinned APE - call set_ape() first.", call. = FALSE)
   if (identical(dgp$route, "panel")) return(true_ape_panel(dgp))

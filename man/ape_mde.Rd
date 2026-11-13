@@ -25,7 +25,9 @@ ape_mde(
 )
 }
 \arguments{
-\item{dgp}{A \code{powerape_dgp} after \code{\link[=set_ape]{set_ape()}} or \code{\link[=set_aie]{set_aie()}}.}
+\item{dgp}{A \code{powerape_dgp} after \code{\link[=set_ape]{set_ape()}}, \code{\link[=set_aie]{set_aie()}},
+\code{\link[=set_aie3]{set_aie3()}} (designs with two moderators), or (for
+difference-in-differences designs) \code{\link[=set_att]{set_att()}}.}
 
 \item{n}{Sample size of the planned study (units for panel designs).}
 
@@ -57,7 +59,9 @@ pre-1.8.0 behavior (one-sided error rate 2.5\%).}
 \item{seed}{Optional seed (the caller's RNG state is preserved).}
 
 \item{main_focal, main_moderator}{Main-effect anchors for AIE designs;
-defaults to the values stored by a previous \code{\link[=set_aie]{set_aie()}} call.}
+defaults to the values stored by a previous \code{\link[=set_aie]{set_aie()}} call. Not
+used for designs with two moderators, whose anchors are always taken
+from the pinned design.}
 
 \item{max_iter}{Maximum search refinements.}
 
@@ -67,7 +71,9 @@ defaults to the values stored by a previous \code{\link[=set_aie]{set_aie()}} ca
 \code{"model"} (default, expected-information ML) or \code{"robust"}
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
-stacked method-of-moments robust sandwich; \code{se} is ignored there.}
+stacked method-of-moments robust sandwich; \code{se} is ignored there, and
+for the linear analysis of a difference-in-differences design, whose
+SEs are always robust (see \code{\link[=ape_dgp_did]{ape_dgp_did()}}).}
 
 \item{direction}{\code{"positive"} (an increase) or \code{"negative"} (a
 decrease) for the detect and minimum-effect claims; default: the sign
@@ -129,7 +135,9 @@ short, so the reported MDE errs on the conservative side.
 For a DGP with a moderator the searched effect is the AIE; the two
 conditional-at-reference main-effect anchors are taken from the
 pinned DGP (or passed via \code{main_focal}/\code{main_moderator}) and held
-fixed across candidates.
+fixed across candidates. For a design with two moderators the searched
+effect is the three-way AIE; its six other anchors are taken from the
+design, which must be pinned with \code{\link[=set_aie3]{set_aie3()}} first.
 }
 \examples{
 \donttest{

@@ -68,6 +68,12 @@ truth_aie <- function(dgp, bf, bm, bi, id) {
 #' @export
 set_aie <- function(dgp, target, main_focal, main_moderator) {
   stopifnot(inherits(dgp, "powerape_dgp"))
+  if (is_did(dgp))
+    stop(paste("This is a difference-in-differences design: pin its effect on",
+               "the treated with set_att()."), call. = FALSE)
+  if (is_aie3(dgp))
+    stop(paste("This DGP has two moderators: pin its three-way interaction",
+               "effect with set_aie3()."), call. = FALSE)
   if (is.null(dgp$moderator))
     stop("This DGP has no moderator: add one in ape_dgp(), or pin an APE with set_ape().",
          call. = FALSE)
@@ -160,6 +166,10 @@ set_aie <- function(dgp, target, main_focal, main_moderator) {
 #'   tolerance.
 #' @export
 true_aie <- function(dgp) {
+  if (is_did(dgp))
+    stop("This is a difference-in-differences design: use true_att().", call. = FALSE)
+  if (is_aie3(dgp))
+    stop("This DGP has two moderators: use true_aie3().", call. = FALSE)
   if (!identical(dgp$estimand, "aie"))
     stop("This DGP has no pinned AIE - call set_aie() first.", call. = FALSE)
   if (identical(dgp$route, "panel")) return(true_aie_panel(dgp))

@@ -1,6 +1,8 @@
 # Citable power statement ------------------------------------------------------
 
 describe_dgp <- function(d) {
+  ## difference-in-differences designs are described by their own text
+  if (is_did(d)) return(describe_did(d))
   is_panel <- identical(d$route, "panel")
   ## panel variables carry their within-unit persistence (icc), in the
   ## constructor's order: focal, moderator, covariates
@@ -145,6 +147,70 @@ claim_text <- function(claim, sesoi, conf, rule = FALSE) {
                           cl, sesoi, al_txt, by_n))
 }
 
+# The sentence that states the result (power, required n, or minimum
+# detectable effect); shared by every route's paragraph.
+statement_result <- function(x, n_text, est_short, rule, size_noun) {
+  if (inherits(x, "powerape_mde")) {
+    conf_frag <- if (isTRUE(x$confirmed)) {
+      sprintf(paste0(", confirmed by a high-precision verification run ",
+                     "(simulated power %.3f, Monte Carlo SE %.3f, %d ",
+                     "replications)"),
+              x$power, x$mcse, x$nsim_confirm)
+    } else {
+      sprintf(" (simulated power %.3f, Monte Carlo SE %.3f)", x$power, x$mcse)
+    }
+    if (isTRUE(x$is_margin)) {
+      sprintf(paste0("At a sample size of %s, the tightest equivalence ",
+                     "bounds establishable with %.0f%% power were +/-%.3f ",
+                     "(%.1f percentage points)%s."),
+              n_text, 100 * x$goal, x$mde, 100 * x$mde, conf_frag)
+    } else {
+      sprintf(paste0("At a sample size of %s, the minimum detectable %s at ",
+                     "%.0f%% power for %s was %.3f (%s of %.1f percentage ",
+                     "points)%s."),
+              n_text, est_short, 100 * x$goal,
+              claim_text(x$claim, x$sesoi, x$conf, rule), x$mde,
+              if (x$mde < 0) "a decrease" else "an increase",
+              100 * abs(x$mde), conf_frag)
+    }
+  } else if (inherits(x, "powerape_n")) {
+    if (isTRUE(x$confirmed)) {
+      sprintf(paste0("The required %s for %.0f%% power for %s ",
+                     "was %s, confirmed by a high-precision verification ",
+                     "run (simulated power %.3f, Monte Carlo SE %.3f, %d ",
+                     "replications)."),
+              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf, rule),
+              n_text, x$power, x$mcse, x$nsim_confirm)
+    } else {
+      sprintf(paste0("The required %s for %.0f%% power for %s ",
+                     "was %s (simulated power %.3f, Monte Carlo SE %.3f, ",
+                     "%d replications per search step)."),
+              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf, rule),
+              n_text, x$power, x$mcse, x$nsim)
+    }
+  } else {
+    sprintf(paste0("At a sample size of %s, simulated power for %s ",
+                   "was %.3f (Monte Carlo SE %.3f; %d replications)."),
+            n_text, claim_text(x$claim, x$sesoi, x$conf, rule), x$power, x$mcse,
+            x$nsim)
+  }
+}
+
+# The outcome distribution of an ape_power() run with a SESOI.
+statement_outcomes <- function(x) {
+  if (inherits(x, "powerape_power") && !is.null(x$sesoi)) {
+    o <- x$outcomes
+    sprintf(paste0("Across replications, the probability of concluding a ",
+                   "meaningful effect was %.3f, of detection without ",
+                   "meaningfulness %.3f, of an inconclusive result %.3f, ",
+                   "and of equivalence %.3f."),
+            o[["minimum"]], o[["detect_only"]], o[["inconclusive"]],
+            o[["equivalence"]])
+  } else {
+    NULL
+  }
+}
+
 #' Render a power analysis as a citable methods paragraph
 #'
 #' Turns a [ape_power()], [ape_n()], or [ape_mde()] result into a
@@ -155,7 +221,10 @@ claim_text <- function(claim, sesoi, conf, rule = FALSE) {
 #' preregistrations. For an [ape_alpha()] result the paragraph states the
 #' justification of the error rate instead: the objective and its
 #' weights, the chosen level and its flat range, the cap, and the
-#' realized-size verification when it was run.
+#' realized-size verification when it was run. Difference-in-differences
+#' designs get their own paragraph (groups, periods, data structure, rates,
+#' the scale on which trends are parallel, and the analysis, including the
+#' linear probability analysis).
 #'
 #' @param x A `powerape_power`, `powerape_n`, `powerape_mde`, or
 #'   `powerape_alpha` object.
@@ -173,7 +242,19 @@ claim_text <- function(claim, sesoi, conf, rule = FALSE) {
 power_statement <- function(x) {
   stopifnot(inherits(x, "powerape_power") || inherits(x, "powerape_n") ||
               inherits(x, "powerape_mde") || inherits(x, "powerape_alpha"))
+  if (is_did(x$dgp)) {
+    ## difference-in-differences designs have their own paragraph, for both
+    ## analyses (did-statement.R); a rejection rate is not reported as power
+    did_power_only(x$dgp, "power_statement()")
+    if (inherits(x, "powerape_alpha")) return(alpha_statement(x))
+    return(did_statement(x))
+  }
+  if (is_linear(x$dgp))
+    stop(paste("power_statement() does not describe the linear probability",
+               "analysis yet: its paragraph would report a probit/logit",
+               "analysis that was not run."), call. = FALSE)
   if (inherits(x, "powerape_alpha")) return(alpha_statement(x))
+  aie3_refuse(x$dgp, "power_statement()")
   rule <- !is.null(x$alpha_rule)
   d <- x$dgp
   is_aie <- identical(x$estimand, "aie")
@@ -206,62 +287,9 @@ power_statement <- function(x) {
   } else {
     sprintf("n = %d", x$n)
   }
-  s4 <- if (inherits(x, "powerape_mde")) {
-    conf_frag <- if (isTRUE(x$confirmed)) {
-      sprintf(paste0(", confirmed by a high-precision verification run ",
-                     "(simulated power %.3f, Monte Carlo SE %.3f, %d ",
-                     "replications)"),
-              x$power, x$mcse, x$nsim_confirm)
-    } else {
-      sprintf(" (simulated power %.3f, Monte Carlo SE %.3f)", x$power, x$mcse)
-    }
-    if (isTRUE(x$is_margin)) {
-      sprintf(paste0("At a sample size of %s, the tightest equivalence ",
-                     "bounds establishable with %.0f%% power were +/-%.3f ",
-                     "(%.1f percentage points)%s."),
-              n_text, 100 * x$goal, x$mde, 100 * x$mde, conf_frag)
-    } else {
-      sprintf(paste0("At a sample size of %s, the minimum detectable %s at ",
-                     "%.0f%% power for %s was %.3f (%s of %.1f percentage ",
-                     "points)%s."),
-              n_text, est_short, 100 * x$goal,
-              claim_text(x$claim, x$sesoi, x$conf, rule), x$mde,
-              if (x$mde < 0) "a decrease" else "an increase",
-              100 * abs(x$mde), conf_frag)
-    }
-  } else if (inherits(x, "powerape_n")) {
-    size_noun <- if (is_panel) "number of units" else "total sample size"
-    if (isTRUE(x$confirmed)) {
-      sprintf(paste0("The required %s for %.0f%% power for %s ",
-                     "was %s, confirmed by a high-precision verification ",
-                     "run (simulated power %.3f, Monte Carlo SE %.3f, %d ",
-                     "replications)."),
-              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf, rule),
-              n_text, x$power, x$mcse, x$nsim_confirm)
-    } else {
-      sprintf(paste0("The required %s for %.0f%% power for %s ",
-                     "was %s (simulated power %.3f, Monte Carlo SE %.3f, ",
-                     "%d replications per search step)."),
-              size_noun, 100 * x$goal, claim_text(x$claim, x$sesoi, x$conf, rule),
-              n_text, x$power, x$mcse, x$nsim)
-    }
-  } else {
-    sprintf(paste0("At a sample size of %s, simulated power for %s ",
-                   "was %.3f (Monte Carlo SE %.3f; %d replications)."),
-            n_text, claim_text(x$claim, x$sesoi, x$conf, rule), x$power, x$mcse,
-            x$nsim)
-  }
-  s5 <- if (inherits(x, "powerape_power") && !is.null(x$sesoi)) {
-    o <- x$outcomes
-    sprintf(paste0("Across replications, the probability of concluding a ",
-                   "meaningful effect was %.3f, of detection without ",
-                   "meaningfulness %.3f, of an inconclusive result %.3f, ",
-                   "and of equivalence %.3f."),
-            o[["minimum"]], o[["detect_only"]], o[["inconclusive"]],
-            o[["equivalence"]])
-  } else {
-    NULL
-  }
+  s4 <- statement_result(x, n_text, est_short, rule,
+                         if (is_panel) "number of units" else "total sample size")
+  s5 <- statement_outcomes(x)
   est_desc <- if (identical(d$route, "iv")) {
     paste0("two-step control-function estimation with stacked ",
            "method-of-moments robust standard errors and delta-method ",

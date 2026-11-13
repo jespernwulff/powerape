@@ -43,6 +43,8 @@ ape_curve <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
     rows[[i]] <- data.frame(n = n[i], alpha = p$alpha, power = p$power,
                             mcse = p$mcse, failed = p$outcomes[["failed"]],
                             separated = p$separated)
+    ## difference-in-differences designs: where the analysis centres
+    if (is_did(dgp) || is_linear(dgp)) rows[[i]]$est_mean <- p$est_mean
     diag[[i]] <- list(separated = p$separated, min_cell = p$min_cell,
                       separation = separation)
   }
@@ -53,14 +55,16 @@ ape_curve <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   if (length(sparse_at))
     sparse_warning(diag[[sparse_at[1L]]],
                    where = sprintf("At n = %s", paste(n[sparse_at], collapse = ", ")),
-                   aie = identical(dgp$estimand, "aie"))
+                   aie = identical(dgp$estimand, "aie"), est = dgp$estimand)
   rule <- is.function(alpha)
   structure(list(results = do.call(rbind, rows), claim = claim, sesoi = sesoi,
                  conf = if (rule) NA_real_ else lv1$conf_claim,
                  alpha = if (rule) NA_real_ else lv1$alpha,
                  alpha_rule = rule, nsim = nsim, target = dgp$target_est,
-                 estimand = dgp$estimand %||% "ape", model = dgp$model,
-                 separation = separation),
+                 estimand = dgp$estimand %||% "ape", model = model_label(dgp),
+                 separation = separation,
+                 mismatch = if (is_did(dgp) && !did_valid(dgp))
+                   did_mismatch_text(dgp) else NULL),
             class = "powerape_curve")
 }
 
@@ -151,10 +155,14 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   claim <- match.arg(claim)
   se <- match.arg(se)
   separation <- match.arg(separation)
-  if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
-    warning(sprintf(paste("`se` is fixed by the route: panel designs use",
-                          "unit-clustered SEs, IV designs the stacked robust",
-                          "sandwich; `se = \"%s\"` is ignored."), se))
+  did_need_valid(dgp, "ape_n()")
+  if (!identical(se, "model") && se_fixed(dgp)) {
+    ## the linear probability analysis is robust by construction, so asking
+    ## for robust SEs there is not worth a warning
+    if (!is_linear(dgp))
+      warning(sprintf(paste("`se` is fixed by the route: panel designs use",
+                            "unit-clustered SEs, IV designs the stacked robust",
+                            "sandwich; `se = \"%s\"` is ignored."), se))
     se <- "model"
   }
   rule <- is.function(alpha)
@@ -162,6 +170,7 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   lv_p <- claim_levels(claim, alpha, conf, n_pilot)
   stopifnot(is.numeric(power), length(power) == 1L, power > 0.5, power < 0.999)
   check_coherence(dgp, claim, sesoi, lv_p$conf_claim)
+  linear_need_side(dgp, claim, sesoi, "ape_n()")
   t_abs <- abs(dgp$target_est)
   dist <- switch(claim,
                  detect = t_abs,
@@ -195,7 +204,7 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
 
   ps <- sim_ci(dgp, n_pilot, 300L, lv_p$conf_claim,
                seed = if (is.null(seed)) NULL else seed - 1L,
-               se_type = if (dgp$route %in% c("panel", "iv")) "model" else se,
+               se_type = if (se_fixed(dgp)) "model" else se,
                separation = separation)
   if (mean(ps$ok) < 0.5)
     stop(paste("Most pilot replications failed to fit or had separation; the",
@@ -267,7 +276,7 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   sparse_warning(list(separated = best$separated, min_cell = best$min_cell,
                       separation = separation),
                  where = sprintf("At the returned n = %d", best$n),
-                 aie = identical(dgp$estimand, "aie"))
+                 aie = identical(dgp$estimand, "aie"), est = dgp$estimand)
   lv_b <- claim_levels(claim, alpha, conf, best$n)
   structure(list(n = best$n, power = best$power, mcse = best$mcse,
                  goal = power, claim = claim, sesoi = sesoi,

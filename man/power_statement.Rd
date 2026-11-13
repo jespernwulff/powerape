@@ -23,7 +23,10 @@ precision -- the transparency artifact for grant applications and
 preregistrations. For an \code{\link[=ape_alpha]{ape_alpha()}} result the paragraph states the
 justification of the error rate instead: the objective and its
 weights, the chosen level and its flat range, the cap, and the
-realized-size verification when it was run.
+realized-size verification when it was run. Difference-in-differences
+designs get their own paragraph (groups, periods, data structure, rates,
+the scale on which trends are parallel, and the analysis, including the
+linear probability analysis).
 }
 \examples{
 \donttest{

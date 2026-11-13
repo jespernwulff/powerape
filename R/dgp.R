@@ -59,7 +59,11 @@ reg_draw_parametric <- function(focal, moderator, covariates, R, n_int, seed_int
 # focal draws, centered moderator draws (if any), and the nuisance index
 # z'gamma, under the route's covariate distribution. Deterministic.
 integration_draw <- function(dgp) {
+  if (identical(dgp$route, "did"))
+    stop("internal: difference-in-differences designs integrate with did_integration().",
+         call. = FALSE)
   if (identical(dgp$route, "iv")) return(iv_integration(dgp))
+  if (is_aie3(dgp)) return(aie3_integration(dgp))
   if (dgp$route == "empirical") {
     idxz <- if (dgp$k > 0L) drop(dgp$emp_x %*% dgp$gamma) else rep(0, dgp$n_emp)
     if (!is.null(dgp$emp_xd)) {
@@ -105,7 +109,9 @@ integration_draw <- function(dgp) {
 #' @param covariates List of [pa_var()] objects (may be empty).
 #' @param correlation `NULL` (independence), a scalar exchangeable
 #'   correlation, or a full correlation matrix over
-#'   `(focal, moderator, covariates)` -- Gaussian-copula dependence.
+#'   `(focal, moderator, covariates)` -- Gaussian-copula dependence. With
+#'   a `moderator2` the order is `(focal, moderator, moderator2,
+#'   covariates)`.
 #' @param baseline Baseline outcome rate in (0, 1): the average probability
 #'   `P(Y = 1)` with the focal (and moderator, if any) set to their
 #'   reference values (0 for binary, the mean for continuous), covariates
@@ -127,10 +133,18 @@ integration_draw <- function(dgp) {
 #'   `length(covariates)`); overrides `signal`.
 #' @param n_int,seed_int Size and seed of the deterministic Monte Carlo
 #'   integration draw used for calibration and inversion.
+#' @param moderator2 Optional second moderator, a **binary** [pa_var()];
+#'   needs a `moderator`. The index then includes all three variables, the
+#'   three pairwise products and the triple product; the estimand is the
+#'   three-way average interaction effect, and the DGP must be pinned with
+#'   [set_aie3()]. The effect is symmetric in its three variables, so only
+#'   a design with three continuous variables is not covered. `baseline`
+#'   is then the outcome rate with all three at their reference values.
 #'
 #' @return An object of class `powerape_dgp`. Pin the effect with
-#'   [set_ape()] / [set_aie()], then use [ape_power()], [ape_curve()],
-#'   [ape_n()], or [ape_robust()].
+#'   [set_ape()] / [set_aie()] / [set_aie3()], then use [ape_power()],
+#'   [ape_curve()], [ape_n()], [ape_mde()], or [ape_robust()] (not yet
+#'   available for designs with two moderators; see [set_aie3()]).
 #' @examples
 #' d <- ape_dgp(
 #'   model = "probit",
@@ -143,8 +157,12 @@ integration_draw <- function(dgp) {
 ape_dgp <- function(model = c("probit", "logit"), focal, moderator = NULL,
                     covariates = list(), correlation = NULL, baseline,
                     signal = 0, gamma = NULL,
-                    n_int = 4e5, seed_int = 20260812L) {
+                    n_int = 4e5, seed_int = 20260812L, moderator2 = NULL) {
   model <- match.arg(model)
+  ## a second moderator: three-way interaction design (aie3.R)
+  if (!is.null(moderator2))
+    return(ape_dgp_3way(model, focal, moderator, moderator2, covariates,
+                        correlation, baseline, signal, gamma, n_int, seed_int))
   if (inherits(covariates, "pa_var")) covariates <- list(covariates)
   stopifnot(inherits(focal, "pa_var"),
             all(vapply(covariates, inherits, logical(1), "pa_var")))
@@ -223,10 +241,13 @@ ape_dgp <- function(model = c("probit", "logit"), focal, moderator = NULL,
 # One simulated design matrix of size n. Layout:
 #   no moderator:  [1, focal, Z]           focal_col = 2
 #   moderator:     [1, focal, mod, focal*mod, Z]   cols 2, 3, 4
+#   two moderators: draw_x_aie3() (aie3.R)
 draw_x <- function(dgp, n) {
+  if (identical(dgp$route, "did")) return(draw_x_did(dgp, n))
   if (identical(dgp$route, "panel")) return(draw_x_panel(dgp, n))
   if (identical(dgp$route, "iv")) return(draw_x_iv(dgp, n))
   if (dgp$route == "empirical") return(draw_x_empirical(dgp, n))
+  if (is_aie3(dgp)) return(draw_x_aie3(dgp, n))
   U <- draw_std_mvn(n, dgp$R_chol)
   d <- transform_u(U[, 1], dgp$focal)
   has_m <- !is.null(dgp$moderator)
@@ -245,6 +266,8 @@ draw_x <- function(dgp, n) {
 # is calibrated with focal (and moderator) centered at their references, so
 # the raw coefficients absorb the centering.
 beta_true <- function(dgp) {
+  if (identical(dgp$route, "did")) return(did_beta(dgp))
+  if (is_aie3(dgp)) return(aie3_beta(dgp))
   if (is.null(dgp$beta_focal))
     stop("This DGP has no target effect yet - call set_ape() or set_aie() first.",
          call. = FALSE)

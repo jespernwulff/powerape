@@ -9,6 +9,16 @@
 
 # Re-pin a DGP at a candidate target, whatever the estimand.
 repin <- function(dgp, target, mf = NULL, mm = NULL) {
+  if (is_did(dgp)) {
+    ## subgroup designs: move the difference, holding the reference
+    ## subgroup's effect at its pinned value
+    if (did_has_subgroup(dgp))
+      return(set_att(dgp, c(dgp$att_sub[1], dgp$att_sub[1] + target)))
+    return(set_att(dgp, target))
+  }
+  ## three-way designs: move the three-way effect, holding the six other
+  ## anchors (and so their coefficients) at their pinned values
+  if (is_aie3(dgp)) return(aie3_repin(dgp, target))
   if (identical(dgp$estimand, "aie") || !is.null(dgp$moderator)) {
     set_aie(dgp, target, main_focal = mf, main_moderator = mm)
   } else {
@@ -57,13 +67,17 @@ repin <- function(dgp, target, mf = NULL, mm = NULL) {
 #' For a DGP with a moderator the searched effect is the AIE; the two
 #' conditional-at-reference main-effect anchors are taken from the
 #' pinned DGP (or passed via `main_focal`/`main_moderator`) and held
-#' fixed across candidates.
+#' fixed across candidates. For a design with two moderators the searched
+#' effect is the three-way AIE; its six other anchors are taken from the
+#' design, which must be pinned with [set_aie3()] first.
 #'
 #' @inheritParams ape_power
 #' @param n Sample size of the planned study (units for panel designs).
 #' @param power Target power for the claim (default 0.80).
 #' @param main_focal,main_moderator Main-effect anchors for AIE designs;
-#'   defaults to the values stored by a previous [set_aie()] call.
+#'   defaults to the values stored by a previous [set_aie()] call. Not
+#'   used for designs with two moderators, whose anchors are always taken
+#'   from the pinned design.
 #' @param max_iter Maximum search refinements.
 #' @param confirm,nsim_confirm Confirmation stage as in [ape_n()].
 #' @param direction `"positive"` (an increase) or `"negative"` (a
@@ -100,10 +114,24 @@ ape_mde <- function(dgp, n, power = 0.80,
             is.numeric(n), length(n) == 1L, n >= 20,
             is.numeric(power), length(power) == 1L, power > 0.5, power < 0.999,
             is.numeric(nsim), length(nsim) == 1L, nsim >= 20)
-  if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
-    warning(sprintf(paste("`se` is fixed by the route: panel designs use",
-                          "unit-clustered SEs, IV designs the stacked robust",
-                          "sandwich; `se = \"%s\"` is ignored."), se))
+  did_need_valid(dgp, "ape_mde()")
+  if (did_has_subgroup(dgp) && is.null(dgp$att_sub))
+    stop(paste("ape_mde() searches the difference between the subgroups'",
+               "effects and holds the reference subgroup's effect fixed: pin",
+               "the design first with set_att(d, c(reference effect, any value))."),
+         call. = FALSE)
+  if (is_aie3(dgp) && is.null(dgp$main3))
+    stop(paste("ape_mde() searches the three-way effect and holds the six",
+               "other anchors fixed: pin the design first with",
+               "set_aie3(d, target = any value, main = , two_way = )."),
+         call. = FALSE)
+  if (!identical(se, "model") && se_fixed(dgp)) {
+    ## the linear probability analysis is robust by construction, so asking
+    ## for robust SEs there is not worth a warning
+    if (!is_linear(dgp))
+      warning(sprintf(paste("`se` is fixed by the route: panel designs use",
+                            "unit-clustered SEs, IV designs the stacked robust",
+                            "sandwich; `se = \"%s\"` is ignored."), se))
     se <- "model"
   }
   direction <- direction %||%
@@ -119,17 +147,17 @@ ape_mde <- function(dgp, n, power = 0.80,
       (is.null(sesoi) || !is.numeric(sesoi) || length(sesoi) != 1L || sesoi <= 0))
     stop("claim = \"minimum\" needs a single positive `sesoi` (in APE units).",
          call. = FALSE)
-  is_aie <- !is.null(dgp$moderator)
+  is_aie <- !is.null(dgp$moderator) && !is_aie3(dgp)
   mf <- main_focal %||% dgp$main_focal
   mm <- main_moderator %||% dgp$main_moderator
   if (is_aie && (is.null(mf) || is.null(mm)))
     stop(paste("An AIE MDE needs the main-effect anchors: pin the DGP with",
                "set_aie() first, or pass `main_focal` and `main_moderator`."),
          call. = FALSE)
-  est_lab <- if (is_aie) "AIE" else "APE"
+  est_lab <- if (did_has_subgroup(dgp)) "DATT" else if (is_did(dgp)) "ATT" else if (is_aie3(dgp)) "three-way AIE" else if (is_aie) "AIE" else "APE"
   z <- zcrit(conf)
   zg <- qnorm(power)
-  st <- if (dgp$route %in% c("panel", "iv")) "model" else se
+  st <- if (se_fixed(dgp)) "model" else se
   ## mean SE of the estimator in the world `d_at` at the design's n
   pilot_se <- function(d_at, seed_use) {
     ps <- sim_ci(d_at, n, 300L, conf, seed = seed_use, se_type = st,
@@ -144,7 +172,7 @@ ape_mde <- function(dgp, n, power = 0.80,
   if (claim == "equivalence") {
     if (is.null(dgp$target_est))
       stop(paste("An equivalence MDE holds the truth fixed: pin the DGP first",
-                 "(typically at target = 0) with set_ape() or set_aie()."),
+                 "(typically at target = 0) with set_ape(), set_aie() or set_att()."),
            call. = FALSE)
     t_abs <- abs(dgp$target_est)
     se_hat <- pilot_se(dgp, sd_(-1L))
@@ -311,11 +339,11 @@ finish_mde <- function(dgp, n, best, hist, power, claim, sesoi, conf, nsim,
     }
   }
 
-  est_kind <- if (!is.null(dgp$moderator)) "aie" else "ape"
+  est_kind <- if (did_has_subgroup(dgp)) "datt" else if (is_did(dgp)) "att" else if (is_aie3(dgp)) "aie3" else if (!is.null(dgp$moderator)) "aie" else "ape"
   sparse_warning(list(separated = best$separated, min_cell = best$min_cell,
                       separation = separation),
                  where = sprintf("At the returned %s", if (is_margin) "margin" else "MDE"),
-                 aie = identical(est_kind, "aie"))
+                 aie = identical(est_kind, "aie"), est = est_kind)
   dgp_at <- if (is_margin) dgp else repin(dgp, best$value, mf, mm)
   structure(list(
     mde = best$value, power = best$power, mcse = best$mcse,
@@ -335,21 +363,21 @@ finish_mde <- function(dgp, n, best, hist, power, claim, sesoi, conf, nsim,
 
 #' @export
 print.powerape_mde <- function(x, ...) {
-  unit_lab <- if (identical(x$dgp$route, "panel")) {
+  unit_lab <- if (unit_design(x$dgp)) {
     sprintf("n = %d units (x %s periods)", x$n, panel_len_label(x$dgp))
   } else {
     sprintf("n = %d", x$n)
   }
   if (x$is_margin) {
     cat(sprintf("powerape minimum establishable equivalence margin -- %s\n",
-                toupper(x$estimand)))
+                est_label(x$estimand)))
     cat(sprintf("  bounds +/-%.4f at %s for %.0f%% target power (%s %.3f, MCSE %.3f)\n",
                 x$mde, unit_lab, 100 * x$goal,
                 if (isTRUE(x$confirmed)) "confirmed" else "achieved",
                 x$power, x$mcse))
   } else {
     cat(sprintf("powerape minimum detectable %s -- %s claim%s\n",
-                toupper(x$estimand), x$claim,
+                est_label(x$estimand), x$claim,
                 if (identical(x$direction, "negative")) ", decreases" else ""))
     cat(sprintf("  MDE = %.4f at %s for %.0f%% target power (%s %.3f, MCSE %.3f)\n",
                 x$mde, unit_lab, 100 * x$goal,
@@ -367,6 +395,8 @@ print.powerape_mde <- function(x, ...) {
   if (!is.null(x$alpha_rule))
     cat(sprintf("  alpha = %.4g by sample-size rule (%.4g%% CI)\n",
                 x$alpha, 100 * x$conf))
+  if (is_linear(x$dgp))
+    cat(sprintf("  analysis: %s%s\n", model_label(x$dgp), linear_se_label(x$dgp)))
   n_search <- sum(x$history$stage == "search")
   n_conf <- sum(x$history$stage == "confirm")
   if (isTRUE(x$confirm_requested)) {

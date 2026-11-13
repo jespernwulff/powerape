@@ -43,6 +43,12 @@ req_margin <- function(p, s, t, z) {
   uniroot(f, c(t + s * max(0, z + qnorm(p)), hi), tol = 1e-12)$root
 }
 
+# The estimand as named in prints and messages: "APE", "AIE", "ATT",
+# "DATT", or "three-way AIE" (DESIGN.md section 19).
+est_label <- function(est) {
+  if (identical(est, "aie3")) "three-way AIE" else toupper(est)
+}
+
 # Evaluate `code` under `seed` without disturbing the caller's RNG state.
 # seed = NULL means: use the ambient RNG stream as-is.
 with_seed <- function(seed, code) {

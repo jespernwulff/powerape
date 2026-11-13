@@ -29,6 +29,9 @@ boundary_dgp <- function(dgp, claim, sesoi, target) {
   sgn <- if (target < 0) -1 else 1
   b <- switch(claim, minimum = sgn * sesoi, equivalence = sgn * sesoi,
               detect = 0)
+  ## difference-in-differences designs: re-pin the effect on the treated
+  ## (for subgroup designs the difference, the reference effect held)
+  if (is_did(dgp)) return(repin(dgp, b))
   if (identical(dgp$estimand, "aie")) {
     set_aie(dgp, b, main_focal = dgp$main_focal,
             main_moderator = dgp$main_moderator)
@@ -64,6 +67,8 @@ boundary_dgp <- function(dgp, claim, sesoi, target) {
 power_at <- function(x, alpha) {
   if (!inherits(x, "powerape_power"))
     stop("`x` must be an ape_power() result.", call. = FALSE)
+  did_power_only(x$dgp, "power_at()")
+  aie3_refuse(x$dgp, "power_at()")
   if (is.null(x$draws))
     stop("`x` carries no stored draws; rerun ape_power() with keep_draws = TRUE.",
          call. = FALSE)
@@ -159,6 +164,8 @@ ape_alpha <- function(x, cost = 1, prior = 1, error = c("minimize", "balance"),
   error <- match.arg(error)
   if (!inherits(x, "powerape_power"))
     stop("`x` must be an ape_power() result.", call. = FALSE)
+  did_power_only(x$dgp, "ape_alpha()")
+  aie3_refuse(x$dgp, "ape_alpha()")
   if (is.null(x$draws))
     stop("`x` carries no stored draws; rerun ape_power() with keep_draws = TRUE.",
          call. = FALSE)
@@ -365,13 +372,15 @@ alpha_frontier <- function(cost = 1, power = 0.80, prior = 1,
 # The justification paragraph for power_statement().
 alpha_statement <- function(x) {
   d <- x$dgp
-  est_short <- if (identical(x$estimand, "aie")) "AIE" else "APE"
+  est_short <- if (identical(x$estimand, "datt")) "difference in ATTs"
+               else if (identical(x$estimand, "att")) "ATT"
+               else if (identical(x$estimand, "aie")) "AIE" else "APE"
   how <- if (x$error == "minimize") {
     "minimizing the weighted combined Type I and Type II error rate"
   } else {
     "balancing the cost-weighted Type I and Type II error rates"
   }
-  n_text <- if (identical(d$route, "panel")) sprintf("n = %d units", x$n) else sprintf("n = %d", x$n)
+  n_text <- if (unit_design(d)) sprintf("n = %d units", x$n) else sprintf("n = %d", x$n)
   s1 <- sprintf(paste0("We chose the error rate for %s by %s (Maier & Lakens, ",
                        "2022; Mudge et al., 2012), weighting a Type I error %s ",
                        "times a Type II error and taking prior odds of %s for ",
@@ -381,6 +390,11 @@ alpha_statement <- function(x) {
                 how, format(x$cost), format(x$prior), est_short, x$target,
                 as.character(packageVersion("powerape")))
   s2 <- sprintf("The assumed data-generating process was %s.", describe_dgp(d))
+  ## difference-in-differences designs: the world's description does not
+  ## name the analysis, so say it
+  if (is_did(d))
+    s2 <- paste(s2, sprintf("Each simulated study was analysed by %s.",
+                            did_analysis_text(x)))
   s3 <- sprintf(paste0("At %s the optimum within the conventional cap of alpha ",
                        "= %s was alpha = %.4f: simulated power %.3f (Monte ",
                        "Carlo SE %.3f; %d replications), a Type II error rate ",

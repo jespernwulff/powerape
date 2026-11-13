@@ -8,6 +8,7 @@ rebuild_dgp <- function(dgp, spec) {
            empirical = do.call(ape_dgp_empirical, spec),
            panel = do.call(ape_dgp_panel, spec),
            iv = do.call(ape_dgp_iv, spec),
+           did = do.call(ape_dgp_did, spec),
            do.call(ape_dgp, spec))
   )
 }
@@ -36,7 +37,8 @@ claim_distance <- function(claim, t, sesoi) {
 #'   base-case values while the contextual calibration is redone; the
 #'   implied true effect drifts and is reported per scenario. Claim-boundary
 #'   guards are relaxed here on purpose -- showing that a scenario collapses
-#'   power is the point.
+#'   power is the point. Not available for difference-in-differences
+#'   designs.
 #'
 #' **n_max.** The insurance-premium n is the largest requirement across
 #' scenarios. Power at the user's `n` cannot rank the scenarios for that
@@ -56,7 +58,16 @@ claim_distance <- function(claim, t, sesoi) {
 #'   Parametric route: `baseline`, `signal`, `correlation` (scalar);
 #'   empirical route: `baseline`, `signal`. A length-2 element is expanded
 #'   to `grid_points` equally spaced values; longer vectors are used as-is.
-#'   Scenarios are the full factorial grid.
+#'   Scenarios are the full factorial grid. Difference-in-differences
+#'   designs ([ape_dgp_did()]): `baseline`, `gap`, `trend` (not with a
+#'   subgroup), `rho` (panels), `p_treated`, `signal`, and `trends =
+#'   c("index", "linear")`, the scale on which untreated trends are
+#'   parallel. In every scenario the effect on the treated is re-pinned at
+#'   the planning value. In a scenario whose world has trends parallel on
+#'   another scale than the analysis assumes, the analysis is biased: the
+#'   row is flagged `valid = FALSE`, its `power` is a rejection rate,
+#'   `est_mean` shows where the estimates centre, and it is left out of the
+#'   worst case and of `n_max`.
 #' @param pin `"ape"` (re-invert per scenario) or `"coefficients"` (hold
 #'   coefficients, let the implied effect drift). Ignored in MDE mode,
 #'   which always re-solves.
@@ -97,12 +108,26 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                        grid_points = 3, nmax = TRUE, nmax_power = 0.90,
                        se = c("model", "robust"), direction = NULL,
                        separation = c("fail", "keep")) {
+  aie3_refuse(dgp, "ape_robust()")
   claim <- match.arg(claim)
   pin <- match.arg(pin)
   mode <- match.arg(mode)
   se <- match.arg(se)
   separation <- match.arg(separation)
-  if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
+  did <- is_did(dgp)
+  if (did) {
+    ## the base design must be analysed on the scale its trends are
+    ## parallel on; the other scale is a scenario (vary = list(trends = ))
+    did_need_valid(dgp, "ape_robust()")
+    if (pin == "coefficients")
+      stop(paste("pin = \"coefficients\" is not available for",
+                 "difference-in-differences designs: the sweep re-pins the",
+                 "effect on the treated in every scenario (pin = \"ape\")."),
+           call. = FALSE)
+    if (is.null(dgp$target_est))
+      stop("This DGP has no target effect yet - call set_att() first.", call. = FALSE)
+  }
+  if (!identical(se, "model") && (dgp$route %in% c("panel", "iv") || did_panel(dgp))) {
     warning(sprintf(paste("`se` is fixed by the route: panel designs use",
                           "unit-clustered SEs, IV designs the stacked robust",
                           "sandwich; `se = \"%s\"` is ignored."), se))
@@ -133,6 +158,9 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                     empirical = c("baseline", "signal"),
                     panel = c("baseline", "signal", "rho", "retention"),
                     iv = c("baseline", "signal", "endogeneity", "iv_strength"),
+                    did = c(if (!did_has_subgroup(dgp)) c("baseline", "gap", "trend"),
+                            if (did_panel(dgp)) "rho", "p_treated", "signal",
+                            "trends"),
                     c("baseline", "signal", "correlation"))
   bad <- setdiff(names(vary), allowed)
   if (length(bad))
@@ -146,11 +174,23 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
     stop("Varying `correlation` needs a scalar correlation in the base DGP.",
          call. = FALSE)
 
-  levels_list <- lapply(vary, function(v) {
+  levels_list <- Map(function(v, nm) {
+    if (identical(nm, "trends")) {
+      ## the scale on which untreated trends are parallel: both worlds
+      if (!is.character(v) || length(v) != 2L || !setequal(v, c("index", "linear")))
+        stop("`vary$trends` must be c(\"index\", \"linear\").", call. = FALSE)
+      return(v)
+    }
     stopifnot(is.numeric(v), length(v) >= 2L)
     if (length(v) == 2L) seq(v[1L], v[2L], length.out = grid_points) else v
-  })
-  grid <- expand.grid(levels_list, KEEP.OUT.ATTRS = FALSE)
+  }, vary, names(vary))
+  grid <- expand.grid(levels_list, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+  ## difference-in-differences scenarios in which the analysis assumes
+  ## another parallel-trends scale than the world has: their rate is a
+  ## rejection rate, so they are shown but never ranked (worst case, n_max)
+  world <- "trends" %in% names(vary)
+  valid <- rep(TRUE, nrow(grid))
+  est_mean <- rep(NA_real_, nrow(grid))
 
   is_aie <- identical(dgp$estimand, "aie")
   rows <- vector("list", nrow(grid))
@@ -160,6 +200,15 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
     spec <- dgp$spec
     for (nm in names(grid)) spec[[nm]] <- grid[i, nm]
     d_i <- tryCatch(rebuild_dgp(dgp, spec), error = function(e) e)
+    ## the rebuild starts from the constructor spec, which does not
+    ## hold the analysis: carry it into every scenario
+    if (!inherits(d_i, "error") && is_linear(dgp)) d_i$analysis <- "linear"
+    if (did && !inherits(d_i, "error")) {
+      valid[i] <- did_valid(d_i)
+      ## a subgroup design must be pinned before its effect can be searched
+      if (mode == "mde" && did_has_subgroup(dgp))
+        d_i <- tryCatch(set_att(d_i, dgp$att_sub), error = function(e) e)
+    }
     if (mode == "mde") {
       if (inherits(d_i, "error")) {
         rows[[i]] <- data.frame(grid[i, , drop = FALSE], mde = NA_real_,
@@ -195,7 +244,9 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
     if (!inherits(d_i, "error")) {
       if (pin == "ape") {
         d_i <- tryCatch(
-          if (is_aie) {
+          if (did) {
+            set_att(d_i, if (did_has_subgroup(dgp)) dgp$att_sub else dgp$target_est)
+          } else if (is_aie) {
             set_aie(d_i, dgp$target_est, main_focal = dgp$main_focal,
                     main_moderator = dgp$main_moderator)
           } else {
@@ -232,6 +283,8 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                             separated = pw$separated, note = "",
                             stringsAsFactors = FALSE)
     dgps[[i]] <- d_i
+    if (did) est_mean[i] <- pw$est_mean %||% NA_real_
+    if (!valid[i]) next                # a rejection rate: shown, not ranked
     ## requirement criterion: (SE scale c = se * sqrt(n)) / (distance to
     ## the claim boundary); (c (z + z_power) / dist)^2 is the normal-
     ## approximation n, so the ranking by c / dist is free of alpha and of
@@ -243,9 +296,18 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   }
   scenarios <- do.call(rbind, rows)
   rownames(scenarios) <- NULL
+  if (world) {
+    ## which scenarios the analysis is valid in, and where its estimates
+    ## centre (power mode)
+    nt <- scenarios$note
+    scenarios$note <- NULL
+    if (mode == "power") scenarios$est_mean <- est_mean
+    scenarios$valid <- valid
+    scenarios$note <- nt
+  }
 
   key <- if (mode == "mde") abs(scenarios$mde) else scenarios$power
-  ok_idx <- which(!is.na(key))
+  ok_idx <- which(!is.na(key) & valid)
   if (!length(ok_idx))
     stop("No scenario was feasible; widen or shift the `vary` ranges.", call. = FALSE)
   worst_i <- if (mode == "mde") {
@@ -319,7 +381,7 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
     }
   }
 
-  structure(list(scenarios = scenarios,
+  out <- structure(list(scenarios = scenarios,
                  worst = scenarios[worst_i, , drop = FALSE],
                  marginals = marginals, n = as.integer(n), claim = claim,
                  sesoi = sesoi, conf = conf, alpha = lv$alpha,
@@ -335,10 +397,17 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
                                  else scenarios[nmax_i, , drop = FALSE],
                  nmax_candidates = nmax_cand),
             class = "powerape_robust")
+  ## named only for linear runs, so default results keep their fields
+  if (is_linear(dgp)) out$analysis <- "linear"
+  if (did && is_linear(dgp)) out$se_label <- linear_se_label(dgp)
+  out
 }
 
 #' @export
 print.powerape_robust <- function(x, ...) {
+  if (identical(x$analysis, "linear"))
+    cat(sprintf("powerape -- linear probability analysis (OLS)%s\n",
+                x$se_label %||% ", robust SEs"))
   if (identical(x$mode, "mde")) {
     cat(sprintf("powerape robustness sweep -- minimum detectable %s, %s claim%s\n",
                 toupper(x$estimand), x$claim,
@@ -347,6 +416,9 @@ print.powerape_robust <- function(x, ...) {
                 x$n, 100 * x$goal, x$nsim, nrow(x$scenarios),
                 paste(names(x$marginals), collapse = ", ")))
     ok <- !is.na(x$scenarios$mde)
+    if (!is.null(x$scenarios$valid) && any(!x$scenarios$valid))
+      cat(sprintf("  note: in %d scenario(s) (valid = FALSE) the analysis assumes another parallel-trends scale than the world has; no effect is searched there.\n",
+                  sum(!x$scenarios$valid)))
     cat(sprintf("  MDE range [%.4f, %.4f]; worst (largest-MDE) scenario:\n",
                 min(x$scenarios$mde[ok]), max(x$scenarios$mde[ok])))
     print(x$worst[, setdiff(names(x$worst), "note"), drop = FALSE],
@@ -364,20 +436,35 @@ print.powerape_robust <- function(x, ...) {
               x$n, x$nsim, nrow(x$scenarios),
               paste(names(x$marginals), collapse = ", ")))
   ok <- !is.na(x$scenarios$power)
+  inval <- !is.null(x$scenarios$valid) && any(!x$scenarios$valid)
+  if (inval) {
+    ok <- ok & x$scenarios$valid
+    cat(sprintf(paste0("  note: in %d scenario(s) (valid = FALSE) the analysis assumes another ",
+                       "parallel-trends scale than the world has: `power` is a rejection rate there\n",
+                       "    and `est_mean` shows where the estimates centre (the true %s is %+.4f); ",
+                       "they are left out of the range, the worst case and n_max.\n"),
+                sum(!x$scenarios$valid), toupper(x$estimand), x$target))
+  }
   cat(sprintf("  power range [%.3f, %.3f]; worst scenario:\n",
               min(x$scenarios$power[ok]), max(x$scenarios$power[ok])))
   print(x$worst[, setdiff(names(x$worst), "note"), drop = FALSE],
         row.names = FALSE)
-  if (any(!ok))
-    cat(sprintf("  %d infeasible scenario(s); see `$scenarios$note`.\n", sum(!ok)))
+  infeasible <- is.na(x$scenarios$power)
+  if (any(infeasible))
+    cat(sprintf("  %d infeasible scenario(s); see `$scenarios$note`.\n", sum(infeasible)))
   cat("  scenarios:\n")
   print(x$scenarios[, setdiff(names(x$scenarios), "note"), drop = FALSE],
         row.names = FALSE)
   if (!is.null(x$nmax)) {
     sc <- x$nmax_scenario
     inputs <- names(x$marginals)
+    ## numeric inputs keep their common format; a sweep that includes the
+    ## trends scale (character) formats each input on its own
+    vals <- if (is.null(sc)) NULL
+            else if (all(vapply(sc[inputs], is.numeric, logical(1)))) format(unlist(sc[inputs]))
+            else vapply(inputs, function(i) trimws(format(sc[[i]])), character(1))
     sc_lab <- if (is.null(sc)) "" else
-      paste0(" (", paste(sprintf("%s = %s", inputs, format(unlist(sc[inputs]))),
+      paste0(" (", paste(sprintf("%s = %s", inputs, vals),
                          collapse = ", "), ")")
     cat(sprintf("  n_max: n = %d reaches %.0f%% power in every scenario; set by the least favorable one%s, achieved %.3f (MCSE %.3f).\n",
                 x$nmax$n, 100 * x$nmax_power, sc_lab, x$nmax$power, x$nmax$mcse))

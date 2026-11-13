@@ -109,6 +109,22 @@ power_statement(ape_power(d, n = 2200, claim = "minimum", sesoi = 0.05))
   by design: a pooled CRE logit would estimate the
   ASF only approximately, so `model = "logit"` is refused with a
   teaching error.
+- **Difference-in-differences designs** (`ape_dgp_did()`): a treated and
+  a control group around one treatment date, as a panel or as repeated
+  cross-sections, with the effect on the treated in probability points
+  as the target (`set_att()`). The design keeps apart the scale on which
+  untreated trends are parallel in the simulated world (the probit/logit
+  index, or probabilities) and the analysis each study receives (a pooled
+  probit/logit, or a linear probability model), so it shows what happens
+  when the two differ. Several periods before and after, a subgroup
+  comparison of two effects, and `ape_dgp_did_pilot()` for a design built
+  from pre-treatment data.
+- **A linear probability analysis for comparison** (`set_analysis()`):
+  any design but an IV design can be analysed by ordinary least squares
+  with robust standard errors, to see what a linear analysis of the same
+  world would find.
+- **Three-way interaction effects** (`set_aie3()`): a second, binary
+  moderator, with the three-way effect of `ginteff` as the target.
 - **IV designs** (`ape_dgp_iv()`): endogenous focal variables via
   control-function probit — the estimator of Stata's `cfprobit`,
   replicated exactly with its stacked no-bootstrap standard errors
@@ -165,14 +181,19 @@ the Donner-Klar cluster design effect. The control-function route
 reproduces Stata's `cfprobit` across all four first-stage models —
 coefficients, stacked robust/clustered SEs, and `margins` ASF effects to
 ~1e-6 — including the endogenous-interaction design run with Stata's own
-syntax. See the package tests and the validation battery for details.
+syntax. The difference-in-differences route, the linear probability
+analysis and the three-way effect match Stata's `regress`, `logit` +
+`margins`, `didregress` and `xtdidregress` on fixed datasets, and
+difference-in-differences power in a small study matches its exact value
+from enumerating every possible study. See the package tests and the
+validation battery for details.
 
 ## Learn more
 
-Seven vignettes cover the workflows:
+Eight vignettes cover the workflows:
 `vignette("minimum-effect")`, `vignette("classic-sesoi-detection")`,
 `vignette("equivalence")`, `vignette("interaction-effects")`,
-`vignette("panel-designs")`, `vignette("iv-designs")`, and
-`vignette("justified-alpha")`. On the
+`vignette("panel-designs")`, `vignette("did-designs")`,
+`vignette("iv-designs")`, and `vignette("justified-alpha")`. On the
 [website](https://jespernwulff.github.io/powerape/) the same workflows show
 the R and the Stata code side by side.

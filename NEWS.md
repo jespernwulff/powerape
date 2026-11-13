@@ -1,3 +1,158 @@
+# powerape (development version)
+
+Not released. Existing designs are untouched under their default analysis:
+seeded results of every existing route are identical to 1.11.4.
+
+* **Three-way interaction effects.** `ape_dgp()` takes a second moderator
+  (`moderator2`, binary), and `set_aie3()` pins the three-way average
+  interaction effect: the two-way interaction effect of the focal variable
+  and the moderator with the second moderator set to 1, minus the same
+  with it set to 0 (the three-way effect of the `ginteff` package; with
+  three binary variables, the triple difference of the eight cell rates).
+  All seven anchors are explicit: three main effects, each with the other
+  two variables at their reference values; three two-way effects, each
+  with the third variable at its reference value; and the three-way
+  target. The focal variable and the first moderator may be binary or
+  continuous, so every type combination but three continuous variables is
+  covered (the effect is symmetric in its variables). Simulated studies
+  are fitted with all pairwise products and the triple product; the
+  estimate and its delta-method standard error match `ginteff` on fixed
+  data. `ape_power()`, `ape_curve()`, `ape_n()` and `ape_mde()` work, under
+  the index analysis and under `set_analysis(d, "linear")` (the
+  coefficient of the triple product); `true_aie3()` recomputes the pinned
+  effect. `ape_robust()`, `power_at()`, `ape_alpha()` and
+  `power_statement()` refuse three-way designs for now, and the empirical,
+  pilot-model, panel and instrumental-variable builders have no second
+  moderator. A three-way effect is expensive: with balanced binary
+  variables, rates near 30% and an effect of 10 points, 80% detection
+  needs about 700 observations for a main effect, 2,700 for a two-way
+  effect and 10,700 for a three-way effect.
+
+* **A linear probability analysis for comparison.** `set_analysis(dgp,
+  "linear")` returns a copy of a design whose simulated studies are
+  analysed by ordinary least squares instead of the design's probit or
+  logit model: the estimate is the coefficient of the focal variable (of
+  the focal-by-moderator product for AIE designs). The world and the
+  pinned effect do not change, so one design can be priced both ways.
+  Standard errors are always robust (HC1; clustered by unit on the panel
+  route), and no study is lost to separation. The linear coefficient is
+  another estimator of the same effect and need not centre on it: it
+  equals the average partial effect in large samples when a binary focal
+  variable is independent of the covariates and when focal variable and
+  covariates are jointly normal, and it can be far from it when a
+  treatment is related to covariates that also move the outcome. The
+  printed design shows the value it centres on next to the truth,
+  `ape_power()` reports the mean of the simulated estimates, and `ape_n()`
+  stops when the two lie on different sides of the claim's boundary.
+  Available for parametric, empirical, pilot-model, panel and
+  difference-in-differences designs; instrumental-variable designs are
+  refused (their linear counterpart is two-stage least squares), and
+  `power_statement()` describes linear analyses for
+  difference-in-differences designs only.
+
+* **Difference-in-differences designs.** `ape_dgp_did()` describes a
+  study with a treated and a control group and one treatment date, as a
+  panel (the same units before and after, unit-clustered standard errors,
+  within-unit dependence `rho`) or as repeated cross-sections, with one
+  period before and one after by default or `n_pre` and `n_post` periods.
+  The target
+  is the average treatment effect on the treated in probability points,
+  pinned with the new `set_att()` and recomputed by `true_att()`.
+  `ape_power()`, `ape_curve()`, `ape_n()` and `ape_mde()` accept the
+  design; all three claims apply.
+* **Two analyses.** `analysis = "index"` (default) fits a pooled probit or
+  logit with group, period and treatment indicators; the effect is the
+  average partial effect of the treatment indicator over the treated
+  post-period observations (Wooldridge, 2023), which is not the cross
+  difference of the four rates (Puhani, 2012). `analysis = "linear"` fits
+  a linear probability model by ordinary least squares; the effect is the
+  coefficient of the treatment indicator, the standard
+  difference-in-differences estimate. Its standard errors are always
+  robust (HC1 in cross-sections, clustered by unit in panels, with the
+  small-sample factors of Stata's `regress`), and it has no separation.
+* **Two worlds.** The design is stated in rates: the control group's rate
+  before treatment, the gap between the groups before treatment, and the
+  control group's change. `trends = "index"` (default) makes the two
+  groups' untreated trends parallel on the probit/logit index;
+  `trends = "linear"` makes them parallel in probabilities. Each analysis
+  is unbiased only in the world whose scale it assumes. When `trends` and
+  `analysis` agree the functions report power; when they differ,
+  `ape_power()` and `ape_curve()` report a rejection rate with the mean of
+  the estimates, and `ape_n()` and `ape_mde()` refuse the design. The
+  printed design shows what the same four rates would be read as under
+  the other scale.
+* **Several periods.** The analysis then includes an indicator for every
+  period but the first and one treatment indicator. Rates are the same in
+  every period before and in every period after the treatment date, and
+  so is the effect. In a panel the dependence between two outcomes of a
+  unit does not fade with the distance between the periods, which is the
+  favourable case for adding periods: the precision extra periods buy is
+  an upper bound (`?ape_dgp_did` gives an example). A period in which no
+  unit (or every unit) has the outcome fails a probit/logit study.
+* **Comparing two subgroups.** `ape_dgp_did(subgroup = pa_var("female",
+  "binary", p = 0.4))` splits both groups into two subgroups that are
+  both treated; the target is the difference between the two subgroups'
+  effects on the treated in probability points (the estimand of a triple
+  difference used to compare effects; Caron, 2025). `baseline`, `gap` and
+  `trend` may differ by subgroup, `set_att()` takes the two effects, and
+  `ape_mde()` searches the difference. The probit/logit analysis is fully
+  interacted with the subgroup and estimates the difference of two average
+  partial effects; the linear analysis estimates the coefficient of the
+  subgroup-by-treatment product. The same eight rates imply different
+  subgroup differences on the index and on the probability scale (the
+  printed design shows both), a zero difference in points is not a zero
+  interaction coefficient, and a difference as large as the effect itself
+  needs about four times the units.
+* **Sensitivity, justified alpha and reporting.** `ape_robust()` sweeps
+  a difference-in-differences design over `baseline`, `gap`, `trend`,
+  `rho`, `p_treated` and `signal`, re-pinning the effect on the treated in
+  every scenario, with `n_max` and the MDE mode. `vary = list(trends =
+  c("index", "linear"))` adds the scale on which trends are parallel: a
+  scenario whose world does not match the analysis is flagged `valid =
+  FALSE`, reported with its rejection rate and the mean of its estimates,
+  and left out of the worst case and of `n_max`. `power_at()` and
+  `ape_alpha()` read a stored run (the realized-size check re-pins the
+  effect at the claim boundary), and `power_statement()` writes the
+  methods paragraph for these designs under both analyses. The three stop
+  for a result that is a rejection rate.
+* **Pilot data.** `ape_dgp_did_pilot()` builds the design from data
+  observed before the treatment date: it estimates the control group's
+  rate, the gap between the groups, the treated share and, in a panel,
+  the within-unit dependence (the latent correlation of the route's
+  dependence model, by the method of moments). The control group's change
+  from before to after treatment is not in such data and is supplied as
+  `trend`.
+* **Limits.** One treated group, one treatment date, treatment assigned at
+  the unit level, balanced panels, trends parallel within each
+  subgroup. Staggered adoption, effects that differ by period, pre-trend
+  tests and fading dependence are not available.
+  `ape_robust(pin = "coefficients")` is not available for these designs.
+* **Checks.** `tests/testthat/test-did.R`: both estimators against their
+  closed forms in the saturated two-by-two design, simulated standard
+  errors against closed-form values for cross-sections and for panels
+  (including the within-unit covariance, unequal group and period
+  shares, and several periods), exact marginal rates under the
+  dependence model, the
+  probit/logit estimate and its unit-clustered standard error against
+  marginaleffects and sandwich, and the least-squares variances against
+  sandwich. `tests/testthat/test-linear.R`: the engine's linear estimate
+  and standard error against `lm` and sandwich on replayed data,
+  study-by-study equality with the probit estimate for a binary focal
+  variable without covariates, where the linear coefficient centres, and
+  the unit-fixed-effects identity on the panel route.
+  `tests/testthat/test-did-known.R`: cases with a known answer: the
+  linear and the index reading coincide when the groups start at the same
+  rate or the control group does not change; repeated cross-sections in a
+  linear world give the same power as the binary-by-binary interaction
+  design of the standard route; and power in a small study equals its
+  exact value, found by enumerating every possible study (both analyses,
+  both links, including the share of studies lost to separation).
+  `tests/testthat/test-stata-constants.R`: the linear analysis, the
+  effect on the treated, the subgroup difference and the three-way
+  interaction effect against Stata's `regress`, `logit` + `margins`,
+  `didregress` and `xtdidregress` on fixed data. New vignette
+  `vignette("did-designs")`.
+
 # powerape 1.11.4
 
 Documentation only: no result moves. The one change in the code is the

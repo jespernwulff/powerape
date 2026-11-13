@@ -21,7 +21,9 @@ ape_curve(
 \method{plot}{powerape_curve}(x, target_power = NULL, ...)
 }
 \arguments{
-\item{dgp}{A \code{powerape_dgp} after \code{\link[=set_ape]{set_ape()}} or \code{\link[=set_aie]{set_aie()}}.}
+\item{dgp}{A \code{powerape_dgp} after \code{\link[=set_ape]{set_ape()}}, \code{\link[=set_aie]{set_aie()}},
+\code{\link[=set_aie3]{set_aie3()}} (designs with two moderators), or (for
+difference-in-differences designs) \code{\link[=set_att]{set_att()}}.}
 
 \item{n}{Integer vector (length >= 2) of total sample sizes.}
 
@@ -54,7 +56,9 @@ pre-1.8.0 behavior (one-sided error rate 2.5\%).}
 \code{"model"} (default, expected-information ML) or \code{"robust"}
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
-stacked method-of-moments robust sandwich; \code{se} is ignored there.}
+stacked method-of-moments robust sandwich; \code{se} is ignored there, and
+for the linear analysis of a difference-in-differences design, whose
+SEs are always robust (see \code{\link[=ape_dgp_did]{ape_dgp_did()}}).}
 
 \item{separation}{How simulated studies with separation in an
 identifying cell are scored: \code{"fail"} (default; counted as failed, as

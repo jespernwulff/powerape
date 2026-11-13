@@ -14,6 +14,20 @@ criteria for detection, minimum-effect, and equivalence claims
 (Riesthuis, 2024) and robustness sweeps over contextual assumptions
 (Hancock and Feng, 2026).
 }
+\details{
+Designs are built by \code{\link[=ape_dgp]{ape_dgp()}} (cross-sections, with an optional
+moderator or two), \code{\link[=ape_dgp_empirical]{ape_dgp_empirical()}} and \code{\link[=ape_dgp_from_fit]{ape_dgp_from_fit()}} (pilot
+data), \code{\link[=ape_dgp_panel]{ape_dgp_panel()}} (panels), \code{\link[=ape_dgp_iv]{ape_dgp_iv()}} (endogenous focal
+variables), and \code{\link[=ape_dgp_did]{ape_dgp_did()}} and \code{\link[=ape_dgp_did_pilot]{ape_dgp_did_pilot()}}
+(difference-in-differences, with the effect on the treated in
+probability points as the target). The effect is pinned with
+\code{\link[=set_ape]{set_ape()}}, \code{\link[=set_aie]{set_aie()}}, \code{\link[=set_aie3]{set_aie3()}} or \code{\link[=set_att]{set_att()}}, and
+\code{\link[=set_analysis]{set_analysis()}} switches a design to a linear probability analysis for
+comparison. \code{\link[=ape_power]{ape_power()}}, \code{\link[=ape_curve]{ape_curve()}}, \code{\link[=ape_n]{ape_n()}}, \code{\link[=ape_mde]{ape_mde()}} and
+\code{\link[=ape_robust]{ape_robust()}} compute power, required sample sizes, detectable effects
+and sensitivity; \code{\link[=ape_alpha]{ape_alpha()}} justifies the error rate, and
+\code{\link[=power_statement]{power_statement()}} writes the methods paragraph.
+}
 \seealso{
 Useful links:
 \itemize{

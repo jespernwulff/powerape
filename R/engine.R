@@ -94,11 +94,26 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model",
   is_aie <- identical(dgp$estimand, "aie")
   is_panel <- identical(dgp$route, "panel")
   is_iv <- identical(dgp$route, "iv")
+  ## difference-in-differences designs (DESIGN.md section 17): the draw
+  ## returns the outcome rates (conditional on the unit draw in panels),
+  ## the identifying cells are group x period, and the estimand is the ATT
+  did <- is_did(dgp)
+  lin <- is_linear(dgp)
+  ## three-way interaction designs (DESIGN.md section 19): own cell check,
+  ## estimator and focal-side columns; checked before the two-way tests
+  a3 <- is_aie3(dgp)
+  if (lin && is_iv)
+    stop("No linear analysis for instrumental-variable designs.", call. = FALSE)
   sep_fail <- !identical(separation, "keep")
   fb <- identical(dgp$focal$type, "binary")
   mb <- !is.null(dgp$moderator) && identical(dgp$moderator$type, "binary")
-  hd_cols <- if (!is.null(dgp$moderator)) 2:4 else 2L
-  bt <- if (is_panel || is_iv) NULL else beta_true(dgp)
+  ## focal-side columns for the Hauck-Donner backup: group, period
+  ## dummies and treatment indicator of a difference-in-differences design
+  ## (2:4 with two periods); focal, moderator, interaction otherwise
+  hd_cols <- if (did) 2:did_last_focal_col(dgp)
+             else if (a3) 2:8
+             else if (!is.null(dgp$moderator)) 2:4 else 2L
+  bt <- if (is_panel || is_iv || did) NULL else beta_true(dgp)
   with_seed(seed, {
     l <- u <- se <- pt <- mc <- rep(NA_real_, nsim)
     ok <- sep <- logical(nsim)
@@ -125,35 +140,58 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model",
         }
         V <- ft$V_main
       } else {
-        pr <- if (is_panel) xx$pr else dgp$G(drop(xx$X %*% bt))
+        pr <- if (is_panel || did) xx$pr else dgp$G(drop(xx$X %*% bt))
         y <- rbinom(length(pr), 1L, pr)
-        cc <- cell_check(y, if (fb) xx$X[, 2L], if (mb) xx$X[, 3L])
+        cc <- if (did) did_cell_check(y, xx)
+              else if (a3) aie3_cell_check(y, xx$X, fb, mb)
+              else cell_check(y, if (fb) xx$X[, 2L], if (mb) xx$X[, 3L])
         mc[r] <- cc$min_cell
         if (all(y == y[1L])) next      # degenerate outcome: failed, not "separated"
-        if (cc$sep) {
-          sep[r] <- TRUE
-          if (sep_fail) next
-        }
-        ft <- fit_index_model(xx$X, y, dgp$link,
-                              start = if (is_panel) xx$start else bt)
-        if (!ft$ok) next
-        if (!sep[r] && hauck_donner(ft$fit, xx$X, hd_cols)) {
-          sep[r] <- TRUE
-          if (sep_fail) next
-        }
-        est <- if (is_aie) {
-          aie_est(ft$fit$coefficients, xx$X, dgp$link,
-                  dgp$focal$type, dgp$moderator$type)
+        if (lin) {
+          ## linear probability analysis (DESIGN.md sections 17.1, 18): OLS
+          ## has no separation, the estimate is one coefficient (focal
+          ## variable, focal-by-moderator product, or treatment indicator),
+          ## and the variance is always robust (HC1 for independent rows,
+          ## unit-clustered when units are observed repeatedly)
+          fo <- fit_ols(xx$X, y)
+          if (!fo$ok) next
+          lc <- linear_col(dgp, xx)
+          est <- list(ape = fo$coefficients[[lc]],
+                      jac = as.numeric(seq_len(ncol(xx$X)) == lc))
+          V <- if (!is.null(xx$id)) vcov_ols_cluster(fo, xx$X, xx$id)
+               else vcov_ols_hc1(fo, xx$X)
         } else {
-          ape_est(ft$fit$coefficients, xx$X, xx$focal_col, dgp$link,
-                  dgp$focal$type)
-        }
-        V <- if (is_panel) {
-          vcov_cluster(ft$fit, xx$X, xx$id, dgp$link)
-        } else if (identical(se_type, "robust")) {
-          vcov_sandwich(ft$fit, xx$X, dgp$link)
-        } else {
-          vcov_from_glmfit(ft$fit)
+          if (cc$sep) {
+            sep[r] <- TRUE
+            if (sep_fail) next
+          }
+          ft <- fit_index_model(xx$X, y, dgp$link,
+                                start = if (is_panel || did) xx$start else bt)
+          if (!ft$ok) next
+          if (!sep[r] && hauck_donner(ft$fit, xx$X, hd_cols)) {
+            sep[r] <- TRUE
+            if (sep_fail) next
+          }
+          est <- if (did) {
+            did_est(ft$fit$coefficients, xx, dgp$link)
+          } else if (a3) {
+            aie3_est(ft$fit$coefficients, xx$X, dgp$link,
+                     dgp$focal$type, dgp$moderator$type)
+          } else if (is_aie) {
+            aie_est(ft$fit$coefficients, xx$X, dgp$link,
+                    dgp$focal$type, dgp$moderator$type)
+          } else {
+            ape_est(ft$fit$coefficients, xx$X, xx$focal_col, dgp$link,
+                    dgp$focal$type)
+          }
+          if (is.null(est)) next           # no treated post-period row
+          V <- if (is_panel || (did && !is.null(xx$id))) {
+            vcov_cluster(ft$fit, xx$X, xx$id, dgp$link)
+          } else if (identical(se_type, "robust")) {
+            vcov_sandwich(ft$fit, xx$X, dgp$link)
+          } else {
+            vcov_from_glmfit(ft$fit)
+          }
         }
       }
       s_ <- sqrt(max(0, drop(t(est$jac) %*% V %*% est$jac)))
@@ -171,9 +209,11 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model",
 # Guard rails for claim/truth coherence (DESIGN.md section 2.3).
 check_coherence <- function(dgp, claim, sesoi, conf) {
   if (is.null(dgp$target_est))
-    stop("This DGP has no target effect yet - call set_ape() (or set_aie()) first.",
+    stop(if (is_did(dgp)) "This DGP has no target effect yet - call set_att() first."
+         else if (is_aie3(dgp)) "This DGP has no target effect yet - call set_aie3() first."
+         else "This DGP has no target effect yet - call set_ape() (or set_aie()) first.",
          call. = FALSE)
-  est_lab <- toupper(dgp$estimand %||% "ape")
+  est_lab <- est_label(dgp$estimand %||% "ape")
   t_abs <- abs(dgp$target_est)
   if (claim %in% c("minimum", "equivalence")) {
     if (is.null(sesoi) || !is.numeric(sesoi) || length(sesoi) != 1L || sesoi <= 0)
@@ -249,12 +289,22 @@ summarize_sim <- function(sim, target, claim, sesoi, nsim, alpha = 0.05) {
        min_cell = if (is.null(mc) || all(is.na(mc))) NA_real_ else mean(mc, na.rm = TRUE))
 }
 
+# The cells that identify the estimand, as named in warnings and notes.
+cell_label <- function(est) {
+  switch(est %||% "ape",
+         aie = "focal-by-moderator cell",
+         aie3 = "three-way cell",
+         att = "group-by-before/after cell",
+         datt = "group-by-before/after cell within a subgroup",
+         "focal cell")
+}
+
 # One warning for a design whose simulated studies have separation or
 # sparse identifying cells (DESIGN.md section 16). `p` carries the
 # `separated` share, the mean smallest-cell count `min_cell`, and the
 # `separation` convention; `where` names the design (e.g. "At n = 523").
-sparse_warning <- function(p, where = NULL, aie = FALSE) {
-  cell <- if (aie) "focal-by-moderator cell" else "focal cell"
+sparse_warning <- function(p, where = NULL, aie = FALSE, est = NULL) {
+  cell <- cell_label(est %||% p$estimand %||% (if (aie) "aie" else "ape"))
   msg <- character()
   if (isTRUE(p$separated > 0.01))
     msg <- c(msg, sprintf(paste0(
@@ -286,21 +336,32 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
                        enforce = TRUE, se = "model", alpha = NULL,
                        keep_draws = FALSE, separation = "fail") {
   stopifnot(is.numeric(n), length(n) == 1L, n >= 20)
-  if (identical(dgp$route, "panel") && n < 30)
+  if (unit_design(dgp) && n < 30)
     warning("Fewer than 30 units (clusters): cluster-robust inference is unreliable at this size.")
   lv <- claim_levels(claim, alpha, conf, n)
   rule <- if (is.function(alpha)) alpha else NULL
   conf <- lv$conf_claim
   stopifnot(is.numeric(nsim), length(nsim) == 1L, nsim >= 20)
-  if (!identical(se, "model") && dgp$route %in% c("panel", "iv")) {
-    warning(sprintf(paste("`se` is fixed by the route: panel designs use",
-                          "unit-clustered SEs, IV designs the stacked robust",
-                          "sandwich; `se = \"%s\"` is ignored."), se))
+  if (!identical(se, "model") && se_fixed(dgp)) {
+    ## the linear probability analysis is robust by construction, so asking
+    ## for robust SEs there is not worth a warning
+    if (!is_linear(dgp))
+      warning(sprintf(paste("`se` is fixed by the route: panel designs use",
+                            "unit-clustered SEs, IV designs the stacked robust",
+                            "sandwich; `se = \"%s\"` is ignored."), se))
     se <- "model"
   }
   if (enforce) check_coherence(dgp, claim, sesoi, conf)
   sim <- sim_ci(dgp, n, nsim, conf, seed, se_type = se, separation = separation)
   res <- summarize_sim(sim, dgp$target_est, claim, sesoi, nsim, lv$alpha)
+  ## difference-in-differences designs also carry the mean of the usable
+  ## estimates: in a world whose trends are parallel on another scale than
+  ## the analysis assumes it shows where the analysis centres
+  if (is_did(dgp) || is_linear(dgp)) {
+    res$est_mean <- if (any(sim$ok)) mean(sim$est[sim$ok]) else NA_real_
+    res$est_mcse <- if (sum(sim$ok) > 1L) sd(sim$est[sim$ok]) / sqrt(sum(sim$ok))
+                    else NA_real_
+  }
   structure(
     c(res, list(claim = claim, sesoi = sesoi, conf = conf, alpha = lv$alpha,
                 alpha_rule = rule,
@@ -342,8 +403,9 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #' @section Separation and sparse cells:
 #' With rare outcomes, small samples, or a small treated group, a simulated
 #' study can contain a cell that identifies the effect -- a level of a
-#' binary focal variable, or for AIE designs a focal-by-moderator cell --
-#' with no events or no non-events. The maximum-likelihood effect does not
+#' binary focal variable, or for AIE designs a focal-by-moderator cell
+#' (for three-way designs a cell of the cross-classification of the binary
+#' design variables) -- with no events or no non-events. The maximum-likelihood effect does not
 #' exist there (quasi-complete separation): Stata's `probit`/`logit` drop
 #' the perfect predictor and `margins` reports the effect as not
 #' estimable, whereas R's `glm()` stops silently at a large finite
@@ -361,8 +423,11 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #' which the sparse cell has the lower rate, and score, Fisher, or Firth
 #' analyses have different power than the Wald analysis powered here.
 #'
-#' @param dgp A `powerape_dgp` after [set_ape()] or [set_aie()].
-#' @param n Total sample size of the simulated study.
+#' @param dgp A `powerape_dgp` after [set_ape()], [set_aie()],
+#'   [set_aie3()] (designs with two moderators), or (for
+#'   difference-in-differences designs) [set_att()].
+#' @param n Total sample size of the simulated study (the number of units
+#'   for panel designs, including panel difference-in-differences designs).
 #' @param claim `"minimum"` (default), `"detect"`, or `"equivalence"`.
 #' @param sesoi Smallest effect size of interest, in APE units. Required for
 #'   `"minimum"` and `"equivalence"`; optional for `"detect"` (if supplied,
@@ -386,7 +451,9 @@ power_once <- function(dgp, n, claim, sesoi, conf = NULL, nsim, seed,
 #'   `"model"` (default, expected-information ML) or `"robust"`
 #'   (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 #'   Panel designs always use unit-clustered SEs and IV designs the
-#'   stacked method-of-moments robust sandwich; `se` is ignored there.
+#'   stacked method-of-moments robust sandwich; `se` is ignored there, and
+#'   for the linear analysis of a difference-in-differences design, whose
+#'   SEs are always robust (see [ape_dgp_did()]).
 #' @param keep_draws Keep the per-replication estimates, standard errors,
 #'   and convergence flags in the result (default TRUE; a few kilobytes).
 #'   They let [power_at()] and [ape_alpha()] re-evaluate the claim at any

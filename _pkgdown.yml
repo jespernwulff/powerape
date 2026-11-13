@@ -53,6 +53,8 @@ navbar:
         href: articles/interaction-effects.html
       - text: Panel designs
         href: articles/panel-designs.html
+      - text: Difference-in-differences
+        href: articles/did-designs.html
       - text: IV designs
         href: articles/iv-designs.html
       - text: Justified alpha
@@ -97,13 +99,20 @@ reference:
   - ape_dgp_from_fit
   - ape_dgp_panel
   - ape_dgp_iv
+  - ape_dgp_did
+  - ape_dgp_did_pilot
+  - set_analysis
 - title: Pin the effect
-  desc: Solve coefficients from targets in APE/AIE units.
+  desc: Solve coefficients from targets in APE/AIE/ATT units.
   contents:
   - set_ape
   - set_aie
+  - set_aie3
+  - set_att
   - true_ape
   - true_aie
+  - true_aie3
+  - true_att
 - title: Power
   desc: Simulated power, curves, required sample sizes, detectable effects.
   contents:
@@ -143,6 +152,7 @@ articles:
   - equivalence
   - interaction-effects
   - panel-designs
+  - did-designs
   - iv-designs
   - justified-alpha
 - title: Guides

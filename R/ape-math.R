@@ -168,3 +168,37 @@ aie_est <- function(beta, X, link, focal_type, mod_type) {
     list(ape = aie, jac = jac)
   }
 }
+
+# Ordinary least squares for the linear probability analysis ------------------
+# QR solution with the residuals and (X'X)^-1 the sandwiches below need;
+# ok = FALSE for a rank-deficient design (e.g. an empty group-by-period cell).
+fit_ols <- function(X, y) {
+  qx <- qr(X)
+  if (qx$rank < ncol(X) || nrow(X) <= ncol(X)) return(list(ok = FALSE))
+  b <- qr.coef(qx, y)
+  list(ok = all(is.finite(b)), coefficients = b,
+       resid = y - drop(X %*% b), XtXi = chol2inv(qr.R(qx)))
+}
+
+# Heteroskedasticity-robust variance of the OLS coefficients, HC1: the HC0
+# sandwich times N / (N - K), as in Stata's `regress, vce(robust)` and
+# sandwich::vcovHC(type = "HC1"). A linear probability model is
+# heteroskedastic by construction, so this is the variance of the
+# linear analysis in cross-sections (never the classical one).
+vcov_ols_hc1 <- function(ft, X) {
+  n <- nrow(X)
+  k <- ncol(X)
+  (n / (n - k)) * (ft$XtXi %*% crossprod(X * ft$resid) %*% ft$XtXi)
+}
+
+# Cluster-robust variance of the OLS coefficients with the factor
+# G / (G - 1) * (N - 1) / (N - K) of Stata's `regress, vce(cluster)` (the
+# default of sandwich::vcovCL).
+vcov_ols_cluster <- function(ft, X, id) {
+  n <- nrow(X)
+  k <- ncol(X)
+  U <- rowsum(X * ft$resid, id)
+  Gn <- nrow(U)
+  (Gn / (Gn - 1)) * ((n - 1) / (n - k)) *
+    (ft$XtXi %*% crossprod(U) %*% ft$XtXi)
+}

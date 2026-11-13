@@ -9,6 +9,7 @@ pa_var_label <- function(v) {
 
 #' @export
 print.powerape_dgp <- function(x, ...) {
+  if (is_did(x)) return(print_did_dgp(x))
   cat(sprintf("powerape DGP -- %s%s\n", x$model,
               if (x$route == "empirical") " (empirical covariates)" else ""))
   focal_note <- if (x$route == "empirical") {
@@ -16,7 +17,11 @@ print.powerape_dgp <- function(x, ...) {
     else " [drawn independently of covariates]"
   } else ""
   cat(sprintf("  focal: %s%s\n", pa_var_label(x$focal), focal_note))
-  if (!is.null(x$moderator))
+  if (is_aie3(x)) {
+    cat(sprintf("  moderator: %s\n", pa_var_label(x$moderator)))
+    cat(sprintf("  second moderator: %s (all pairwise products and the triple product included)\n",
+                pa_var_label(x$moderator2)))
+  } else if (!is.null(x$moderator))
     cat(sprintf("  moderator: %s (focal-by-moderator interaction included)\n",
                 pa_var_label(x$moderator)))
   if (x$k > 0L) {
@@ -55,7 +60,9 @@ print.powerape_dgp <- function(x, ...) {
   }
   cat(sprintf("  baseline P(Y=1 | reference) = %.3f, %s\n", x$baseline, sig))
   if (!is.null(x$target_est)) {
-    if (identical(x$estimand, "aie")) {
+    if (is_aie3(x)) {
+      print_aie3_effects(x)
+    } else if (identical(x$estimand, "aie")) {
       cat(sprintf("  true AIE pinned at %+.4f (beta_int = %.4f)\n",
                   x$target_est, x$beta_int))
       cat(sprintf("  main APEs at reference: %s %+.3f (beta = %.4f), %s %+.3f (beta = %.4f)\n",
@@ -68,8 +75,20 @@ print.powerape_dgp <- function(x, ...) {
       cat(sprintf("  true APE pinned at %+.4f per unit of %s (beta_focal = %.4f, reference = %.2f)\n",
                   x$target_est, x$focal$name, x$beta_focal, x$focal_ref))
     }
+  } else if (is_aie3(x)) {
+    cat("  target effect not set yet - call set_aie3().\n")
   } else {
     cat("  target effect not set yet - call set_ape() or set_aie().\n")
+  }
+  if (is_linear(x)) {
+    term <- if (is.null(x$moderator)) x$focal$name
+            else if (is_aie3(x)) aie3_term(x)
+            else sprintf("%s x %s", x$focal$name, x$moderator$name)
+    cat(sprintf("  analysis: linear probability model (OLS); estimate = coefficient of %s;%s\n",
+                term, sub("^,", "", linear_se_label(x))))
+    if (!is.null(x$target_est))
+      cat(sprintf("  in large samples that coefficient is %+.4f (the true %s is %+.4f)\n",
+                  linear_centre(x), est_label(x$estimand), x$target_est))
   }
   invisible(x)
 }
@@ -81,13 +100,14 @@ print.powerape_power <- function(x, ...) {
     detect = "detection claim (CI excludes 0, directional)",
     equivalence = sprintf("equivalence claim (CI within +/-%.3f)", x$sesoi))
   cat(sprintf("powerape -- %s\n", claim_lab))
-  n_lab <- if (identical(x$dgp$route, "panel")) {
+  n_lab <- if (unit_design(x$dgp)) {
     sprintf("n = %d units x %s periods (%s obs)", x$n,
             panel_len_label(x$dgp), panel_obs_label(x$dgp, x$n))
   } else {
     sprintf("n = %d", x$n)
   }
   se_lab <- if (identical(x$dgp$route, "iv")) ", stacked robust SEs"
+            else if (is_linear(x$dgp)) linear_se_label(x$dgp)
             else if (identical(x$se, "robust")) ", robust SEs"
             else ""
   al <- x$alpha %||% (if (identical(x$claim, "detect")) 1 - x$conf else (1 - x$conf) / 2)
@@ -97,9 +117,22 @@ print.powerape_power <- function(x, ...) {
     sprintf("alpha = %g", al)
   }
   cat(sprintf("  %s, %s, assumed true %s %+.4f, %.4g%% CI (%s), nsim = %d%s\n",
-              x$model, n_lab, toupper(x$estimand), x$target, 100 * x$conf,
+              model_label(x$dgp), n_lab, est_label(x$estimand), x$target, 100 * x$conf,
               al_lab, x$nsim, se_lab))
-  cat(sprintf("  power = %.3f (MCSE %.3f)\n", x$power, x$mcse))
+  if (is_did(x$dgp) && !did_valid(x$dgp)) {
+    ## the analysis assumes another parallel-trends scale than the world has
+    cat(sprintf("  rejection rate = %.3f (MCSE %.3f) -- not power: the simulated world has %s-parallel trends,\n",
+                x$power, x$mcse, x$dgp$trends))
+    cat(sprintf("    the %s analysis assumes %s-parallel trends; its estimates average %+.4f, the true %s is %+.4f\n",
+                model_label(x$dgp), x$dgp$analysis, x$est_mean,
+                est_label(x$estimand), x$target))
+  } else {
+    cat(sprintf("  power = %.3f (MCSE %.3f)\n", x$power, x$mcse))
+    ## a linear analysis of a standard design: where its estimates centre
+    if (is_linear(x$dgp) && !is_did(x$dgp))
+      cat(sprintf("  the linear estimates average %+.4f (MCSE %.4f); the true %s is %+.4f\n",
+                  x$est_mean, x$est_mcse, est_label(x$estimand), x$target))
+  }
   o <- x$outcomes
   cat("  outcomes:", paste(sprintf("%s %.3f", gsub("_", "-", names(o)), o),
                            collapse = " | "), "\n")
@@ -112,7 +145,7 @@ print.powerape_power <- function(x, ...) {
 print_separation_note <- function(x) {
   sepd <- x$separated %||% 0
   keep <- identical(x$separation, "keep")
-  cell <- if (identical(x$estimand, "aie")) "focal-by-moderator cell" else "focal cell"
+  cell <- cell_label(x$estimand)
   if (!is.null(x$outcomes)) {
     other <- x$outcomes[["failed"]] - (if (keep) 0 else sepd)
     if (other > 1e-12)
@@ -136,8 +169,12 @@ print_separation_note <- function(x) {
 #' @export
 print.powerape_curve <- function(x, ...) {
   cat(sprintf("powerape power curve -- %s claim, %s (%s), nsim = %d per point%s\n",
-              x$claim, x$model, toupper(x$estimand), x$nsim,
+              x$claim, x$model, est_label(x$estimand), x$nsim,
               if (isTRUE(x$alpha_rule)) "; alpha by sample-size rule (column alpha)" else ""))
+  if (!is.null(x$mismatch))
+    cat(sprintf(paste0("  %s:\n  column `power` is a rejection ",
+                       "rate, `est_mean` the mean estimate (true %s %+.4f)\n"),
+                x$mismatch, est_label(x$estimand), x$target))
   print(x$results, row.names = FALSE)
   invisible(x)
 }
@@ -146,7 +183,7 @@ print.powerape_curve <- function(x, ...) {
 print.powerape_n <- function(x, ...) {
   cat(sprintf("powerape required sample size -- %s claim\n", x$claim))
   lab <- if (isTRUE(x$confirmed)) "confirmed" else "achieved"
-  unit_lab <- if (identical(x$dgp$route, "panel")) {
+  unit_lab <- if (unit_design(x$dgp)) {
     sprintf("n = %d units (x %s periods)", x$n, panel_len_label(x$dgp))
   } else {
     sprintf("n = %d", x$n)
@@ -155,14 +192,15 @@ print.powerape_n <- function(x, ...) {
               unit_lab, 100 * x$goal, lab, x$power, x$mcse))
   al <- x$alpha %||% (if (identical(x$claim, "detect")) 1 - x$conf else (1 - x$conf) / 2)
   se_lab <- if (identical(x$dgp$route, "iv")) ", stacked robust SEs"
+            else if (is_linear(x$dgp)) linear_se_label(x$dgp)
             else if (identical(x$se, "robust")) ", robust SEs"
             else ""
   cat(sprintf("  assumed true %s %+.4f, sesoi %s, %.4g%% CI (alpha = %.4g%s), %s%s\n",
-              toupper(x$estimand), x$target,
+              est_label(x$estimand), x$target,
               if (is.null(x$sesoi)) "-" else sprintf("%.3f", x$sesoi),
               100 * x$conf, al,
               if (!is.null(x$alpha_rule)) " by sample-size rule" else "",
-              x$model, se_lab))
+              model_label(x$dgp), se_lab))
   n_search <- sum(x$history$stage == "search")
   n_conf <- sum(x$history$stage == "confirm")
   if (isTRUE(x$confirm_requested)) {

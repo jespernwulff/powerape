@@ -19,9 +19,12 @@ ape_power(
 )
 }
 \arguments{
-\item{dgp}{A \code{powerape_dgp} after \code{\link[=set_ape]{set_ape()}} or \code{\link[=set_aie]{set_aie()}}.}
+\item{dgp}{A \code{powerape_dgp} after \code{\link[=set_ape]{set_ape()}}, \code{\link[=set_aie]{set_aie()}},
+\code{\link[=set_aie3]{set_aie3()}} (designs with two moderators), or (for
+difference-in-differences designs) \code{\link[=set_att]{set_att()}}.}
 
-\item{n}{Total sample size of the simulated study.}
+\item{n}{Total sample size of the simulated study (the number of units
+for panel designs, including panel difference-in-differences designs).}
 
 \item{claim}{\code{"minimum"} (default), \code{"detect"}, or \code{"equivalence"}.}
 
@@ -52,7 +55,9 @@ pre-1.8.0 behavior (one-sided error rate 2.5\%).}
 \code{"model"} (default, expected-information ML) or \code{"robust"}
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
-stacked method-of-moments robust sandwich; \code{se} is ignored there.}
+stacked method-of-moments robust sandwich; \code{se} is ignored there, and
+for the linear analysis of a difference-in-differences design, whose
+SEs are always robust (see \code{\link[=ape_dgp_did]{ape_dgp_did()}}).}
 
 \item{keep_draws}{Keep the per-replication estimates, standard errors,
 and convergence flags in the result (default TRUE; a few kilobytes).
@@ -106,8 +111,9 @@ Lakens (2022), computed from this function's stored draws.
 
 With rare outcomes, small samples, or a small treated group, a simulated
 study can contain a cell that identifies the effect -- a level of a
-binary focal variable, or for AIE designs a focal-by-moderator cell --
-with no events or no non-events. The maximum-likelihood effect does not
+binary focal variable, or for AIE designs a focal-by-moderator cell
+(for three-way designs a cell of the cross-classification of the binary
+design variables) -- with no events or no non-events. The maximum-likelihood effect does not
 exist there (quasi-complete separation): Stata's \code{probit}/\code{logit} drop
 the perfect predictor and \code{margins} reports the effect as not
 estimable, whereas R's \code{glm()} stops silently at a large finite

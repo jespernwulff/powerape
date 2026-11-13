@@ -14,7 +14,8 @@ ape_dgp(
   signal = 0,
   gamma = NULL,
   n_int = 4e+05,
-  seed_int = 20260812L
+  seed_int = 20260812L,
+  moderator2 = NULL
 )
 }
 \arguments{
@@ -32,7 +33,8 @@ the DGP must be pinned with \code{\link[=set_aie]{set_aie()}}.}
 
 \item{correlation}{\code{NULL} (independence), a scalar exchangeable
 correlation, or a full correlation matrix over
-\verb{(focal, moderator, covariates)} -- Gaussian-copula dependence.}
+\verb{(focal, moderator, covariates)} -- Gaussian-copula dependence. With
+a \code{moderator2} the order is \verb{(focal, moderator, moderator2, covariates)}.}
 
 \item{baseline}{Baseline outcome rate in (0, 1): the average probability
 \code{P(Y = 1)} with the focal (and moderator, if any) set to their
@@ -56,11 +58,20 @@ supplied.}
 
 \item{n_int, seed_int}{Size and seed of the deterministic Monte Carlo
 integration draw used for calibration and inversion.}
+
+\item{moderator2}{Optional second moderator, a \strong{binary} \code{\link[=pa_var]{pa_var()}};
+needs a \code{moderator}. The index then includes all three variables, the
+three pairwise products and the triple product; the estimand is the
+three-way average interaction effect, and the DGP must be pinned with
+\code{\link[=set_aie3]{set_aie3()}}. The effect is symmetric in its three variables, so only
+a design with three continuous variables is not covered. \code{baseline}
+is then the outcome rate with all three at their reference values.}
 }
 \value{
 An object of class \code{powerape_dgp}. Pin the effect with
-\code{\link[=set_ape]{set_ape()}} / \code{\link[=set_aie]{set_aie()}}, then use \code{\link[=ape_power]{ape_power()}}, \code{\link[=ape_curve]{ape_curve()}},
-\code{\link[=ape_n]{ape_n()}}, or \code{\link[=ape_robust]{ape_robust()}}.
+\code{\link[=set_ape]{set_ape()}} / \code{\link[=set_aie]{set_aie()}} / \code{\link[=set_aie3]{set_aie3()}}, then use \code{\link[=ape_power]{ape_power()}},
+\code{\link[=ape_curve]{ape_curve()}}, \code{\link[=ape_n]{ape_n()}}, \code{\link[=ape_mde]{ape_mde()}}, or \code{\link[=ape_robust]{ape_robust()}} (not yet
+available for designs with two moderators; see \code{\link[=set_aie3]{set_aie3()}}).
 }
 \description{
 Describes the world the study will sample from: an index model

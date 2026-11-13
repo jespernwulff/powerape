@@ -56,7 +56,8 @@ includes Mundlak means either way.}
 
 \item{correlation}{\code{NULL} (independence), a scalar exchangeable
 correlation, or a full correlation matrix over
-\verb{(focal, moderator, covariates)} -- Gaussian-copula dependence.}
+\verb{(focal, moderator, covariates)} -- Gaussian-copula dependence. With
+a \code{moderator2} the order is \verb{(focal, moderator, moderator2, covariates)}.}
 
 \item{baseline}{Baseline outcome rate in (0, 1): the average probability
 \code{P(Y = 1)} with the focal (and moderator, if any) set to their

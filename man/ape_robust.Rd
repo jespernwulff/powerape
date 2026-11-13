@@ -26,9 +26,12 @@ ape_robust(
 )
 }
 \arguments{
-\item{dgp}{A \code{powerape_dgp} after \code{\link[=set_ape]{set_ape()}} or \code{\link[=set_aie]{set_aie()}}.}
+\item{dgp}{A \code{powerape_dgp} after \code{\link[=set_ape]{set_ape()}}, \code{\link[=set_aie]{set_aie()}},
+\code{\link[=set_aie3]{set_aie3()}} (designs with two moderators), or (for
+difference-in-differences designs) \code{\link[=set_att]{set_att()}}.}
 
-\item{n}{Total sample size of the simulated study.}
+\item{n}{Total sample size of the simulated study (the number of units
+for panel designs, including panel difference-in-differences designs).}
 
 \item{claim}{\code{"minimum"} (default), \code{"detect"}, or \code{"equivalence"}.}
 
@@ -59,7 +62,15 @@ pre-1.8.0 behavior (one-sided error rate 2.5\%).}
 Parametric route: \code{baseline}, \code{signal}, \code{correlation} (scalar);
 empirical route: \code{baseline}, \code{signal}. A length-2 element is expanded
 to \code{grid_points} equally spaced values; longer vectors are used as-is.
-Scenarios are the full factorial grid.}
+Scenarios are the full factorial grid. Difference-in-differences
+designs (\code{\link[=ape_dgp_did]{ape_dgp_did()}}): \code{baseline}, \code{gap}, \code{trend} (not with a
+subgroup), \code{rho} (panels), \code{p_treated}, \code{signal}, and \code{trends = c("index", "linear")}, the scale on which untreated trends are
+parallel. In every scenario the effect on the treated is re-pinned at
+the planning value. In a scenario whose world has trends parallel on
+another scale than the analysis assumes, the analysis is biased: the
+row is flagged \code{valid = FALSE}, its \code{power} is a rejection rate,
+\code{est_mean} shows where the estimates centre, and it is left out of the
+worst case and of \code{n_max}.}
 
 \item{pin}{\code{"ape"} (re-invert per scenario) or \code{"coefficients"} (hold
 coefficients, let the implied effect drift). Ignored in MDE mode,
@@ -85,7 +96,9 @@ default of \code{\link[=ape_n]{ape_n()}}).}
 \code{"model"} (default, expected-information ML) or \code{"robust"}
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
-stacked method-of-moments robust sandwich; \code{se} is ignored there.}
+stacked method-of-moments robust sandwich; \code{se} is ignored there, and
+for the linear analysis of a difference-in-differences design, whose
+SEs are always robust (see \code{\link[=ape_dgp_did]{ape_dgp_did()}}).}
 
 \item{direction}{MDE mode only: \code{"positive"} or \code{"negative"} search
 direction, as in \code{\link[=ape_mde]{ape_mde()}}; default: the sign of the base DGP's
@@ -124,7 +137,8 @@ as such, not dropped silently.
 base-case values while the contextual calibration is redone; the
 implied true effect drifts and is reported per scenario. Claim-boundary
 guards are relaxed here on purpose -- showing that a scenario collapses
-power is the point.
+power is the point. Not available for difference-in-differences
+designs.
 }
 
 \strong{n_max.} The insurance-premium n is the largest requirement across
