@@ -17,7 +17,7 @@ every scenario – the insurance-premium n."><meta property="og:image" content="
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,7 @@ every scenario – the insurance-premium n."><meta property="og:image" content="
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul></li>
@@ -112,11 +113,14 @@ every scenario – the insurance-premium n.</p>
 
 
 <dl><dt id="arg-dgp">dgp<a class="anchor" aria-label="anchor" href="#arg-dgp"></a></dt>
-<dd><p>A <code>powerape_dgp</code> after <code><a href="set_ape.html">set_ape()</a></code> or <code><a href="set_aie.html">set_aie()</a></code>.</p></dd>
+<dd><p>A <code>powerape_dgp</code> after <code><a href="set_ape.html">set_ape()</a></code>, <code><a href="set_aie.html">set_aie()</a></code>,
+<code><a href="set_aie3.html">set_aie3()</a></code> (designs with two moderators), or (for
+difference-in-differences designs) <code><a href="set_att.html">set_att()</a></code>.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>Total sample size of the simulated study.</p></dd>
+<dd><p>Total sample size of the simulated study (the number of units
+for panel designs, including panel difference-in-differences designs).</p></dd>
 
 
 <dt id="arg-claim">claim<a class="anchor" aria-label="anchor" href="#arg-claim"></a></dt>
@@ -161,7 +165,15 @@ pre-1.8.0 behavior (one-sided error rate 2.5%).</p></dd>
 Parametric route: <code>baseline</code>, <code>signal</code>, <code>correlation</code> (scalar);
 empirical route: <code>baseline</code>, <code>signal</code>. A length-2 element is expanded
 to <code>grid_points</code> equally spaced values; longer vectors are used as-is.
-Scenarios are the full factorial grid.</p></dd>
+Scenarios are the full factorial grid. Difference-in-differences
+designs (<code><a href="ape_dgp_did.html">ape_dgp_did()</a></code>): <code>baseline</code>, <code>gap</code>, <code>trend</code> (not with a
+subgroup), <code>rho</code> (panels), <code>p_treated</code>, <code>signal</code>, and <code>trends = c("index", "linear")</code>, the scale on which untreated trends are
+parallel. In every scenario the effect on the treated is re-pinned at
+the planning value. In a scenario whose world has trends parallel on
+another scale than the analysis assumes, the analysis is biased: the
+row is flagged <code>valid = FALSE</code>, its <code>power</code> is a rejection rate,
+<code>est_mean</code> shows where the estimates centre, and it is left out of the
+worst case and of <code>n_max</code>.</p></dd>
 
 
 <dt id="arg-pin">pin<a class="anchor" aria-label="anchor" href="#arg-pin"></a></dt>
@@ -201,7 +213,9 @@ default of <code><a href="ape_n.html">ape_n()</a></code>).</p></dd>
 <code>"model"</code> (default, expected-information ML) or <code>"robust"</code>
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
-stacked method-of-moments robust sandwich; <code>se</code> is ignored there.</p></dd>
+stacked method-of-moments robust sandwich; <code>se</code> is ignored there, and
+for the linear analysis of a difference-in-differences design, whose
+SEs are always robust (see <code><a href="ape_dgp_did.html">ape_dgp_did()</a></code>).</p></dd>
 
 
 <dt id="arg-direction">direction<a class="anchor" aria-label="anchor" href="#arg-direction"></a></dt>
@@ -237,7 +251,8 @@ as such, not dropped silently.</p></li>
 base-case values while the contextual calibration is redone; the
 implied true effect drifts and is reported per scenario. Claim-boundary
 guards are relaxed here on purpose – showing that a scenario collapses
-power is the point.</p></li>
+power is the point. Not available for difference-in-differences
+designs.</p></li>
 </ul><p><strong>n_max.</strong> The insurance-premium n is the largest requirement across
 scenarios. Power at the user's <code>n</code> cannot rank the scenarios for that
 purpose – at a generous <code>n</code> every scenario's power is near 1 – so the

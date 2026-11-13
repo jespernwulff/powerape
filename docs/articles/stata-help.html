@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,7 @@
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul>
@@ -66,7 +67,7 @@
     <li><a class="dropdown-item" href="../articles/validation.html">How powerape is validated</a></li>
   </ul>
 </li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-reference" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Reference</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-reference">
 <li><a class="dropdown-item" href="../reference/index.html">R functions</a></li>
@@ -144,11 +145,22 @@ Syntax
                  ivstrength(#) baseline(#) [moderator(varspec) covariates(varspecs)
                  correlation() signal(#) ...]
 
+        powerape dgp name, did baseline(# [#]) [gap(# [#]) trend(# [#]) ptreated(#)
+                 design(panel|cross-sections) rho(#) ppost(#) trends(index|linear)
+                 analysis(index|linear) npre(#) npost(#) subgroup(varspec)
+                 covariates(varspecs) correlation() signal(#) gamma(numlist)
+                 model(probit|logit) ...]
+
+        powerape dgp name [if] [in], didpilot outcome(varname) group(varname) trend(#)
+                 [id(varname) period(varname) options of did]
+
     Pin the effect in effect-size units (the inversion step):
 
         powerape setape name, target(#)
 
         powerape setaie name, target(#) mainfocal(#) mainmoderator(#)
+
+        powerape setatt name, target(# [#])        (difference-in-differences designs)
 
     Power, curves, required sample size, minimum detectable effect, robustness:
 
@@ -179,8 +191,9 @@ Syntax
 
     Housekeeping:
 
-        powerape describe name | trueape name | trueaie name | list | drop name|_all |
-                 engine [, engine(stata|mata) effects(closed|margins)] | version
+        powerape describe name | trueape name | trueaie name | trueatt name | list | drop
+                 name|_all | engine [, engine(stata|mata) effects(closed|margins)] |
+                 version
 
     sim_options                 Description
     --------------------------------------------------------------------------------------
@@ -195,7 +208,9 @@ Syntax
                                   robust 800)
       seed(#)                   seed; the ambient RNG state is restored afterwards
       se(model|robust)          model-based or heteroskedasticity-robust SEs
-                                  (cross-sectional routes)
+                                  (cross-sectional routes; ignored where the design fixes
+                                  the SEs: panels, IV, and the linear analysis of a
+                                  difference-in-differences design)
       separation(fail|keep)     scoring of replications with a separated identifying cell
       engine(stata|mata)        who fits the simulated studies (see Engines) for this
                                   command only; default stata, or the session default set
@@ -210,7 +225,7 @@ Syntax
 
 Description
 
-    powerape is a Stata port of the R package powerape (version 1.11.3):  simulation-based
+    powerape is a Stata port of the R package powerape (version 1.12.0):  simulation-based
     power analysis in which the effect size of interest is the average partial effect
     (APE) or the average interaction effect (AIE) of a probit or logit model. Targets are
     stated in probability points; the package calibrates the data-generating process
@@ -227,7 +242,9 @@ Description
     from pilot data in memory (empirical); a fitted probit or logit pilot model (fromfit);
     correlated random effects panel probit with Mundlak means, unit-clustered SEs and
     unbalanced panels (panel); and an endogenous focal variable estimated by
-    control-function probit, the estimator of Stata's cfprobit (iv).
+    control-function probit, the estimator of Stata's cfprobit (iv). A sixth route, did,
+    plans a difference-in-differences study with a binary outcome: its target is the
+    effect on the treated in probability points (see Difference-in-differences designs).
 
     Every simulated study is, by default, fit by Stata's own estimation commands (probit,
     logit, cfprobit; see Engines).
@@ -261,6 +278,13 @@ Subcommands
         conditional-at-reference APEs.  Infeasible targets are refused with the attainable
         range.
 
+    setatt pins the effect on the treated of a difference-in-differences design (dgp ...,
+        did): target() is the treated group's rate after treatment minus the rate it would
+        have had without, in probability points. A design with subgroup() takes two
+        numbers, the effect in the reference subgroup and then in the other one; its
+        estimand is their difference. trueatt recomputes the effect(s) from the stored
+        design.
+
     power simulates power at n() and prints the outcome distribution (minimum /
         detect-only / inconclusive / equivalence / failed).  curve does so over a grid. n
         searches the required sample size for power() (default 0.90) and confirms it at
@@ -268,11 +292,14 @@ Subcommands
         smallest effect that reaches power() (default 0.80) at a fixed n (for equivalence:
         the tightest margin at the pinned truth). robust re-runs the analysis over a
         factorial grid of contextual inputs (baseline, signal, correlation; rho,
-        retention; endogeneity, ivstrength) and reports the worst scenario and n_max. For
-        panel DGPs n() counts units. Sweeps over empirical and fromfit DGPs recalibrate
-        from the pilot rows stored in the DGP (the data need not be in memory);
-        parametric, panel and IV DGPs are rebuilt from their options. The engine
-        subcommands hold and restore the user's e() around the simulated fits.
+        retention; endogeneity, ivstrength) and reports the worst scenario and n_max.
+        Difference-in-differences designs can vary baseline, gap and trend (not with a
+        subgroup), rho (panels), ptreated, signal, and the scale on which untreated trends
+        are parallel, vary(trends(index linear)). For panel DGPs n() counts units. Sweeps
+        over empirical and fromfit DGPs recalibrate from the pilot rows stored in the DGP
+        (the data need not be in memory); parametric, panel and IV DGPs are rebuilt from
+        their options. The engine subcommands hold and restore the user's e() around the
+        simulated fits.
 
     statement prints a citable methods paragraph for the last (or named) power, n, mde or
         alpha result.  alpha chooses the error rate on the stored draws of a power result
@@ -286,6 +313,122 @@ Subcommands
         options shows the session defaults; with options it sets them.  engine() or
         effects() given on a simulation command apply to that command only and leave the
         session defaults unchanged.
+
+Difference-in-differences designs
+
+    powerape dgp name, did describes a difference-in-differences study with one treatment
+    date: a treated and a control group observed before and after the treated group
+    receives the intervention, in one period each by default or in npre() periods before
+    and npost() periods after. The target is the average treatment effect on the treated
+    (ATT) after treatment, in probability points, pinned with powerape setatt. The outcome
+    is regressed on the group indicator, period indicators, the treatment indicator
+    (treated group after the treatment date) and any covariates.
+
+    The world is described on the probability scale by three rates:  baseline() (control
+    group, before), gap() (treated minus control, before; default 0) and trend() (the
+    control group's change from before to after; default 0). With several periods the
+    rates are the same in every period before and in every period after the treatment
+    date, and so is the effect. What the treated group's rate would have been after the
+    treatment date without treatment depends on the scale on which the two groups'
+    untreated trends are parallel, set by trends(): index (default) means parallel on the
+    probit/logit index, the assumption under which the probit/logit analysis identifies
+    the ATT (Wooldridge, 2023; Puhani, 2012); linear means parallel in probabilities, the
+    assumption of the linear analysis (with covariates: parallel on average over each
+    group's covariates).  ptreated() is the treated share (default 0.5). Covariates are
+    constant over time; correlation() runs over (group, covariates), or over (group,
+    subgroup, covariates).
+
+    The analysis each simulated study receives is set by analysis():  index (default) is a
+    pooled probit or logit, with the ATT as the average partial effect of the treatment
+    indicator over the treated post-period observations and a delta-method standard error
+    (in Stata:  margins, dydx(w) subpop(if w == 1)); linear is a linear probability model
+    fitted by ordinary least squares, with the ATT as the coefficient of the treatment
+    indicator (the standard difference-in-differences estimate). Each analysis is unbiased
+    only in the world whose scale it assumes.  When trends() and analysis() name the same
+    scale, powerape power reports power. When they differ, the analysis centres on another
+    number than the ATT: power and curve then report a rejection rate together with the
+    mean of the estimates, and n, mde, powerat, alpha and statement refuse the design or
+    the result. With two periods and no covariates the data cannot tell the two scales
+    apart, and the same four rates imply different effects under each (control .20 to .30
+    and treated .40 to .60 is an effect of .100 under linear trends, .074 on the probit
+    index and .067 on the logit index): the printed design shows both readings. The linear
+    analysis always centres on the cross difference of the four rates.
+
+    Data structure. design(panel) (default) follows the same units over all periods (a
+    balanced panel); n() counts units and standard errors are clustered by unit. Outcomes
+    of one unit are dependent through a Gaussian copula with latent correlation rho() that
+    leaves the marginal rates exact under either link (under probit this is the
+    random-effects probit with rho = Var(c)/(Var(c) + 1)). design(cross-sections) draws
+    independent observations, each after the treatment date with probability ppost()
+    (default npost/(npre + npost)) and then in one of that block's periods with equal
+    probability; n() counts all observations and se() chooses model-based or robust
+    standard errors for the probit/logit analysis.
+
+    More than two periods. The analysis includes an indicator for every period but the
+    first and one treatment indicator, so it estimates one effect, not one per period. In
+    a panel the dependence between two outcomes of a unit is the same however far apart
+    the periods are (one shared unit component).  That is the favourable case for adding
+    periods: the gain is larger than under dependence that fades with the distance between
+    periods, which this version does not offer. (With rates of .20 and .30 in the control
+    group, .40 and .60 in the treated group and rho(0.5), two periods on each side instead
+    of one cut the variance of the linear panel estimate to 51%; if the latent correlation
+    halved with every period of distance it would be 71%.) Treat the precision bought by
+    extra periods as an upper bound.
+
+    Comparing two subgroups. With subgroup(name, p(#)) both subgroups are treated in the
+    treated group and the target is the difference between the two subgroups' effects on
+    the treated, in probability points (the estimand of a triple difference that compares,
+    say, the effect on women with the effect on men; Caron, 2025). baseline(), gap() and
+    trend() may then hold two numbers, for the reference subgroup (name = 0) and for name
+    = 1, and setatt takes the two effects. The probit/logit analysis is fully interacted
+    with the subgroup and the estimate is the difference of the two subgroups' average
+    partial effects of treatment (margins, dydx() subpop() over()); the linear analysis
+    estimates the coefficient of the subgroup-by-treatment product. Trends are parallel
+    within each subgroup, on the scale trends() names. The same eight rates imply
+    different subgroup differences on the two scales (the design print shows both); a
+    difference of zero in probability points is not a zero interaction coefficient when
+    the subgroups have different rates; and with equal subgroups a difference as large as
+    the effect itself needs about four times the units the effect needs. mde searches the
+    difference, holding the reference subgroup's effect at its pinned value.
+
+    The linear analysis. A linear probability model is heteroskedastic by construction, so
+    its standard errors are always robust and se() is ignored: HC1 in cross-sections
+    (regress, vce(robust)) and clustered by unit in panels (regress, vce(cluster), with
+    its small-sample factor).  Ordinary least squares has no separation, so no simulated
+    study is discarded for an all-zero or all-one cell; the sparse-cell warning still
+    applies. In a balanced panel a time-constant covariate changes neither the estimate
+    nor its clustered standard error beyond the degrees of freedom, so signal() buys the
+    linear panel analysis no precision; in cross-sections it does.
+
+    Interval coverage in small samples. Under the index analysis the effect on the treated
+    is a nonlinear function of the estimated rates, and its delta-method interval (the one
+    margins reports) covers slightly less than its nominal level when the group-by-period
+    cells are small: for a 95% interval at a true effect of zero, 94.0% with 125
+    observations per cell, 94.5% with 250, 94.7% with 500 and 94.9% with 1,000 under logit
+    (exact values in the design without covariates). The simulated studies use this
+    interval, so the power reported is the power of the analysis a study will run.
+
+    A design from pre-treatment pilot data. powerape dgp name, didpilot estimates, from
+    data in memory observed before the treatment date, the inputs such data can inform and
+    builds the design: baseline() (the control group's rate; group() is the 0/1 indicator
+    of the group that will be treated), gap(), ptreated() and, with id() and two or more
+    periods per unit, rho() by the method of moments (the value at which the model's
+    probability of the outcome in two periods of one unit equals the observed share of
+    such pairs). All pre-treatment periods are pooled.  Pre-treatment data cannot show how
+    the control group will change from before to after treatment, so trend() is required;
+    with period() the control group's average change between pilot periods is reported as
+    a guide.  Without id() the design is repeated cross-sections. Naming baseline(),
+    gap(), ptreated(), rho() or design() overrides the estimate; covariates are not taken
+    from the pilot, and subgroup designs are not supported. The estimates are used as if
+    they were known: vary them with powerape robust, in particular for a small pilot (a
+    note is printed below 500 rows).
+
+    Limits of this version. One treated group, one treatment date, treatment assigned at
+    the unit level, balanced panels, effects that are the same in every period after
+    treatment, covariates that are constant over time and not interacted with period or
+    treatment. Staggered adoption, period-specific effects, pre-trend tests and treatment
+    assigned to whole clusters are not available (unit clustering would overstate power
+    under cluster-level assignment).
 
 Engines
 
@@ -305,6 +448,15 @@ Engines
     Inference follows Stata's conventions (observed information, Stata's small-sample
     factors).
 
+    For difference-in-differences designs engine(stata) fits logit or probit with
+    vce(cluster) in panels (model-based or vce(robust) in cross-sections) and computes the
+    effect on the treated in closed form, or with effects(margins) by margins, dydx(w)
+    subpop(if w == 1) (adding over(m) and taking the difference for a subgroup design);
+    the two agree to 1e-16 on fixed data. The linear analysis is regress with vce(robust)
+    or vce(cluster); effects() does not apply to it. engine(mata) uses Fisher scoring with
+    the cluster sandwich, and ordinary least squares with the same HC1 and cluster factors
+    as regress.
+
     engine(mata) is a self-contained Mata engine that reproduces the R package's
     conventions (Fisher scoring with expected information, HC0 and G/(G-1) cluster
     sandwiches, the stacked control-function covariance). It is about 10-30 times faster
@@ -322,18 +474,25 @@ Engines
 Separation and sparse cells
 
     A simulated study may contain an identifying cell (a level of a binary focal variable,
-    or a focal-by-moderator cell) with no events or no non-events, where the
-    maximum-likelihood effect does not exist. By default such replications count as failed
-    (separation(fail)), as Stata's probit refuses the fit; separation(keep) retains them
-    with their degenerate Wald intervals (R's glm behaviour). engine(mata) keeps the
-    Fisher-scoring fit; engine(stata) fits with asis and keeps the separated coefficient,
-    whose variance row Stata sets to zero (its standard error prints as missing), so the
-    delta-method interval collapses onto the identified cells, which is the same limit:
-    for a binary focal with an empty arm the estimate is minus the other arm's event rate,
-    with that arm's binomial standard error. Terms omitted for collinearity still count as
-    failures under either engine. The share with separation and the average smallest cell
-    count are reported and warned about (more than 1% separated, or fewer than 10 events
-    in the smallest cell).
+    a focal-by-moderator cell, or for difference-in-differences designs a
+    group-by-before/after cell, within each subgroup if there is one) with no events or no
+    non-events, where the maximum-likelihood effect does not exist. By default such
+    replications count as failed (separation(fail)), as Stata's probit refuses the fit;
+    separation(keep) retains them with their degenerate Wald intervals (R's glm
+    behaviour). engine(mata) keeps the Fisher-scoring fit; engine(stata) fits with asis
+    and keeps the separated coefficient, whose variance row Stata sets to zero (its
+    standard error prints as missing), so the delta-method interval collapses onto the
+    identified cells, which is the same limit: for a binary focal with an empty arm the
+    estimate is minus the other arm's event rate, with that arm's binomial standard error.
+    For difference-in-differences designs this holds under engine(mata) only:  under
+    engine(stata) the asis fit is kept when the separated cell is the treated group's
+    post-period cell (one coefficient without a variance), but when another
+    group-by-before/after cell is separated several coefficients diverge together, Stata's
+    fit does not converge and the study still counts as failed, so use engine(mata) with
+    separation(keep) there. Terms omitted for collinearity still count as failures under
+    either engine. The share with separation and the average smallest cell count are
+    reported and warned about (more than 1% separated, or fewer than 10 events in the
+    smallest cell).
 
 Stored results
 
@@ -348,6 +507,22 @@ Stored results
     r(beta), r(wcer), r(range_lo), r(range_hi), r(capped), r(alpha_uncapped), r(size) and
     r(grid); dgp, setape, setaie and describe store r(beta0), r(beta_focal), r(beta_mod),
     r(beta_int), r(target), r(p1), r(gamma); statement stores r(statement).
+
+    Difference-in-differences designs add: after dgp, setatt and describe, macros
+    r(design), r(trends), r(analysis), r(subgroup), scalars r(p_treated), r(p_post),
+    r(rho), r(n_pre), r(n_post), r(reading_linear), r(reading_index) (the two readings of
+    the rates; differences between the subgroups in a subgroup design), r(att_ref),
+    r(att_sub), and matrices r(rates) (one row per subgroup: control before, control
+    after, treated before, treated after without treatment, treated after) and r(didcoef)
+    (the index coefficients a, b, l, th, de); didpilot adds r(pilot) (rows, units,
+    periods, pairs, and the estimates). trueatt stores r(att) (for a subgroup design the
+    difference, with r(att_ref) and r(att_sub)). power, n and mde add r(analysis),
+    r(trends) and r(valid) (1 when the analysis assumes the scale the world has), and
+    power adds r(est_mean) and r(est_mcse), the mean of the usable estimates and its Monte
+    Carlo standard error; r(results) of curve gains a column est_mean. When robust varies
+    trends, r(scenarios) codes it 1 = index, 2 = linear and gains the columns est_mean
+    (power mode) and valid; scenarios with valid = 0 are shown but left out of the range,
+    the worst case and n_max.
 
 Examples
 
@@ -381,6 +556,25 @@ Examples
             baseline(0.30) signal(0.10)
         . powerape setape i1, target(0.10)
         . powerape power i1, n(1500) claim(detect)
+
+    Difference-in-differences: a logit panel, the linear analysis, a subgroup, a sweep
+    over the scale of the trends
+        . powerape dgp dd, did model(logit) baseline(0.20) gap(0.20) trend(0.10) rho(0.4)
+        . powerape setatt dd, target(0.07)
+        . powerape power dd, n(1500) claim(detect)
+        . powerape n dd, power(0.8) claim(detect) engine(mata)
+        . powerape robust dd, n(1500) claim(detect) vary(trends(index linear))
+            engine(mata)
+        . powerape dgp dl, did baseline(0.20) gap(0.20) trend(0.10) rho(0.5)
+            trends(linear) analysis(linear) npre(2) npost(2)
+        . powerape setatt dl, target(0.10)
+        . powerape power dl, n(500) claim(detect)
+        . powerape dgp ds, did model(logit) baseline(0.30 0.20) gap(0.10 0.15) trend(0.10
+            0.05) rho(0.5) subgroup(female, p(0.4))
+        . powerape setatt ds, target(0.10 0.03)
+        . powerape mde ds, n(4000) claim(detect) engine(mata)
+        . powerape dgp dp, didpilot outcome(y) group(treated) id(firm) period(year)
+            trend(0.05) model(logit)
 
 Installation and requirements
 
@@ -417,18 +611,35 @@ Validation
     nint()); it changes no number: the panel constants of tiers C and D are bit-identical
     to 0.1.2.
 
+    Version 0.2.0 (2026-11-13) adds the difference-in-differences route, which has its own
+    four tiers, against version 1.12.0 of the R package: exact power by enumeration of the
+    four group-by-period cells under both engines and both analyses; fixed-data parity
+    with R's internals and with logit/probit + margins, regress, didregress and
+    xtdidregress; calibration constants; and stochastic agreement of power, rejection
+    rates, required n, MDE, sweeps and justified alpha. The results of the routes that
+    existed before are unchanged. Not ported from version 1.12.0 of the R package:  the
+    three-way interaction design, and the linear probability analysis of the designs other
+    than difference-in-differences.
+
 References
 
+    Caron, L. 2025. Triple difference designs with heterogeneous treatment effects.
+        arXiv:2502.19620.
     Hancock, G. R., and Feng, Y. 2025. Power analysis under uncertainty about contextual
         parameters. Psychological Methods.
     Maier, M., and Lakens, D. 2022. Justify your alpha: A primer on two practical
         approaches. Advances in Methods and Practices in Psychological Science 5(2).
+    Puhani, P. A. 2012. The treatment effect, the cross difference, and the interaction
+        term in nonlinear "difference-in-differences" models.  Economics Letters 115(1):
+        85-87.
     Riesthuis, P. 2024. Simulation-based power analyses for the smallest effect size of
         interest. Advances in Methods and Practices in Psychological Science 7.
+    Wooldridge, J. M. 2023. Simple approaches to nonlinear difference-in-differences with
+        panel data. The Econometrics Journal 26(3): C31-C66.
     Wooldridge, J. M. 2019. Correlated random effects models with unbalanced panels.
         Journal of Econometrics 211: 137-150.
     Wulff, J. N. powerape: Power analysis for average partial effects. R package version
-        1.11.3. https://github.com/jespernwulff/powerape
+        1.12.0. https://github.com/jespernwulff/powerape
 
 Author
 

@@ -19,7 +19,7 @@ units, by set_ape() (no moderator) or set_aie() (with moderator)."><meta propert
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,7 @@ units, by set_ape() (no moderator) or set_aie() (with moderator)."><meta propert
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul></li>
@@ -98,7 +99,8 @@ units, by <code><a href="set_ape.html">set_ape()</a></code> (no moderator) or <c
 <span>  signal <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  gamma <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_int <span class="op">=</span> <span class="fl">4e+05</span>,</span>
-<span>  seed_int <span class="op">=</span> <span class="fl">20260812L</span></span>
+<span>  seed_int <span class="op">=</span> <span class="fl">20260812L</span>,</span>
+<span>  moderator2 <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -129,7 +131,8 @@ the DGP must be pinned with <code><a href="set_aie.html">set_aie()</a></code>.</
 <dt id="arg-correlation">correlation<a class="anchor" aria-label="anchor" href="#arg-correlation"></a></dt>
 <dd><p><code>NULL</code> (independence), a scalar exchangeable
 correlation, or a full correlation matrix over
-<code>(focal, moderator, covariates)</code> – Gaussian-copula dependence.</p></dd>
+<code>(focal, moderator, covariates)</code> – Gaussian-copula dependence. With
+a <code>moderator2</code> the order is <code>(focal, moderator, moderator2, covariates)</code>.</p></dd>
 
 
 <dt id="arg-baseline">baseline<a class="anchor" aria-label="anchor" href="#arg-baseline"></a></dt>
@@ -162,12 +165,23 @@ supplied.</p></dd>
 <dd><p>Size and seed of the deterministic Monte Carlo
 integration draw used for calibration and inversion.</p></dd>
 
+
+<dt id="arg-moderator-">moderator2<a class="anchor" aria-label="anchor" href="#arg-moderator-"></a></dt>
+<dd><p>Optional second moderator, a <strong>binary</strong> <code><a href="pa_var.html">pa_var()</a></code>;
+needs a <code>moderator</code>. The index then includes all three variables, the
+three pairwise products and the triple product; the estimand is the
+three-way average interaction effect, and the DGP must be pinned with
+<code><a href="set_aie3.html">set_aie3()</a></code>. The effect is symmetric in its three variables, so only
+a design with three continuous variables is not covered. <code>baseline</code>
+is then the outcome rate with all three at their reference values.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>powerape_dgp</code>. Pin the effect with
-<code><a href="set_ape.html">set_ape()</a></code> / <code><a href="set_aie.html">set_aie()</a></code>, then use <code><a href="ape_power.html">ape_power()</a></code>, <code><a href="ape_curve.html">ape_curve()</a></code>,
-<code><a href="ape_n.html">ape_n()</a></code>, or <code><a href="ape_robust.html">ape_robust()</a></code>.</p>
+<code><a href="set_ape.html">set_ape()</a></code> / <code><a href="set_aie.html">set_aie()</a></code> / <code><a href="set_aie3.html">set_aie3()</a></code>, then use <code><a href="ape_power.html">ape_power()</a></code>,
+<code><a href="ape_curve.html">ape_curve()</a></code>, <code><a href="ape_n.html">ape_n()</a></code>, <code><a href="ape_mde.html">ape_mde()</a></code>, or <code><a href="ape_robust.html">ape_robust()</a></code> (not yet
+available for designs with two moderators; see <code><a href="set_aie3.html">set_aie3()</a></code>).</p>
     </div>
 
     <div class="section level2">

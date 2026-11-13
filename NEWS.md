@@ -1,6 +1,6 @@
-# powerape (development version)
+# powerape 1.12.0
 
-Not released. Existing designs are untouched under their default analysis:
+Existing designs are untouched under their default analysis:
 seeded results of every existing route are identical to 1.11.4.
 
 * **Three-way interaction effects.** `ape_dgp()` takes a second moderator

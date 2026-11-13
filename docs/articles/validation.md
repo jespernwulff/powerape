@@ -25,7 +25,7 @@ results:
 - **Panels.** Panel designs match Stata’s clustered `margins` (the APE
   and the AIE’s double difference) to all printed digits on fixed
   panels, the clustered sandwich matches
-  [`sandwich::vcovCL()`](https://rdrr.io/pkg/sandwich/man/vcovCL.html)
+  [`sandwich::vcovCL()`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html)
   exactly, and the engine reproduces the Donner-Klar cluster design
   effect and, for unequal panel lengths, the Eldridge-Ashby-Kerry design
   effect.

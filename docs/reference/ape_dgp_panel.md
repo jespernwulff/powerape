@@ -90,7 +90,8 @@ ape_dgp_panel(
 
   `NULL` (independence), a scalar exchangeable correlation, or a full
   correlation matrix over `(focal, moderator, covariates)` –
-  Gaussian-copula dependence.
+  Gaussian-copula dependence. With a `moderator2` the order is
+  `(focal, moderator, moderator2, covariates)`.
 
 - baseline:
 

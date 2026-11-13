@@ -190,7 +190,8 @@ One treated group and one treatment date; treatment assigned to units,
 not to clusters of units; balanced panels; covariates that do not change
 over time and are not interacted with treatment. Staggered adoption,
 effects that differ by period and pre-trend tests are not available. The
-Stata command does not cover these designs yet.
+Stata command covers these designs from its version 0.2.0
+(`powerape dgp NAME, did`); this vignette shows the R code only.
 
 ## References
 

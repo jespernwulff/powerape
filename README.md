@@ -196,4 +196,5 @@ Eight vignettes cover the workflows:
 `vignette("panel-designs")`, `vignette("did-designs")`,
 `vignette("iv-designs")`, and `vignette("justified-alpha")`. On the
 [website](https://jespernwulff.github.io/powerape/) the same workflows show
-the R and the Stata code side by side.
+the R and the Stata code side by side (the difference-in-differences
+vignette shows R only so far).

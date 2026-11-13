@@ -28,9 +28,12 @@ plot(x, target_power = NULL, ...)
 - dgp:
 
   A `powerape_dgp` after
-  [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md)
-  or
-  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md).
+  [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md),
+  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md),
+  [`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md)
+  (designs with two moderators), or (for difference-in-differences
+  designs)
+  [`set_att()`](https://jespernwulff.github.io/powerape/reference/set_att.md).
 
 - n:
 
@@ -80,7 +83,10 @@ plot(x, target_power = NULL, ...)
   (default, expected-information ML) or `"robust"`
   (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
   Panel designs always use unit-clustered SEs and IV designs the stacked
-  method-of-moments robust sandwich; `se` is ignored there.
+  method-of-moments robust sandwich; `se` is ignored there, and for the
+  linear analysis of a difference-in-differences design, whose SEs are
+  always robust (see
+  [`ape_dgp_did()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md)).
 
 - separation:
 

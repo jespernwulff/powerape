@@ -19,7 +19,7 @@ criteria for detection, minimum-effect, and equivalence claims
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,7 @@ criteria for detection, minimum-effect, and equivalence claims
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul></li>
@@ -87,6 +88,21 @@ criteria for detection, minimum-effect, and equivalence claims
     </div>
 
 
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Designs are built by <code><a href="ape_dgp.html">ape_dgp()</a></code> (cross-sections, with an optional
+moderator or two), <code><a href="ape_dgp_empirical.html">ape_dgp_empirical()</a></code> and <code><a href="ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code> (pilot
+data), <code><a href="ape_dgp_panel.html">ape_dgp_panel()</a></code> (panels), <code><a href="ape_dgp_iv.html">ape_dgp_iv()</a></code> (endogenous focal
+variables), and <code><a href="ape_dgp_did.html">ape_dgp_did()</a></code> and <code><a href="ape_dgp_did_pilot.html">ape_dgp_did_pilot()</a></code>
+(difference-in-differences, with the effect on the treated in
+probability points as the target). The effect is pinned with
+<code><a href="set_ape.html">set_ape()</a></code>, <code><a href="set_aie.html">set_aie()</a></code>, <code><a href="set_aie3.html">set_aie3()</a></code> or <code><a href="set_att.html">set_att()</a></code>, and
+<code><a href="set_analysis.html">set_analysis()</a></code> switches a design to a linear probability analysis for
+comparison. <code><a href="ape_power.html">ape_power()</a></code>, <code><a href="ape_curve.html">ape_curve()</a></code>, <code><a href="ape_n.html">ape_n()</a></code>, <code><a href="ape_mde.html">ape_mde()</a></code> and
+<code><a href="ape_robust.html">ape_robust()</a></code> compute power, required sample sizes, detectable effects
+and sensitivity; <code><a href="ape_alpha.html">ape_alpha()</a></code> justifies the error rate, and
+<code><a href="power_statement.html">power_statement()</a></code> writes the methods paragraph.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Useful links:</p><ul><li><p><a href="https://jespernwulff.github.io/powerape/">https://jespernwulff.github.io/powerape/</a></p></li>

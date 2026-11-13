@@ -1,6 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://jespernwulff.github.io/powerape/404.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/articles/classic-sesoi-detection.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/articles/did-designs.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/articles/equivalence.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/articles/index.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/articles/interaction-effects.html</loc></url>
@@ -23,6 +24,8 @@
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_alpha.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_curve.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_dgp.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/ape_dgp_did.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/ape_dgp_did_pilot.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_dgp_empirical.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_dgp_from_fit.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/ape_dgp_iv.html</loc></url>
@@ -37,8 +40,13 @@
 <url><loc>https://jespernwulff.github.io/powerape/reference/power_at.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/power_statement.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/set_aie.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/set_aie3.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/set_analysis.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/set_ape.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/set_att.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/true_aie.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/true_aie3.html</loc></url>
 <url><loc>https://jespernwulff.github.io/powerape/reference/true_ape.html</loc></url>
+<url><loc>https://jespernwulff.github.io/powerape/reference/true_att.html</loc></url>
 </urlset>
 

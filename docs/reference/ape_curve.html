@@ -9,7 +9,7 @@ results. Works for APE and AIE designs alike."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,6 +29,7 @@ results. Works for APE and AIE designs alike."><meta property="og:image" content
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul></li>
@@ -95,7 +96,9 @@ results. Works for APE and AIE designs alike.</p>
 
 
 <dl><dt id="arg-dgp">dgp<a class="anchor" aria-label="anchor" href="#arg-dgp"></a></dt>
-<dd><p>A <code>powerape_dgp</code> after <code><a href="set_ape.html">set_ape()</a></code> or <code><a href="set_aie.html">set_aie()</a></code>.</p></dd>
+<dd><p>A <code>powerape_dgp</code> after <code><a href="set_ape.html">set_ape()</a></code>, <code><a href="set_aie.html">set_aie()</a></code>,
+<code><a href="set_aie3.html">set_aie3()</a></code> (designs with two moderators), or (for
+difference-in-differences designs) <code><a href="set_att.html">set_att()</a></code>.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -144,7 +147,9 @@ pre-1.8.0 behavior (one-sided error rate 2.5%).</p></dd>
 <code>"model"</code> (default, expected-information ML) or <code>"robust"</code>
 (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
 Panel designs always use unit-clustered SEs and IV designs the
-stacked method-of-moments robust sandwich; <code>se</code> is ignored there.</p></dd>
+stacked method-of-moments robust sandwich; <code>se</code> is ignored there, and
+for the linear analysis of a difference-in-differences design, whose
+SEs are always robust (see <code><a href="ape_dgp_did.html">ape_dgp_did()</a></code>).</p></dd>
 
 
 <dt id="arg-separation">separation<a class="anchor" aria-label="anchor" href="#arg-separation"></a></dt>

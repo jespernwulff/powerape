@@ -37,13 +37,17 @@ ape_robust(
 - dgp:
 
   A `powerape_dgp` after
-  [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md)
-  or
-  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md).
+  [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md),
+  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md),
+  [`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md)
+  (designs with two moderators), or (for difference-in-differences
+  designs)
+  [`set_att()`](https://jespernwulff.github.io/powerape/reference/set_att.md).
 
 - n:
 
-  Total sample size of the simulated study.
+  Total sample size of the simulated study (the number of units for
+  panel designs, including panel difference-in-differences designs).
 
 - claim:
 
@@ -89,7 +93,16 @@ ape_robust(
   `baseline`, `signal`, `correlation` (scalar); empirical route:
   `baseline`, `signal`. A length-2 element is expanded to `grid_points`
   equally spaced values; longer vectors are used as-is. Scenarios are
-  the full factorial grid.
+  the full factorial grid. Difference-in-differences designs
+  ([`ape_dgp_did()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md)):
+  `baseline`, `gap`, `trend` (not with a subgroup), `rho` (panels),
+  `p_treated`, `signal`, and `trends = c("index", "linear")`, the scale
+  on which untreated trends are parallel. In every scenario the effect
+  on the treated is re-pinned at the planning value. In a scenario whose
+  world has trends parallel on another scale than the analysis assumes,
+  the analysis is biased: the row is flagged `valid = FALSE`, its
+  `power` is a rejection rate, `est_mean` shows where the estimates
+  centre, and it is left out of the worst case and of `n_max`.
 
 - pin:
 
@@ -129,7 +142,10 @@ ape_robust(
   (default, expected-information ML) or `"robust"`
   (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
   Panel designs always use unit-clustered SEs and IV designs the stacked
-  method-of-moments robust sandwich; `se` is ignored there.
+  method-of-moments robust sandwich; `se` is ignored there, and for the
+  linear analysis of a difference-in-differences design, whose SEs are
+  always robust (see
+  [`ape_dgp_did()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md)).
 
 - direction:
 
@@ -166,7 +182,8 @@ Two pinning modes (DESIGN.md section 3.3):
   base-case values while the contextual calibration is redone; the
   implied true effect drifts and is reported per scenario.
   Claim-boundary guards are relaxed here on purpose – showing that a
-  scenario collapses power is the point.
+  scenario collapses power is the point. Not available for
+  difference-in-differences designs.
 
 **n_max.** The insurance-premium n is the largest requirement across
 scenarios. Power at the user's `n` cannot rank the scenarios for that

@@ -494,7 +494,7 @@ fixed panels – balanced and unbalanced alike (the unbalanced check
 matches the APE to all seven decimals with cohort dummies in the model)
 – with the small clustered-SE difference fully attributed to Stata’s
 observed-Hessian bread; the clustered sandwich matches
-[`sandwich::vcovCL`](https://rdrr.io/pkg/sandwich/man/vcovCL.html);
+[`sandwich::vcovCL`](https://sandwich.R-Forge.R-project.org/reference/vcovCL.html);
 unbalanced pure-RE panels anchor against `xtprobit`; the AIE reproduces
 `ginteff` on the identical fit; and the engine reduces to exact
 enumeration, to the Donner-Klar cluster design effect, and, for unequal

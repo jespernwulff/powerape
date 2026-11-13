@@ -3,6 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   classic-sesoi-detection: classic-sesoi-detection.html
+  did-designs: did-designs.html
   equivalence: equivalence.html
   interaction-effects: interaction-effects.html
   iv-designs: iv-designs.html
@@ -15,7 +16,7 @@ articles:
   articles/stata: stata.html
   articles/validation: validation.html
   articles/worked-example: worked-example.html
-last_built: 2026-10-19T17:36Z
+last_built: 2026-11-13T21:42Z
 urls:
   reference: https://jespernwulff.github.io/powerape/reference
   article: https://jespernwulff.github.io/powerape/articles

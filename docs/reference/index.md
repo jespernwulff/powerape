@@ -16,19 +16,35 @@ Describe the data-generating process the study will sample from.
   : Specify a panel DGP: correlated random effects probit
 - [`ape_dgp_iv()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_iv.md)
   : Specify an IV DGP: endogenous focal, control-function probit
+- [`ape_dgp_did()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md)
+  : Specify a difference-in-differences design with a binary outcome
+- [`ape_dgp_did_pilot()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did_pilot.md)
+  : A difference-in-differences design from pre-treatment pilot data
+- [`set_analysis()`](https://jespernwulff.github.io/powerape/reference/set_analysis.md)
+  : Choose the analysis the simulated studies receive
 
 ## Pin the effect
 
-Solve coefficients from targets in APE/AIE units.
+Solve coefficients from targets in APE/AIE/ATT units.
 
 - [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md)
   : Pin the true APE of a DGP (inversion step)
 - [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md)
   : Pin the true AIE of a moderated DGP (inversion step)
+- [`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md)
+  : Pin the three-way interaction effect of a design with two moderators
+- [`set_att()`](https://jespernwulff.github.io/powerape/reference/set_att.md)
+  : Pin the true effect on the treated of a difference-in-differences
+  design
 - [`true_ape()`](https://jespernwulff.github.io/powerape/reference/true_ape.md)
   : Recompute the true APE implied by a pinned DGP
 - [`true_aie()`](https://jespernwulff.github.io/powerape/reference/true_aie.md)
   : Recompute the true AIE implied by a pinned DGP
+- [`true_aie3()`](https://jespernwulff.github.io/powerape/reference/true_aie3.md)
+  : Recompute the true three-way interaction effect implied by a pinned
+  DGP
+- [`true_att()`](https://jespernwulff.github.io/powerape/reference/true_att.md)
+  : Recompute the true effect on the treated implied by a pinned design
 
 ## Power
 

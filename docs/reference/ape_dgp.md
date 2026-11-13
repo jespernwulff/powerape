@@ -25,7 +25,8 @@ ape_dgp(
   signal = 0,
   gamma = NULL,
   n_int = 4e+05,
-  seed_int = 20260812L
+  seed_int = 20260812L,
+  moderator2 = NULL
 )
 ```
 
@@ -62,7 +63,8 @@ ape_dgp(
 
   `NULL` (independence), a scalar exchangeable correlation, or a full
   correlation matrix over `(focal, moderator, covariates)` –
-  Gaussian-copula dependence.
+  Gaussian-copula dependence. With a `moderator2` the order is
+  `(focal, moderator, moderator2, covariates)`.
 
 - baseline:
 
@@ -96,18 +98,35 @@ ape_dgp(
   Size and seed of the deterministic Monte Carlo integration draw used
   for calibration and inversion.
 
+- moderator2:
+
+  Optional second moderator, a **binary**
+  [`pa_var()`](https://jespernwulff.github.io/powerape/reference/pa_var.md);
+  needs a `moderator`. The index then includes all three variables, the
+  three pairwise products and the triple product; the estimand is the
+  three-way average interaction effect, and the DGP must be pinned with
+  [`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md).
+  The effect is symmetric in its three variables, so only a design with
+  three continuous variables is not covered. `baseline` is then the
+  outcome rate with all three at their reference values.
+
 ## Value
 
 An object of class `powerape_dgp`. Pin the effect with
 [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md)
 /
-[`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md),
+[`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md)
+/
+[`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md),
 then use
 [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md),
 [`ape_curve()`](https://jespernwulff.github.io/powerape/reference/ape_curve.md),
 [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md),
+[`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md),
 or
-[`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md).
+[`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
+(not yet available for designs with two moderators; see
+[`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md)).
 
 ## Examples
 

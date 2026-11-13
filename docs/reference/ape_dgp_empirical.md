@@ -91,7 +91,7 @@ d <- ape_dgp_empirical(data = pilot, focal = "treat",
                        baseline = 0.30, signal = 0.15)
 d
 #> powerape DGP -- probit (empirical covariates)
-#>   focal: treat (binary, p = 0.53) [resampled jointly with covariates]
+#>   focal: treat (binary, p = 0.50) [resampled jointly with covariates]
 #>   covariates: age 
 #>   pilot rows: 600 (resampled with replacement)
 #>   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.150

@@ -10,6 +10,27 @@ version it ports is named in `powerape version` and in every power
 statement. The changes of the R package are listed in its
 [news](../news/index.html).
 
+## powerape for Stata 0.2.0 (2026-11-13)
+
+* Difference-in-differences designs. `powerape dgp NAME, did` builds a
+  design with a treated and a control group before and after one treatment
+  date, as a panel or as repeated cross-sections, with one or several
+  periods on each side and an optional binary subgroup. `powerape setatt`
+  pins the effect on the treated in probability points, and
+  `powerape trueatt` returns it.
+* `trends()` sets the scale on which the untreated trends are parallel, and
+  `analysis()` sets the analysis: probit or logit, or a linear probability
+  model with robust standard errors. When the two differ, `power` and
+  `curve` report a labelled rejection rate with the mean estimate, and the
+  searches refuse the design.
+* `power`, `curve`, `n`, `mde`, `robust` (also over `trends()`), `powerat`,
+  `alpha` and `statement` take these designs under both engines.
+  `powerape dgp NAME, didpilot` builds a design from pre-treatment data.
+* The command now follows version 1.12.0 of the R package. Not ported from
+  it: the three-way interaction design, and the linear probability analysis
+  of the designs other than difference-in-differences.
+* Results of the designs that existed before are bit-identical to 0.1.3.
+
 ## powerape for Stata 0.1.3 (2026-10-17)
 
 * Panel designs calibrate about as fast as in the R package. A panel

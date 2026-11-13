@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,13 +45,14 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/worked-example.html">Worked example</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-workflows" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Workflows</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-workflows">
 <li><a class="dropdown-item" href="../articles/classic-sesoi-detection.html">The classic SESOI analysis</a></li>
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul>
@@ -271,7 +272,7 @@ Stata
 <span><span class="co">#&gt;   outcomes: minimum 0.790 | detect-only 0.210 | inconclusive 0.000 | equivalence 0.000 | failed 0.000</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw_rule</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average partial effect</span></span>
-<span><span class="co">#&gt; (APE) of program using the powerape package (version 1.11.4), following the</span></span>
+<span><span class="co">#&gt; (APE) of program using the powerape package (version 1.12.0), following the</span></span>
 <span><span class="co">#&gt; confidence-interval approach of Riesthuis (2024). The assumed data-generating</span></span>
 <span><span class="co">#&gt; process was a probit model with focal variable program (binary, prevalence</span></span>
 <span><span class="co">#&gt; 0.50); parametric covariates z (continuous, mean 0, SD 1), with the focal</span></span>
@@ -586,7 +587,7 @@ Stata
 <span><span class="co">#&gt; and Type II error rate (Maier &amp; Lakens, 2022; Mudge et al., 2012), weighting</span></span>
 <span><span class="co">#&gt; a Type I error 4 times a Type II error and taking prior odds of 1 for the</span></span>
 <span><span class="co">#&gt; planning value (APE = 0.100) against the claim boundary, using the powerape</span></span>
-<span><span class="co">#&gt; package (version 1.11.4). The assumed data-generating process was a probit</span></span>
+<span><span class="co">#&gt; package (version 1.12.0). The assumed data-generating process was a probit</span></span>
 <span><span class="co">#&gt; model with focal variable program (binary, prevalence 0.50); parametric</span></span>
 <span><span class="co">#&gt; covariates z (continuous, mean 0, SD 1), with the focal variable and the</span></span>
 <span><span class="co">#&gt; covariates mutually independent; baseline outcome rate 0.300 with the focal</span></span>

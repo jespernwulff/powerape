@@ -14,6 +14,9 @@ preregistrations. For an
 result the paragraph states the justification of the error rate instead:
 the objective and its weights, the chosen level and its flat range, the
 cap, and the realized-size verification when it was run.
+Difference-in-differences designs get their own paragraph (groups,
+periods, data structure, rates, the scale on which trends are parallel,
+and the analysis, including the linear probability analysis).
 
 ## Usage
 
@@ -42,7 +45,7 @@ pw <- ape_power(d, n = 800, claim = "minimum", sesoi = 0.03,
                 nsim = 500, seed = 1)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.11.4), following the
+#> (APE) of treat using the powerape package (version 1.12.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); no additional covariates; baseline outcome rate 0.300 with the focal

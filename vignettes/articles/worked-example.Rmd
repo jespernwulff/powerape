@@ -1359,7 +1359,7 @@ sA <- ape_power(dA, n = nA_min$n, claim = "minimum", sesoi = 0.05,
                 nsim = 4000, seed = 20260821)
 power_statement(sA)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of program using the powerape package (version 1.11.4), following the
+#> (APE) of program using the powerape package (version 1.12.0), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable program (binary, prevalence
 #> 0.50); parametric covariates z (continuous, mean 0, SD 1), with the focal
@@ -1417,7 +1417,7 @@ replications).
 ## Notes on reproducibility
 
 * The R output on this page comes from `powerape`
-  1.11.4, the Stata output from the Stata command
+  1.12.0, the Stata output from the Stata command
   0.1.3 (StataNow 19.5). Every call shows its seed and its number
   of replications, so with the same versions the R numbers reproduce
   exactly.

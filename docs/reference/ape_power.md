@@ -31,13 +31,17 @@ ape_power(
 - dgp:
 
   A `powerape_dgp` after
-  [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md)
-  or
-  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md).
+  [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md),
+  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md),
+  [`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md)
+  (designs with two moderators), or (for difference-in-differences
+  designs)
+  [`set_att()`](https://jespernwulff.github.io/powerape/reference/set_att.md).
 
 - n:
 
-  Total sample size of the simulated study.
+  Total sample size of the simulated study (the number of units for
+  panel designs, including panel difference-in-differences designs).
 
 - claim:
 
@@ -83,7 +87,10 @@ ape_power(
   (default, expected-information ML) or `"robust"`
   (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
   Panel designs always use unit-clustered SEs and IV designs the stacked
-  method-of-moments robust sandwich; `se` is ignored there.
+  method-of-moments robust sandwich; `se` is ignored there, and for the
+  linear analysis of a difference-in-differences design, whose SEs are
+  always robust (see
+  [`ape_dgp_did()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md)).
 
 - keep_draws:
 
@@ -138,26 +145,27 @@ this function's stored draws.
 
 With rare outcomes, small samples, or a small treated group, a simulated
 study can contain a cell that identifies the effect – a level of a
-binary focal variable, or for AIE designs a focal-by-moderator cell –
-with no events or no non-events. The maximum-likelihood effect does not
-exist there (quasi-complete separation): Stata's `probit`/`logit` drop
-the perfect predictor and `margins` reports the effect as not estimable,
-whereas R's [`glm()`](https://rdrr.io/r/stats/glm.html) stops silently
-at a large finite coefficient whose delta-method standard error
-collapses to the other cell's binomial SE, so the replication usually
-counts as a detection. By default (`separation = "fail"`) such
-replications count as failed, against every claim, like any other
-replication without a usable estimate; `separation = "keep"` retains
-them with their degenerate Wald intervals (the R
-[`glm()`](https://rdrr.io/r/stats/glm.html) + marginaleffects analysis,
-and Stata's `asis` option; the behavior before powerape 1.11.0). Either
-way the share is reported (`separated`), and the function warns when it
-exceeds 1%, or when the smallest identifying cell averages fewer than 10
-events (or non-events) per simulated study: there the Wald test's
-one-sided error rates can run up to about twice their nominal level in
-the direction in which the sparse cell has the lower rate, and score,
-Fisher, or Firth analyses have different power than the Wald analysis
-powered here.
+binary focal variable, or for AIE designs a focal-by-moderator cell (for
+three-way designs a cell of the cross-classification of the binary
+design variables) – with no events or no non-events. The
+maximum-likelihood effect does not exist there (quasi-complete
+separation): Stata's `probit`/`logit` drop the perfect predictor and
+`margins` reports the effect as not estimable, whereas R's
+[`glm()`](https://rdrr.io/r/stats/glm.html) stops silently at a large
+finite coefficient whose delta-method standard error collapses to the
+other cell's binomial SE, so the replication usually counts as a
+detection. By default (`separation = "fail"`) such replications count as
+failed, against every claim, like any other replication without a usable
+estimate; `separation = "keep"` retains them with their degenerate Wald
+intervals (the R [`glm()`](https://rdrr.io/r/stats/glm.html) +
+marginaleffects analysis, and Stata's `asis` option; the behavior before
+powerape 1.11.0). Either way the share is reported (`separated`), and
+the function warns when it exceeds 1%, or when the smallest identifying
+cell averages fewer than 10 events (or non-events) per simulated study:
+there the Wald test's one-sided error rates can run up to about twice
+their nominal level in the direction in which the sparse cell has the
+lower rate, and score, Fisher, or Firth analyses have different power
+than the Wald analysis powered here.
 
 ## Examples
 

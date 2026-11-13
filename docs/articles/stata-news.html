@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,7 @@
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul>
@@ -73,7 +74,7 @@
     <li><a class="dropdown-item" href="../articles/stata-help.html">Stata help file</a></li>
   </ul>
 </li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news">
 <li><a class="dropdown-item" href="../news/index.html">R package</a></li>
@@ -117,6 +118,38 @@
 releases; the version it ports is named in <code>powerape version</code>
 and in every power statement. The changes of the R package are listed in
 its <a href="../news/index.html">news</a>.</p>
+<div class="section level2">
+<h2 id="powerape-for-stata-0-2-0-2026-11-13">powerape for Stata 0.2.0 (2026-11-13)<a class="anchor" aria-label="anchor" href="#powerape-for-stata-0-2-0-2026-11-13"></a>
+</h2>
+<ul>
+<li>Difference-in-differences designs.
+<code>powerape dgp NAME, did</code> builds a design with a treated and a
+control group before and after one treatment date, as a panel or as
+repeated cross-sections, with one or several periods on each side and an
+optional binary subgroup. <code>powerape setatt</code> pins the effect
+on the treated in probability points, and <code>powerape trueatt</code>
+returns it.</li>
+<li>
+<code>trends()</code> sets the scale on which the untreated trends
+are parallel, and <code>analysis()</code> sets the analysis: probit or
+logit, or a linear probability model with robust standard errors. When
+the two differ, <code>power</code> and <code>curve</code> report a
+labelled rejection rate with the mean estimate, and the searches refuse
+the design.</li>
+<li>
+<code>power</code>, <code>curve</code>, <code>n</code>,
+<code>mde</code>, <code>robust</code> (also over <code>trends()</code>),
+<code>powerat</code>, <code>alpha</code> and <code>statement</code> take
+these designs under both engines.
+<code>powerape dgp NAME, didpilot</code> builds a design from
+pre-treatment data.</li>
+<li>The command now follows version 1.12.0 of the R package. Not ported
+from it: the three-way interaction design, and the linear probability
+analysis of the designs other than difference-in-differences.</li>
+<li>Results of the designs that existed before are bit-identical to
+0.1.3.</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="powerape-for-stata-0-1-3-2026-10-17">powerape for Stata 0.1.3 (2026-10-17)<a class="anchor" aria-label="anchor" href="#powerape-for-stata-0-1-3-2026-10-17"></a>
 </h2>

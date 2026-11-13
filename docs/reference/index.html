@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,6 +27,7 @@
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul></li>
@@ -113,10 +114,31 @@
 
         </dt>
         <dd>Specify an IV DGP: endogenous focal, control-function probit</dd>
+
+        <dt>
+
+          <code><a href="ape_dgp_did.html">ape_dgp_did()</a></code>
+
+        </dt>
+        <dd>Specify a difference-in-differences design with a binary outcome</dd>
+
+        <dt>
+
+          <code><a href="ape_dgp_did_pilot.html">ape_dgp_did_pilot()</a></code>
+
+        </dt>
+        <dd>A difference-in-differences design from pre-treatment pilot data</dd>
+
+        <dt>
+
+          <code><a href="set_analysis.html">set_analysis()</a></code>
+
+        </dt>
+        <dd>Choose the analysis the simulated studies receive</dd>
       </dl></div><div class="section level2">
       <h2 id="pin-the-effect">Pin the effect<a class="anchor" aria-label="anchor" href="#pin-the-effect"></a></h2>
 
-      <div class="section-desc"><p>Solve coefficients from targets in APE/AIE units.</p></div>
+      <div class="section-desc"><p>Solve coefficients from targets in APE/AIE/ATT units.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -139,6 +161,20 @@
 
         <dt>
 
+          <code><a href="set_aie3.html">set_aie3()</a></code>
+
+        </dt>
+        <dd>Pin the three-way interaction effect of a design with two moderators</dd>
+
+        <dt>
+
+          <code><a href="set_att.html">set_att()</a></code>
+
+        </dt>
+        <dd>Pin the true effect on the treated of a difference-in-differences design</dd>
+
+        <dt>
+
           <code><a href="true_ape.html">true_ape()</a></code>
 
         </dt>
@@ -150,6 +186,20 @@
 
         </dt>
         <dd>Recompute the true AIE implied by a pinned DGP</dd>
+
+        <dt>
+
+          <code><a href="true_aie3.html">true_aie3()</a></code>
+
+        </dt>
+        <dd>Recompute the true three-way interaction effect implied by a pinned DGP</dd>
+
+        <dt>
+
+          <code><a href="true_att.html">true_att()</a></code>
+
+        </dt>
+        <dd>Recompute the true effect on the treated implied by a pinned design</dd>
       </dl></div><div class="section level2">
       <h2 id="power">Power<a class="anchor" aria-label="anchor" href="#power"></a></h2>
 

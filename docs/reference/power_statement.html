@@ -7,7 +7,10 @@ precision – the transparency artifact for grant applications and
 preregistrations. For an ape_alpha() result the paragraph states the
 justification of the error rate instead: the objective and its
 weights, the chosen level and its flat range, the cap, and the
-realized-size verification when it was run."><meta property="og:description" content="Turns a ape_power(), ape_n(), or ape_mde() result into a
+realized-size verification when it was run. Difference-in-differences
+designs get their own paragraph (groups, periods, data structure, rates,
+the scale on which trends are parallel, and the analysis, including the
+linear probability analysis)."><meta property="og:description" content="Turns a ape_power(), ape_n(), or ape_mde() result into a
 self-contained methods paragraph stating the estimand, the full
 data-generating assumptions, the claim and CI convention (including a
 sample-size rule for alpha when one was used), and the Monte Carlo
@@ -15,7 +18,10 @@ precision – the transparency artifact for grant applications and
 preregistrations. For an ape_alpha() result the paragraph states the
 justification of the error rate instead: the objective and its
 weights, the chosen level and its flat range, the cap, and the
-realized-size verification when it was run."><meta property="og:image" content="https://jespernwulff.github.io/powerape/logo.svg"></head><body>
+realized-size verification when it was run. Difference-in-differences
+designs get their own paragraph (groups, periods, data structure, rates,
+the scale on which trends are parallel, and the analysis, including the
+linear probability analysis)."><meta property="og:image" content="https://jespernwulff.github.io/powerape/logo.svg"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -23,7 +29,7 @@ realized-size verification when it was run."><meta property="og:image" content="
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.11.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +49,7 @@ realized-size verification when it was run."><meta property="og:image" content="
     <li><a class="dropdown-item" href="../articles/equivalence.html">Equivalence</a></li>
     <li><a class="dropdown-item" href="../articles/interaction-effects.html">Interaction effects (AIE)</a></li>
     <li><a class="dropdown-item" href="../articles/panel-designs.html">Panel designs</a></li>
+    <li><a class="dropdown-item" href="../articles/did-designs.html">Difference-in-differences</a></li>
     <li><a class="dropdown-item" href="../articles/iv-designs.html">IV designs</a></li>
     <li><a class="dropdown-item" href="../articles/justified-alpha.html">Justified alpha</a></li>
   </ul></li>
@@ -89,7 +96,10 @@ precision – the transparency artifact for grant applications and
 preregistrations. For an <code><a href="ape_alpha.html">ape_alpha()</a></code> result the paragraph states the
 justification of the error rate instead: the objective and its
 weights, the chosen level and its flat range, the cap, and the
-realized-size verification when it was run.</p>
+realized-size verification when it was run. Difference-in-differences
+designs get their own paragraph (groups, periods, data structure, rates,
+the scale on which trends are parallel, and the analysis, including the
+linear probability analysis).</p>
     </div>
 
     <div class="section level2">
@@ -121,7 +131,7 @@ wrapped).</p>
 <span class="r-in"><span>                nsim <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">power_statement</span><span class="op">(</span><span class="va">pw</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> We conducted a simulation-based power analysis for the average partial effect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (APE) of treat using the powerape package (version 1.11.4), following the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (APE) of treat using the powerape package (version 1.12.0), following the</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> confidence-interval approach of Riesthuis (2024). The assumed data-generating</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> process was a probit model with focal variable treat (binary, prevalence</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.50); no additional covariates; baseline outcome rate 0.300 with the focal</span>

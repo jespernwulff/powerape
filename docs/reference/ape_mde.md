@@ -41,9 +41,12 @@ ape_mde(
 - dgp:
 
   A `powerape_dgp` after
-  [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md)
-  or
-  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md).
+  [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md),
+  [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md),
+  [`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md)
+  (designs with two moderators), or (for difference-in-differences
+  designs)
+  [`set_att()`](https://jespernwulff.github.io/powerape/reference/set_att.md).
 
 - n:
 
@@ -96,7 +99,8 @@ ape_mde(
   Main-effect anchors for AIE designs; defaults to the values stored by
   a previous
   [`set_aie()`](https://jespernwulff.github.io/powerape/reference/set_aie.md)
-  call.
+  call. Not used for designs with two moderators, whose anchors are
+  always taken from the pinned design.
 
 - max_iter:
 
@@ -113,7 +117,10 @@ ape_mde(
   (default, expected-information ML) or `"robust"`
   (heteroskedasticity-robust HC0 sandwich, as in the sandwich package).
   Panel designs always use unit-clustered SEs and IV designs the stacked
-  method-of-moments robust sandwich; `se` is ignored there.
+  method-of-moments robust sandwich; `se` is ignored there, and for the
+  linear analysis of a difference-in-differences design, whose SEs are
+  always robust (see
+  [`ape_dgp_did()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md)).
 
 - direction:
 
@@ -169,7 +176,11 @@ short, so the reported MDE errs on the conservative side.
 For a DGP with a moderator the searched effect is the AIE; the two
 conditional-at-reference main-effect anchors are taken from the pinned
 DGP (or passed via `main_focal`/`main_moderator`) and held fixed across
-candidates.
+candidates. For a design with two moderators the searched effect is the
+three-way AIE; its six other anchors are taken from the design, which
+must be pinned with
+[`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md)
+first.
 
 ## Examples
 

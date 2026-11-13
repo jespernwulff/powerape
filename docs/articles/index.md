@@ -39,6 +39,8 @@ by side.
   (AIEs)](https://jespernwulff.github.io/powerape/articles/interaction-effects.md):
 - [Panel designs: correlated random
   effects](https://jespernwulff.github.io/powerape/articles/panel-designs.md):
+- [Difference-in-differences
+  designs](https://jespernwulff.github.io/powerape/articles/did-designs.md):
 - [IV designs: endogenous focal variables via control
   functions](https://jespernwulff.github.io/powerape/articles/iv-designs.md):
 - [Justifying the error rate: alpha by sample size, or by error
