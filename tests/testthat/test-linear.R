@@ -1,5 +1,5 @@
-# The linear probability analysis on the standard routes (DESIGN.md section
-# 18): set_analysis(), the engine's OLS path, where the linear coefficient
+# The linear probability analysis on the standard routes:
+# set_analysis(), the engine's OLS path, where the linear coefficient
 # centres, and the wiring into searches, sweeps and reports.
 
 lin_base <- function(target = 0.10, ...) {

@@ -1,6 +1,6 @@
 # Justified alpha -------------------------------------------------------------
-# Two routes to an error rate that is chosen rather than inherited (DESIGN.md
-# section 15). (1) A sample-size rule: `alpha` may be a function of n in
+# Two routes to an error rate that is chosen rather than inherited.
+# (1) A sample-size rule: `alpha` may be a function of n in
 # every public function (for example alphaN::alphaN), evaluated at each
 # candidate n, so ape_n()/ape_curve()/ape_mde()/ape_robust() design jointly
 # over (alpha(n), n). (2) Error-cost optimization on stored draws: the engine

@@ -1,4 +1,4 @@
-# Difference-in-differences designs (DESIGN.md section 17): calibration of
+# Difference-in-differences designs: calibration of
 # the two worlds, the effect-on-the-treated estimator, closed-form anchors
 # for the saturated two-by-two design, and the wiring into the power
 # functions.
@@ -445,7 +445,7 @@ test_that("negative effects and the equivalence margin search run on the ATT", {
   expect_lt(abs(mg$mde / (se0 * (qnorm(0.95) + qnorm(0.90))) - 1), 0.12)
 })
 
-## ---- the linear probability analysis (DESIGN.md section 17.1) -----------------
+## ---- the linear probability analysis -----------------
 
 # closed-form SEs of the cross difference of the four cell means
 did_se_cs_lin <- function(r, n, pt = 0.5, pp = 0.5) {
@@ -652,7 +652,7 @@ test_that("linear analysis: no separation, sparse cells still flagged; searches 
   expect_identical(cv$model, "linear probability (OLS)")
 })
 
-## ---- more than two periods, common timing (DESIGN.md section 17.2) -----------
+## ---- more than two periods, common timing -----------
 
 # Closed-form SE with n_pre periods before and n_post after, on the pooled
 # block rates. Gradient of the estimator in (c11, c10, c01, c00): (1, -1,

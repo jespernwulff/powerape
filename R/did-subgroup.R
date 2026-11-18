@@ -1,5 +1,5 @@
 # Difference-in-differences designs with a binary subgroup ---------------------
-# DESIGN.md section 17.3. Both subgroups are treated in the treated group;
+# Both subgroups are treated in the treated group;
 # the estimand is the difference between the two subgroups' effects on the
 # treated in probability points (Caron, 2025: the DATT),
 #   ATT(subgroup = 1) - ATT(subgroup = 0).

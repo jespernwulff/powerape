@@ -1,4 +1,4 @@
-# DESIGN.md section 19: three-way interaction designs. A focal variable, a
+# Three-way interaction designs. A focal variable, a
 # moderator and a second, binary moderator w; the estimand is the two-way
 # AIE of (focal, moderator) at w = 1 minus the same at w = 0 (ginteff's
 # three-way effect). Anchors: ginteff on fixed data, finite differences,

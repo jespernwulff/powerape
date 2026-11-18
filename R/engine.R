@@ -1,13 +1,13 @@
 # Simulation engine and power computation -------------------------------------
 
-# Error-rate convention (v1.8.0; DESIGN.md section 14). `alpha` is the
+# Error-rate convention (v1.8.0). `alpha` is the
 # claim's error rate, each claim in its conventional form: detection is the
 # two-sided test at alpha (1 - alpha interval, directional counting);
 # the minimum-effect claim is a one-sided test at alpha and equivalence a
 # TOST at alpha (both read off the 1 - 2 alpha interval). A user-supplied
 # `conf` overrides by naming the claim's own interval level directly.
-# Since 1.9.0 `alpha` may also be a sample-size rule (a function of n;
-# DESIGN.md section 15), evaluated at the design's `n`.
+# Since 1.9.0 `alpha` may also be a sample-size rule (a function of n),
+# evaluated at the design's `n`.
 claim_levels <- function(claim, alpha = NULL, conf = NULL, n = NULL) {
   if (is.function(alpha)) {
     if (!is.null(conf))
@@ -36,7 +36,7 @@ claim_levels <- function(claim, alpha = NULL, conf = NULL, n = NULL) {
        conf_claim = if (identical(claim, "detect")) 1 - alpha else 1 - 2 * alpha)
 }
 
-# Separation in the cells that identify the estimand (DESIGN.md section 16):
+# Separation in the cells that identify the estimand:
 # a level of a binary focal variable -- or, for AIE designs, a cell of the
 # binary focal x moderator layout -- whose outcomes are all 0 or all 1. The
 # maximum-likelihood estimate of the effect does not exist there: Stata's
@@ -94,12 +94,12 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model",
   is_aie <- identical(dgp$estimand, "aie")
   is_panel <- identical(dgp$route, "panel")
   is_iv <- identical(dgp$route, "iv")
-  ## difference-in-differences designs (DESIGN.md section 17): the draw
+  ## difference-in-differences designs: the draw
   ## returns the outcome rates (conditional on the unit draw in panels),
   ## the identifying cells are group x period, and the estimand is the ATT
   did <- is_did(dgp)
   lin <- is_linear(dgp)
-  ## three-way interaction designs (DESIGN.md section 19): own cell check,
+  ## three-way interaction designs: own cell check,
   ## estimator and focal-side columns; checked before the two-way tests
   a3 <- is_aie3(dgp)
   if (lin && is_iv)
@@ -148,7 +148,7 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model",
         mc[r] <- cc$min_cell
         if (all(y == y[1L])) next      # degenerate outcome: failed, not "separated"
         if (lin) {
-          ## linear probability analysis (DESIGN.md sections 17.1, 18): OLS
+          ## linear probability analysis: OLS
           ## has no separation, the estimate is one coefficient (focal
           ## variable, focal-by-moderator product, or treatment indicator),
           ## and the variance is always robust (HC1 for independent rows,
@@ -206,7 +206,7 @@ sim_ci <- function(dgp, n, nsim, conf, seed = NULL, se_type = "model",
   })
 }
 
-# Guard rails for claim/truth coherence (DESIGN.md section 2.3).
+# Guard rails for claim/truth coherence.
 check_coherence <- function(dgp, claim, sesoi, conf) {
   if (is.null(dgp$target_est))
     stop(if (is_did(dgp)) "This DGP has no target effect yet - call set_att() first."
@@ -247,7 +247,7 @@ check_coherence <- function(dgp, claim, sesoi, conf) {
 # Turn simulated CIs into claim power and the outcome distribution.
 # Negative targets are mirrored so claims read in the effect's direction.
 summarize_sim <- function(sim, target, claim, sesoi, nsim, alpha = 0.05) {
-  ## two interval widths from one estimate and SE (DESIGN.md section 14):
+  ## two interval widths from one estimate and SE:
   ## detection reads the two-sided 1 - alpha interval, the one-sided SESOI
   ## claims read the 1 - 2 alpha interval (minimum: one-sided test at alpha;
   ## equivalence: TOST at alpha). Sign is flipped for negative targets so
@@ -300,7 +300,7 @@ cell_label <- function(est) {
 }
 
 # One warning for a design whose simulated studies have separation or
-# sparse identifying cells (DESIGN.md section 16). `p` carries the
+# sparse identifying cells. `p` carries the
 # `separated` share, the mean smallest-cell count `min_cell`, and the
 # `separation` convention; `where` names the design (e.g. "At n = 523").
 sparse_warning <- function(p, where = NULL, aie = FALSE, est = NULL) {

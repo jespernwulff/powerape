@@ -1,5 +1,5 @@
 # A difference-in-differences design from pre-treatment pilot data -------------
-# DESIGN.md section 20. Data observed before the treatment date inform four
+# Data observed before the treatment date inform four
 # inputs of ape_dgp_did(): the control group's outcome rate (baseline), the
 # gap between the groups, the treated share, and, in a panel, the latent
 # within-unit correlation of the route's Gaussian copula. They do not

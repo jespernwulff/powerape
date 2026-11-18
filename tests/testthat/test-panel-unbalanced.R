@@ -1,6 +1,5 @@
 # Unbalanced panels (Wooldridge, 2019): length mixtures, monotone
-# attrition, observed-period Mundlak means, T-cohort dummies. DESIGN.md
-# section 13.
+# attrition, observed-period Mundlak means, T-cohort dummies.
 
 unbal_base <- function(..., target = 0.10) {
   set_ape(ape_dgp_panel(

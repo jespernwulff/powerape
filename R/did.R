@@ -1,5 +1,5 @@
 # Difference-in-differences designs --------------------------------------------
-# DESIGN.md section 17. A treated and a control group observed in n_pre
+# A treated and a control group observed in n_pre
 # periods before and n_post periods after one common treatment date (one
 # period each by default). The estimand is the average
 # treatment effect on the treated (ATT) in the post period, in probability

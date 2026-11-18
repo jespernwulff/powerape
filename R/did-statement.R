@@ -1,6 +1,6 @@
 # Methods paragraph for difference-in-differences designs ----------------------
-# power_statement() dispatches here for designs built with ape_dgp_did()
-# (DESIGN.md section 20). Both analyses are described: the pooled
+# power_statement() dispatches here for designs built with ape_dgp_did().
+# Both analyses are described: the pooled
 # probit/logit with the effect on the treated as an average partial effect,
 # and the linear probability analysis.
 

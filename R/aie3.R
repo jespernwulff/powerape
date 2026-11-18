@@ -1,5 +1,5 @@
 # Three-way average interaction effects -----------------------------------------
-# DESIGN.md section 19. A parametric design with a focal variable, a
+# A parametric design with a focal variable, a
 # moderator, and a second moderator w that is binary. The estimand is
 # ginteff's three-way average interaction effect: the two-way AIE of
 # (focal, moderator) with w set to 1 for every observation minus the same

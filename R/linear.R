@@ -1,5 +1,5 @@
 # The linear probability analysis ----------------------------------------------
-# DESIGN.md sections 17.1 and 18. Every design is analysed by its index
+# Every design is analysed by its index
 # model (probit/logit) unless its `analysis` field says "linear": then the
 # simulated studies are fitted by ordinary least squares on the same design
 # matrix, the estimate is the coefficient of the focal variable (or of the

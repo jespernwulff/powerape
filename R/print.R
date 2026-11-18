@@ -141,7 +141,7 @@ print.powerape_power <- function(x, ...) {
 }
 
 # Notes on failed fits, separation, and sparse identifying cells, shared by
-# the power, n, and mde print methods (DESIGN.md section 16).
+# the power, n, and mde print methods.
 print_separation_note <- function(x) {
   sepd <- x$separated %||% 0
   keep <- identical(x$separation, "keep")

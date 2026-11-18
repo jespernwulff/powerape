@@ -1,4 +1,4 @@
-# DESIGN.md sections 2.1 and 7.2: the internal AIE must reproduce ginteff
+# The internal AIE must reproduce ginteff
 # exactly on fixed datasets. Binary variables enter ginteff as factors in
 # `dydxs` (the analog of Stata's i. syntax): discrete change from the base
 # level. Numeric `firstdiff` would instead mean "+1 unit from the observed

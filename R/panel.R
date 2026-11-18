@@ -1,5 +1,5 @@
 # Panel designs: correlated random effects probit -----------------------------
-# DESIGN.md section 11. Model: y_it = 1[b0 + b_d d_it + z'gamma + c_i + u_it > 0],
+# Model: y_it = 1[b0 + b_d d_it + z'gamma + c_i + u_it > 0],
 # c_i = xi'(centered observed unit means of time-varying regressors) + a_i,
 # a_i ~ N(0, var_a). Estimation: pooled probit with Mundlak means and
 # unit-clustered SEs. Estimand: ASF-based APE (means held at observed values).
@@ -15,7 +15,7 @@
 # One draw of all regressor paths (unit-major order). Balanced panels give
 # every unit T_p rows; unbalanced panels (t_support/t_prob set) first draw
 # each unit's length T_i from the researcher's distribution -- selection is
-# completely at random by construction (DESIGN.md section 13). Mundlak means
+# completely at random by construction. Mundlak means
 # are computed over each unit's OBSERVED periods (Wooldridge, 2019). The
 # balanced branch consumes the identical RNG stream as pre-1.7.0 releases,
 # so balanced results are bit-identical.
@@ -245,7 +245,7 @@ ape_dgp_panel <- function(model = "probit", focal, moderator = NULL,
                  "moderator; continuous pairs are on the roadmap."),
            call. = FALSE)
   }
-  ## panel-length distribution (DESIGN.md section 13): a scalar n_periods is
+  ## panel-length distribution: a scalar n_periods is
   ## the balanced panel; a vector (+ optional p_periods) is an explicit length
   ## mixture; scalar + retention is monotone attrition. Degenerate mixtures
   ## short-circuit to the balanced code path (bit-identical numerics).

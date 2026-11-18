@@ -1,5 +1,5 @@
 # The difference-in-differences route in the robustness sweep, the
-# justified-alpha functions and the methods paragraph (DESIGN.md section 20).
+# justified-alpha functions and the methods paragraph.
 
 di_base <- function(t = 0.07, gap = 0.10, ...) {
   set_att(ape_dgp_did(model = "logit", baseline = 0.25, gap = gap, trend = 0.08,

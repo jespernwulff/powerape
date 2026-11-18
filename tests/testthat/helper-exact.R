@@ -4,7 +4,7 @@
 # validation/run-validation.R (V1).
 #
 # `separation` mirrors the engine's convention for an arm with no events or
-# no non-events (separation; DESIGN.md section 16): "fail" (the engine's
+# no non-events (separation): "fail" (the engine's
 # default since 1.11.0) scores it as a failed fit; "keep" scores its
 # degenerate Wald interval, in which the boundary arm contributes zero
 # variance. A constant focal column and constant y (both arms at the same

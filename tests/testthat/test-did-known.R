@@ -1,6 +1,6 @@
 # Known-answer checks of the difference-in-differences route: cases where
 # the answer is fixed by an identity, by another route of the package, or
-# by exact enumeration (DESIGN.md section 20).
+# by exact enumeration.
 
 test_that("the scales agree when there is no baseline gap or no control-group change", {
   ## with gap = 0 or trend = 0, "parallel" means the same on every scale:

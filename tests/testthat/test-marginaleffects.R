@@ -1,4 +1,4 @@
-# DESIGN.md section 7.2: APE point estimates and delta-method SEs must match
+# APE point estimates and delta-method SEs must match
 # marginaleffects on fixed datasets.
 
 test_that("APE and SE match marginaleffects (probit, binary focal)", {

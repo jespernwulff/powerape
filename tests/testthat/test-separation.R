@@ -1,5 +1,5 @@
-# Separation in the cells that identify the estimand (1.11.0; DESIGN.md
-# section 16): flagged per replication, scored as failed by default
+# Separation in the cells that identify the estimand (1.11.0):
+# flagged per replication, scored as failed by default
 # ("fail", the field's reference analysis refuses such fits) or kept with the
 # degenerate Wald interval ("keep", R's glm + marginaleffects), and reported
 # either way. The exact-enumeration certificate of both conventions lives in

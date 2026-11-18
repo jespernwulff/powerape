@@ -1,5 +1,5 @@
 # IV designs: endogenous focal via control-function probit ---------------------
-# DESIGN.md section 12. Structural model: y = 1[b0 + a*d + (bm*m + bdm*d*m)
+# Structural model: y = 1[b0 + a*d + (bm*m + bdm*d*m)
 # + z'gamma + u > 0], with the focal d endogenous: a linear first stage
 # (continuous d) or probit first stage (binary d) on the instruments, and
 # (u, v) bivariate normal with correlation `endogeneity`. u is standard

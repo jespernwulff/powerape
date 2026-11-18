@@ -44,7 +44,7 @@ req_margin <- function(p, s, t, z) {
 }
 
 # The estimand as named in prints and messages: "APE", "AIE", "ATT",
-# "DATT", or "three-way AIE" (DESIGN.md section 19).
+# "DATT", or "three-way AIE".
 est_label <- function(est) {
   if (identical(est, "aie3")) "three-way AIE" else toupper(est)
 }

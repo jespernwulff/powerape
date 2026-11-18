@@ -1,5 +1,5 @@
 # ape_dgp_did_pilot(): the inputs of a difference-in-differences design
-# estimated from pre-treatment data (DESIGN.md section 20).
+# estimated from pre-treatment data.
 
 # A large pre-treatment panel drawn from the route itself.
 pilot_from_route <- function(n = 20000, rho = 0.5, n_pre = 3) {

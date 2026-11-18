@@ -1,4 +1,4 @@
-# The primary correctness benchmark (DESIGN.md section 7.1): with a binary
+# The primary correctness benchmark: with a binary
 # focal variable and no covariates, the APE is a difference in proportions,
 # so simulated detection power must reproduce power.prop.test().
 

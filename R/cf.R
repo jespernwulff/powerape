@@ -1,5 +1,5 @@
 # Control-function probit: estimator internals ---------------------------------
-# DESIGN.md section 12. Replicates Stata 18.5's cfprobit/cfregress (StataNow):
+# Replicates Stata 18.5's cfprobit/cfregress (StataNow):
 # first-stage regression per endogenous variable (linear / probit / fprobit /
 # poisson), control function = the first stage's score residual, second-stage
 # probit by ML with the CF (and its interactions) as regressors, and standard
