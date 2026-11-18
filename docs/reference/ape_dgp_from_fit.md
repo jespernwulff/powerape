@@ -1,12 +1,12 @@
 # Specify a DGP from a fitted pilot model
 
-The third covariate route (DESIGN.md section 3.1): everything except the
-focal coefficient is lifted from a fitted pilot `glm` — the covariate
-rows come from the pilot's model matrix (resampled with replacement, so
-their joint distribution is preserved), the nuisance coefficients are
-the pilot estimates, and the intercept is the pilot's unless `baseline`
-overrides it. The focal coefficient itself is *not* taken from the
-pilot: it is re-solved in APE units by
+The third covariate route: everything except the focal coefficient is
+lifted from a fitted pilot `glm` — the covariate rows come from the
+pilot's model matrix (resampled with replacement, so their joint
+distribution is preserved), the nuisance coefficients are the pilot
+estimates, and the intercept is the pilot's unless `baseline` overrides
+it. The focal coefficient itself is *not* taken from the pilot: it is
+re-solved in APE units by
 [`set_ape()`](https://jespernwulff.github.io/powerape/reference/set_ape.md),
 keeping the "power for the effect size you care about" logic intact.
 

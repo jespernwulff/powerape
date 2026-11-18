@@ -28,7 +28,7 @@ claim_distance <- function(claim, t, sesoi) {
 #' (optionally) `n_max`: the sample size that reaches the target power in
 #' every scenario -- the insurance-premium n.
 #'
-#' Two pinning modes (DESIGN.md section 3.3):
+#' Two pinning modes:
 #' * `pin = "ape"` (default): the inversion is re-run in every scenario, so
 #'   the true effect stays at the planning value and only the *precision*
 #'   channel varies. Scenarios where the target is infeasible are reported

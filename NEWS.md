@@ -276,7 +276,7 @@ regenerates bit for bit, apart from `ape_mde()` (fixed below).
 * **Separation is now detected, reported, and by default scored as a
   failed fit** (new argument `separation = c("fail", "keep")` in
   `ape_power()`, `ape_curve()`, `ape_n()`, `ape_mde()`, and
-  `ape_robust()`; DESIGN.md section 16). When a simulated study has a
+  `ape_robust()`). When a simulated study has a
   cell that identifies the effect -- a level of a binary focal variable,
   or for AIE designs a focal-by-moderator cell -- with no events or no
   non-events, the maximum-likelihood effect does not exist. Stata's
@@ -406,8 +406,8 @@ regenerates bit for bit, apart from `ape_mde()` (fixed below).
 
 # powerape 1.9.0
 
-* **Justified error rates** (`vignette("justified-alpha")`; DESIGN.md
-  section 15). Two routes to an alpha that is chosen rather than
+* **Justified error rates** (`vignette("justified-alpha")`). Two routes
+  to an alpha that is chosen rather than
   inherited, both opt-in; the default stays `alpha = 0.05` per claim.
   - **Sample-size rules.** `alpha` may be a function of `n` in every
     power function, for example `alpha = function(n) alphaN::alphaN(n,

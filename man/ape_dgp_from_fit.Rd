@@ -25,7 +25,7 @@ An object of class \code{powerape_dgp} (route \code{"empirical"}, builder
 power functions; \code{\link[=ape_robust]{ape_robust()}} can vary \code{baseline}.
 }
 \description{
-The third covariate route (DESIGN.md section 3.1): everything except the
+The third covariate route: everything except the
 focal coefficient is lifted from a fitted pilot \code{glm} — the covariate
 rows come from the pilot's model matrix (resampled with replacement, so
 their joint distribution is preserved), the nuisance coefficients are

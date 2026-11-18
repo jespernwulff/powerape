@@ -127,7 +127,7 @@ grid of those inputs and reports per-scenario power, the worst case, and
 every scenario -- the insurance-premium n.
 }
 \details{
-Two pinning modes (DESIGN.md section 3.3):
+Two pinning modes:
 \itemize{
 \item \code{pin = "ape"} (default): the inversion is re-run in every scenario, so
 the true effect stays at the planning value and only the \emph{precision}

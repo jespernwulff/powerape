@@ -48,7 +48,7 @@ check_focal_role <- function(trm, assign, cols, focal) {
 
 #' Specify a DGP from a fitted pilot model
 #'
-#' The third covariate route (DESIGN.md section 3.1): everything except the
+#' The third covariate route: everything except the
 #' focal coefficient is lifted from a fitted pilot `glm` — the covariate
 #' rows come from the pilot's model matrix (resampled with replacement, so
 #' their joint distribution is preserved), the nuisance coefficients are

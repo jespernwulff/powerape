@@ -48,7 +48,7 @@ is the empirical joint distribution of a pilot (or register) dataset:
 simulation resamples its rows with replacement, and all calibration
 integrals are exact averages over the rows. This preserves the covariate
 dependence structure for free and is the recommended route when data
-exist (DESIGN.md section 3.1).
+exist.
 }
 \details{
 The focal variable comes in two flavors:

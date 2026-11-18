@@ -171,7 +171,7 @@ inputs; `nmax_candidates`, every scenario searched with its answer).
 
 ## Details
 
-Two pinning modes (DESIGN.md section 3.3):
+Two pinning modes:
 
 - `pin = "ape"` (default): the inversion is re-run in every scenario, so
   the true effect stays at the planning value and only the *precision*

@@ -354,27 +354,27 @@ regenerates bit for bit, apart from
   [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md),
   [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md),
   and
-  [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md);
-  DESIGN.md section 16). When a simulated study has a cell that
-  identifies the effect – a level of a binary focal variable, or for AIE
-  designs a focal-by-moderator cell – with no events or no non-events,
-  the maximum-likelihood effect does not exist. Stata’s probit/logit
-  drop the perfect predictor and `margins` reports the effect as not
-  estimable; R’s [`glm()`](https://rdrr.io/r/stats/glm.html) instead
-  stops silently at a large finite coefficient whose delta-method
-  standard error collapses to the other cell’s binomial SE. Through
-  1.10.0 the engine kept such replications, contrary to its
-  documentation, and they usually counted as detections: power was
-  overstated, and required sample sizes understated, in rare-outcome
-  designs with small focal groups (by up to about half in the audit’s
-  unbalanced examples), with `failed 0.000` printed throughout. They now
-  count as failed (`"fail"`, the default, matching the documentation and
-  Stata’s default analysis); `separation = "keep"` restores the 1.10.0
-  behavior (R’s [`glm()`](https://rdrr.io/r/stats/glm.html) +
-  marginaleffects analysis, Stata’s `asis`). Either way results report
-  the share of simulated studies with separation (`separated`) and the
-  average smallest identifying-cell count of events or non-events
-  (`min_cell`); print methods and
+  [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)).
+  When a simulated study has a cell that identifies the effect – a level
+  of a binary focal variable, or for AIE designs a focal-by-moderator
+  cell – with no events or no non-events, the maximum-likelihood effect
+  does not exist. Stata’s probit/logit drop the perfect predictor and
+  `margins` reports the effect as not estimable; R’s
+  [`glm()`](https://rdrr.io/r/stats/glm.html) instead stops silently at
+  a large finite coefficient whose delta-method standard error collapses
+  to the other cell’s binomial SE. Through 1.10.0 the engine kept such
+  replications, contrary to its documentation, and they usually counted
+  as detections: power was overstated, and required sample sizes
+  understated, in rare-outcome designs with small focal groups (by up to
+  about half in the audit’s unbalanced examples), with `failed 0.000`
+  printed throughout. They now count as failed (`"fail"`, the default,
+  matching the documentation and Stata’s default analysis);
+  `separation = "keep"` restores the 1.10.0 behavior (R’s
+  [`glm()`](https://rdrr.io/r/stats/glm.html) + marginaleffects
+  analysis, Stata’s `asis`). Either way results report the share of
+  simulated studies with separation (`separated`) and the average
+  smallest identifying-cell count of events or non-events (`min_cell`);
+  print methods and
   [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
   state both, and the functions warn when the share exceeds 1% or the
   smallest cell averages fewer than 10 events. A backup check flags
@@ -508,10 +508,9 @@ regenerates bit for bit, apart from
 ## powerape 1.9.0
 
 - **Justified error rates**
-  ([`vignette("justified-alpha")`](https://jespernwulff.github.io/powerape/articles/justified-alpha.md);
-  DESIGN.md section 15). Two routes to an alpha that is chosen rather
-  than inherited, both opt-in; the default stays `alpha = 0.05` per
-  claim.
+  ([`vignette("justified-alpha")`](https://jespernwulff.github.io/powerape/articles/justified-alpha.md)).
+  Two routes to an alpha that is chosen rather than inherited, both
+  opt-in; the default stays `alpha = 0.05` per claim.
   - **Sample-size rules.** `alpha` may be a function of `n` in every
     power function, for example
     `alpha = function(n) alphaN::alphaN(n, BF = 3)`, the Bayes-factor
