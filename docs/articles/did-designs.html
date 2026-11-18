@@ -111,8 +111,6 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jespernwulff.github.io/powerape/">powerape</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-question">The question<a class="anchor" aria-label="anchor" href="#the-question"></a>
 </h2>
@@ -135,6 +133,23 @@ group’s rate before treatment (<code>baseline</code>), the gap between
 the groups before treatment (<code>gap</code>), the control group’s
 change from before to after (<code>trend</code>), and the share of
 treated units (<code>p_treated</code>).</p>
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="design-r-tab" data-bs-toggle="tab" data-bs-target="#design-r" type="button" role="tab" aria-controls="design-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="design-stata-tab" data-bs-toggle="tab" data-bs-target="#design-stata" type="button" role="tab" aria-controls="design-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="design-r" class="tab-pane active" role="tabpanel" aria-labelledby="design-r-tab">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jespernwulff.github.io/powerape/">powerape</a></span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp_did.html">ape_dgp_did</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"logit"</span>, baseline <span class="op">=</span> <span class="fl">0.20</span>, gap <span class="op">=</span> <span class="fl">0.20</span>, trend <span class="op">=</span> <span class="fl">0.10</span>,</span>
 <span>                 design <span class="op">=</span> <span class="st">"panel"</span>, rho <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
@@ -149,6 +164,25 @@ treated units (<code>p_treated</code>).</p>
 <span><span class="co">#&gt;   rates before -&gt; after: control 0.200 -&gt; 0.300; treated 0.400 -&gt; 0.600 (0.533 without treatment)</span></span>
 <span><span class="co">#&gt;   true ATT pinned at +0.0670 (treatment coefficient = 0.2733)</span></span>
 <span><span class="co">#&gt;   the same four rates read under linear-parallel trends: +0.1003 (their cross difference)</span></span></code></pre></div>
+</div>
+<div id="design-stata" class="tab-pane" role="tabpanel" aria-labelledby="design-stata-tab">
+<div class="sourceCode" id="cb3"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>powerape dgp <span class="kw">d</span>, did <span class="kw">model</span>(<span class="kw">logit</span>) baseline(0.20) gap(0.20) trend(0.10)      <span class="co">///</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>    design(panel) rho(0.5)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>powerape setatt <span class="kw">d</span>, target(0.067)</span></code></pre></div>
+<pre class="stata-output"><code>powerape DGP -- logit, difference-in-differences (two periods)
+  data: panel, both periods per unit; rho = 0.50 (latent within-unit correlation); unit-clustered SEs
+  analysis: pooled logit; ATT = average partial effect of the treatment indicator over treated
+    post-period rows
+  treated group: 50% of units
+  covariates: none
+  untreated trends: parallel on the logit index (the scale the logit analysis assumes)
+  rates before -&gt; after: control 0.200 -&gt; 0.300; treated 0.400 -&gt; 0.600 (0.533 without treatment)
+  true ATT pinned at +0.0670 (treatment coefficient = 0.2733)
+  the same four rates read under linear-parallel trends: +0.1003 (their cross difference)</code></pre>
+</div>
+</div>
+</div>
 <p><code>design = "panel"</code> follows the same units in both periods;
 <code>n</code> then counts units, standard errors are clustered by unit,
 and <code>rho</code> is the dependence between a unit’s outcomes.
@@ -182,17 +216,60 @@ is the coefficient of the treatment indicator.</li>
 </ul>
 <p>An analysis is unbiased in the world whose scale it assumes. When the
 two agree, the functions report power:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="power-r-tab" data-bs-toggle="tab" data-bs-target="#power-r" type="button" role="tab" aria-controls="power-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="power-stata-tab" data-bs-toggle="tab" data-bs-target="#power-stata" type="button" role="tab" aria-controls="power-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="power-r" class="tab-pane active" role="tabpanel" aria-labelledby="power-r-tab">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">3000</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; powerape -- detection claim (CI excludes 0, directional)</span></span>
 <span><span class="co">#&gt;   logit, n = 3000 units x 2 periods (6000 obs), assumed true ATT +0.0670, 95% CI (alpha = 0.05), nsim = 300</span></span>
 <span><span class="co">#&gt;   power = 0.797 (MCSE 0.023)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.797 | inconclusive 0.203 | failed 0.000</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_n.html">ape_n</a></span><span class="op">(</span><span class="va">d</span>, power <span class="op">=</span> <span class="fl">0.80</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div id="power-stata" class="tab-pane" role="tabpanel" aria-labelledby="power-stata-tab">
+<div class="sourceCode" id="cb7"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>powerape power <span class="kw">d</span>, n(3000) claim(detect) nsim(300) <span class="dv">seed</span>(1)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- detection claim (CI excludes 0, directional)
+  logit, n = 3000 units x 2 periods (6000 obs), assumed true ATT + 0.0670, 95% CI (alpha = .05),
+    nsim = 300
+  fit: logit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.820 (MCSE 0.022)
+  outcomes: detect 0.820 | inconclusive 0.180 | failed 0.000</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>powerape n <span class="kw">d</span>, power(0.80) claim(detect) nsim(1000) <span class="dv">seed</span>(2) engine(<span class="kw">mata</span>)</span></code></pre></div>
+</div>
+</div>
+</div>
 <p>When they differ, the result is labelled a rejection rate, and the
 mean of the estimates shows what the analysis centres on:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="mismatch-r-tab" data-bs-toggle="tab" data-bs-target="#mismatch-r" type="button" role="tab" aria-controls="mismatch-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="mismatch-stata-tab" data-bs-toggle="tab" data-bs-target="#mismatch-stata" type="button" role="tab" aria-controls="mismatch-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="mismatch-r" class="tab-pane active" role="tabpanel" aria-labelledby="mismatch-r-tab">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d_mis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_att.html">set_att</a></span><span class="op">(</span><span class="fu"><a href="../reference/ape_dgp_did.html">ape_dgp_did</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"logit"</span>, baseline <span class="op">=</span> <span class="fl">0.20</span>, gap <span class="op">=</span> <span class="fl">0.20</span>,</span>
 <span>                             trend <span class="op">=</span> <span class="fl">0.10</span>, rho <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>                             trends <span class="op">=</span> <span class="st">"linear"</span>, analysis <span class="op">=</span> <span class="st">"index"</span><span class="op">)</span>, <span class="fl">0.10</span><span class="op">)</span></span>
@@ -202,6 +279,23 @@ mean of the estimates shows what the analysis centres on:</p>
 <span><span class="co">#&gt;   rejection rate = 0.367 (MCSE 0.028) -- not power: the simulated world has linear-parallel trends,</span></span>
 <span><span class="co">#&gt;     the logit analysis assumes index-parallel trends; its estimates average +0.0658, the true ATT is +0.1000</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.367 | inconclusive 0.633 | failed 0.000</span></span></code></pre></div>
+</div>
+<div id="mismatch-stata" class="tab-pane" role="tabpanel" aria-labelledby="mismatch-stata-tab">
+<div class="sourceCode" id="cb11"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>powerape dgp d_mis, did <span class="kw">model</span>(<span class="kw">logit</span>) baseline(0.20) gap(0.20) trend(0.10)  <span class="co">///</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>    rho(0.5) trends(linear) analysis(<span class="fu">index</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>powerape setatt d_mis, target(0.10)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>powerape power d_mis, n(1000) claim(detect) nsim(300) <span class="dv">seed</span>(3)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- detection claim (CI excludes 0, directional)
+  logit, n = 1000 units x 2 periods (2000 obs), assumed true ATT + 0.1000, 95% CI (alpha = .05),
+    nsim = 300
+  fit: logit, vce(cluster) via engine(stata), effects(closed)
+  rejection rate = 0.393 (MCSE 0.028) -- not power: the simulated world has linear-parallel trends,
+    the logit analysis assumes index-parallel trends; its estimates average +0.0675, the true ATT is +0.1000
+  outcomes: detect 0.393 | inconclusive 0.607 | failed 0.000</code></pre>
+</div>
+</div>
+</div>
 <p>Here the world has an effect of 10 points, and the logit analysis
 averages about 6.7, the logit reading of the same rates.
 <code><a href="../reference/ape_n.html">ape_n()</a></code> and <code><a href="../reference/ape_mde.html">ape_mde()</a></code> stop for such a design,
@@ -213,7 +307,22 @@ because no sample size delivers the claim for the right reason.</p>
 <p><code><a href="../reference/ape_robust.html">ape_robust()</a></code> re-runs the analysis over a grid of the
 design’s inputs. For these designs the grid can include the scale
 itself:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="robust-r-tab" data-bs-toggle="tab" data-bs-target="#robust-r" type="button" role="tab" aria-controls="robust-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="robust-stata-tab" data-bs-toggle="tab" data-bs-target="#robust-stata" type="button" role="tab" aria-controls="robust-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="robust-r" class="tab-pane active" role="tabpanel" aria-labelledby="robust-r-tab">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ape_robust.html">ape_robust</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">3000</span>, claim <span class="op">=</span> <span class="st">"detect"</span>, nsim <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>           vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.7</span><span class="op">)</span>, trends <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"index"</span>, <span class="st">"linear"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>           grid_points <span class="op">=</span> <span class="fl">2</span>, nmax <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -230,6 +339,26 @@ itself:</p>
 <span><span class="co">#&gt;  0.7  index          0.067 0.870 0.02378024         0 0.06493598  TRUE</span></span>
 <span><span class="co">#&gt;  0.3 linear          0.067 0.230 0.02975735         0 0.03095584 FALSE</span></span>
 <span><span class="co">#&gt;  0.7 linear          0.067 0.370 0.03413942         0 0.03440064 FALSE</span></span></code></pre></div>
+</div>
+<div id="robust-stata" class="tab-pane" role="tabpanel" aria-labelledby="robust-stata-tab">
+<div class="sourceCode" id="cb14"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>powerape <span class="kw">robust</span> <span class="kw">d</span>, n(3000) claim(detect) nsim(200) <span class="dv">seed</span>(4)                 <span class="co">///</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>    vary(rho(0.3 0.7) trends(<span class="fu">index</span> linear)) gridpoints(2) nonmax engine(<span class="kw">mata</span>)</span></code></pre></div>
+<pre class="stata-output"><code>powerape robustness sweep -- detect claim, ATT, pin = ape
+  n = 3000, nsim = 200 per scenario, 4 scenario(s) over: rho, trends
+  note: in 2 scenario(s) (valid = 0) the analysis assumes another parallel-trends scale than the
+    world has: power is a rejection rate there
+    and est_mean shows where the estimates centre (the true ATT is +0.0670); they are left out of
+      the range, the worst case and n_max.
+  power range [0.775, 0.915]; worst scenario: row 1
+  fit: Mata engine (Fisher scoring)
+ row          rho       trends    implied_eff    power     mcse separated  est_mean  valid
+   1           .3        index         0.0670   0.7750   0.0295    0.0000    0.0696      1
+   2           .7        index         0.0670   0.9150   0.0197    0.0000    0.0676      1
+   3           .3       linear         0.0670   0.2500   0.0306    0.0000    0.0348      0
+   4           .7       linear         0.0670   0.3750   0.0342    0.0000    0.0344      0</code></pre>
+</div>
+</div>
+</div>
 <p>In every scenario the effect on the treated is pinned at the planning
 value. Rows with <code>valid = FALSE</code> are worlds in which the
 analysis is biased: their <code>power</code> is a rejection rate,
@@ -246,7 +375,22 @@ other inputs that can be varied are <code>baseline</code>,
 before and after the treatment date. The analysis then has an indicator
 for every period but the first and one treatment indicator, so it
 estimates one effect.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="periods-r-tab" data-bs-toggle="tab" data-bs-target="#periods-r" type="button" role="tab" aria-controls="periods-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="periods-stata-tab" data-bs-toggle="tab" data-bs-target="#periods-stata" type="button" role="tab" aria-controls="periods-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="periods-r" class="tab-pane active" role="tabpanel" aria-labelledby="periods-r-tab">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_att.html">set_att</a></span><span class="op">(</span><span class="fu"><a href="../reference/ape_dgp_did.html">ape_dgp_did</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"logit"</span>, baseline <span class="op">=</span> <span class="fl">0.20</span>, gap <span class="op">=</span> <span class="fl">0.20</span>,</span>
 <span>                          trend <span class="op">=</span> <span class="fl">0.10</span>, rho <span class="op">=</span> <span class="fl">0.5</span>, n_pre <span class="op">=</span> <span class="fl">2</span>, n_post <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
 <span>              <span class="fl">0.067</span><span class="op">)</span></span>
@@ -255,6 +399,22 @@ estimates one effect.</p>
 <span><span class="co">#&gt;   logit, n = 1500 units x 4 periods (6000 obs), assumed true ATT +0.0670, 95% CI (alpha = 0.05), nsim = 300</span></span>
 <span><span class="co">#&gt;   power = 0.807 (MCSE 0.023)</span></span>
 <span><span class="co">#&gt;   outcomes: detect 0.807 | inconclusive 0.193 | failed 0.000</span></span></code></pre></div>
+</div>
+<div id="periods-stata" class="tab-pane" role="tabpanel" aria-labelledby="periods-stata-tab">
+<div class="sourceCode" id="cb17"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>powerape dgp d4, did <span class="kw">model</span>(<span class="kw">logit</span>) baseline(0.20) gap(0.20) trend(0.10)     <span class="co">///</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>    rho(0.5) npre(2) npost(2)</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>powerape setatt d4, target(0.067)</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>powerape power d4, n(1500) claim(detect) nsim(300) <span class="dv">seed</span>(5)</span></code></pre></div>
+<pre class="stata-output"><code>powerape -- detection claim (CI excludes 0, directional)
+  logit, n = 1500 units x 4 periods (6000 obs), assumed true ATT + 0.0670, 95% CI (alpha = .05),
+    nsim = 300
+  fit: logit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.810 (MCSE 0.023)
+  outcomes: detect 0.810 | inconclusive 0.190 | failed 0.000</code></pre>
+</div>
+</div>
+</div>
 <p>Two limits matter when reading this. Rates are the same in every
 period before and in every period after the treatment date, and so is
 the effect. And the dependence between two outcomes of a unit is the
@@ -268,7 +428,22 @@ bound.</p>
 <p>With <code>subgroup</code>, both groups are split into two subgroups
 that are both treated, and the target becomes the difference between
 their effects on the treated.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="subgroup-r-tab" data-bs-toggle="tab" data-bs-target="#subgroup-r" type="button" role="tab" aria-controls="subgroup-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="subgroup-stata-tab" data-bs-toggle="tab" data-bs-target="#subgroup-stata" type="button" role="tab" aria-controls="subgroup-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="subgroup-r" class="tab-pane active" role="tabpanel" aria-labelledby="subgroup-r-tab">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_dgp_did.html">ape_dgp_did</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"logit"</span>, baseline <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.30</span>, <span class="fl">0.20</span><span class="op">)</span>, gap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.15</span><span class="op">)</span>,</span>
 <span>                  trend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.05</span><span class="op">)</span>, rho <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>                  subgroup <span class="op">=</span> <span class="fu"><a href="../reference/pa_var.html">pa_var</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"binary"</span>, p <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span><span class="op">)</span></span>
@@ -284,6 +459,26 @@ their effects on the treated.</p>
 <span><span class="co">#&gt;   rates before -&gt; after, female = 1: control 0.200 -&gt; 0.250; treated 0.350 -&gt; 0.448 (0.418 without treatment)</span></span>
 <span><span class="co">#&gt;   effects on the treated: +0.1000 (female = 0), +0.0300 (female = 1); true difference (DATT) pinned at -0.0700</span></span>
 <span><span class="co">#&gt;   the same eight rates read under linear-parallel trends: difference -0.0612 (their triple cross difference)</span></span></code></pre></div>
+</div>
+<div id="subgroup-stata" class="tab-pane" role="tabpanel" aria-labelledby="subgroup-stata-tab">
+<div class="sourceCode" id="cb20"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>powerape dgp <span class="kw">ds</span>, did <span class="kw">model</span>(<span class="kw">logit</span>) baseline(0.30 0.20) gap(0.10 0.15)       <span class="co">///</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>    trend(0.10 0.05) rho(0.5) subgroup(female, <span class="kw">p</span>(0.4))</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>powerape setatt <span class="kw">ds</span>, target(0.10 0.03)</span></code></pre></div>
+<pre class="stata-output"><code>powerape DGP -- logit, difference-in-differences with a subgroup (two periods)
+  data: panel, both periods per unit; rho = 0.50 (latent within-unit correlation); unit-clustered SEs
+  analysis: pooled logit, fully interacted with female; estimate = difference of the two subgroups'
+    average partial effects of treatment
+  treated group: 50% of units; subgroup female = 1: 40%
+  covariates: none
+  untreated trends: parallel within each subgroup, on the logit index
+  rates before -&gt; after, female = 0: control 0.300 -&gt; 0.400; treated 0.400 -&gt; 0.609 (0.509 without treatment)
+  rates before -&gt; after, female = 1: control 0.200 -&gt; 0.250; treated 0.350 -&gt; 0.448 (0.418 without treatment)
+  effects on the treated: +0.1000 (female = 0), +0.0300 (female = 1); true difference (DATT) pinned at -0.0700
+  the same eight rates read under linear-parallel trends: difference -0.0612 (their triple cross difference)</code></pre>
+</div>
+</div>
+</div>
 <p>A difference between two effects is far more expensive than one
 effect: with equal subgroups and a difference as large as the effect
 itself, it needs about four times the units.</p>
@@ -296,7 +491,22 @@ the gap between the groups, the treated share and, in a panel, the
 dependence within units. <code><a href="../reference/ape_dgp_did_pilot.html">ape_dgp_did_pilot()</a></code> estimates
 these and builds the design. The control group’s change from before to
 after is not in such data, so <code>trend</code> has to be supplied.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="pilot-r-tab" data-bs-toggle="tab" data-bs-target="#pilot-r" type="button" role="tab" aria-controls="pilot-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="pilot-stata-tab" data-bs-toggle="tab" data-bs-target="#pilot-stata" type="button" role="tab" aria-controls="pilot-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="pilot-r" class="tab-pane active" role="tabpanel" aria-labelledby="pilot-r-tab">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">u</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">600</span><span class="op">)</span></span>
 <span><span class="va">treated</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">600</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span></span>
@@ -316,6 +526,30 @@ after is not in such data, so <code>trend</code> has to be supplied.</p>
 <span><span class="co">#&gt;   pilot: baseline, gap, treated share, rho estimated from 1200 pre-treatment rows (600 units); control group's change between pilot periods +0.010</span></span>
 <span><span class="co">#&gt;   true ATT pinned at +0.0800 (treatment coefficient = 0.3268)</span></span>
 <span><span class="co">#&gt;   the same four rates read under linear-parallel trends: +0.0814 (their cross difference)</span></span></code></pre></div>
+</div>
+<div id="pilot-stata" class="tab-pane" role="tabpanel" aria-labelledby="pilot-stata-tab">
+<div class="sourceCode" id="cb23"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>* The pilot <span class="bn">rows</span> are the ones the R code draws (Stata cannot <span class="bn">draw</span> R's random</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>* numbers): precompute/stata/did-pilot.csv <span class="kw">in</span> the R package's repository.</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>import delimited <span class="kw">using</span> <span class="st">"did-pilot.csv"</span>, encoding(utf-8) <span class="kw">clear</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>powerape dgp <span class="dv">dp</span>, didpilot outcome(<span class="fu">y</span>) <span class="fu">group</span>(treated) id(firm) period(<span class="fu">year</span>)  <span class="co">///</span></span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>    trend(0.05) <span class="kw">model</span>(<span class="kw">logit</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>powerape setatt <span class="dv">dp</span>, target(0.08)</span></code></pre></div>
+<pre class="stata-output"><code>powerape DGP -- logit, difference-in-differences (two periods)
+  data: panel, both periods per unit; rho = 0.43 (latent within-unit correlation); unit-clustered SEs
+  analysis: pooled logit; ATT = average partial effect of the treatment indicator over treated
+    post-period rows
+  treated group: 48% of units
+  covariates: none
+  untreated trends: parallel on the logit index (the scale the logit analysis assumes)
+  rates before -&gt; after: control 0.320 -&gt; 0.370; treated 0.341 -&gt; 0.472 (0.392 without treatment)
+  pilot: baseline, gap, treated share, rho estimated from 1200 pre-treatment rows (600 units);
+    control group's change between pilot periods +0.010
+  true ATT pinned at +0.0800 (treatment coefficient = 0.3268)
+  the same four rates read under linear-parallel trends: +0.0814 (their cross difference)</code></pre>
+</div>
+</div>
+</div>
 <p>The estimates are used as if they were known. Sweep them with
 <code><a href="../reference/ape_robust.html">ape_robust()</a></code> before relying on a sample size.</p>
 </div>
@@ -325,7 +559,22 @@ after is not in such data, so <code>trend</code> has to be supplied.</p>
 <p><code><a href="../reference/power_statement.html">power_statement()</a></code> writes the methods paragraph: the
 groups and periods, the rates, the scale on which trends are parallel,
 the analysis and its standard errors.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="lang-tabs">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button class="nav-link active" id="statement-r-tab" data-bs-toggle="tab" data-bs-target="#statement-r" type="button" role="tab" aria-controls="statement-r" aria-selected="true" data-lang="r">
+R
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button class="nav-link" id="statement-stata-tab" data-bs-toggle="tab" data-bs-target="#statement-stata" type="button" role="tab" aria-controls="statement-stata" aria-selected="false" data-lang="stata">
+Stata
+</button>
+</li>
+</ul>
+<div class="tab-content">
+<div id="statement-r" class="tab-pane active" role="tabpanel" aria-labelledby="statement-r-tab">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ape_power.html">ape_power</a></span><span class="op">(</span><span class="va">d</span>, n <span class="op">=</span> <span class="fl">3000</span>, claim <span class="op">=</span> <span class="st">"minimum"</span>, sesoi <span class="op">=</span> <span class="fl">0.02</span>, nsim <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/power_statement.html">power_statement</a></span><span class="op">(</span><span class="va">pw</span><span class="op">)</span></span>
 <span><span class="co">#&gt; We conducted a simulation-based power analysis for the average treatment</span></span>
@@ -356,6 +605,41 @@ the analysis and its standard errors.</p>
 <span><span class="co">#&gt; group-by-before/after cell with no events or no non-events), counted against</span></span>
 <span><span class="co">#&gt; the claim (0.0% of replications).</span></span></code></pre></div>
 </div>
+<div id="statement-stata" class="tab-pane" role="tabpanel" aria-labelledby="statement-stata-tab">
+<div class="sourceCode" id="cb26"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>powerape power <span class="kw">d</span>, n(3000) claim(minimum) sesoi(0.02) nsim(300) <span class="dv">seed</span>(6)</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>powerape statement</span></code></pre></div>
+<pre class="stata-output"><code>We conducted a simulation-based power analysis for the average treatment
+effect on the treated (ATT) in a difference-in-differences design, in
+probability points, using the powerape package for Stata (version 0.2.0 (Stata
+port of powerape 1.12.0)), following the confidence-interval approach of
+Riesthuis (2024). The assumed data-generating process was a
+difference-in-differences design with a treated group (50% of the units) and a
+control group, observed in one period before and one period after one common
+treatment date as a panel of the same units, with a latent within-unit
+correlation of 0.50 shared by all periods (Gaussian copula); outcome rates
+before and after treatment of 0.200 and 0.300 in the control group and 0.400
+and 0.600 in the treated group (0.533 without treatment); untreated trends
+parallel on the logit index; no covariates. The assumed true ATT was 0.067
+(6.7 percentage points). At a sample size of n = 3000 units observed in 2
+periods (6,000 unit-period observations), simulated power for the
+minimum-effect claim (the 90% confidence interval's lower bound exceeding the
+smallest effect size of interest, 0.020; a one-sided test at alpha = 5%) was
+0.673 (Monte Carlo SE 0.027; 300 replications). Across replications, the
+probability of concluding a meaningful effect was 0.673, of detection without
+meaningfulness 0.153, of an inconclusive result 0.173, and of equivalence
+0.000. Each simulated study was analysed by a pooled logit regression of the
+outcome on group, period indicators and the treatment indicator, with the
+effect on the treated computed as the average partial effect of the treatment
+indicator over the treated post-treatment observations (Wooldridge, 2023), and
+delta-method Wald confidence intervals from unit-clustered standard errors;
+replications without a maximum-likelihood estimate, from a failed fit or from
+separation (a group-by-before/after cell with no events or no non-events),
+counted against the claim (0.0% of replications).</code></pre>
+</div>
+</div>
+</div>
+</div>
 <div class="section level2">
 <h2 id="limits">Limits<a class="anchor" aria-label="anchor" href="#limits"></a>
 </h2>
@@ -364,8 +648,8 @@ units, not to clusters of units; balanced panels; covariates that do not
 change over time and are not interacted with treatment. Staggered
 adoption, effects that differ by period and pre-trend tests are not
 available. The Stata command covers these designs from its version 0.2.0
-(<code>powerape dgp NAME, did</code>); this vignette shows the R code
-only.</p>
+(<code>powerape dgp NAME, did</code>); on the package’s website this
+vignette shows the Stata code next to the R code.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

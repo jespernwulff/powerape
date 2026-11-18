@@ -71,10 +71,18 @@ is many times faster and is the one to use for searches.
 | Panel: periods, persistence, unit effect | `ape_dgp_panel(n_periods = 4, rho = 0.3, cre_share = 0.5, ...)`, `pa_var(..., icc = 0.6)` | `powerape dgp name, panel nperiods(4) rho(0.3) creshare(0.5) ...`, `icc(0.6)` in a variable |
 | Unbalanced panel | `n_periods = c(2, 4, 6)` with `p_periods`, or `retention = 0.85` | `nperiods(2 4 6)` with `pperiods()`, or `retention(0.85)` |
 | Endogenous focal variable | `ape_dgp_iv(instruments = ..., endogeneity = 0.4, iv_strength = 0.2, ...)` | `powerape dgp name, iv instruments(...) endogeneity(0.4) ivstrength(0.2) ...` |
+| Difference-in-differences: rates, data structure | `ape_dgp_did(baseline = 0.20, gap = 0.20, trend = 0.10, design = "panel", rho = 0.5, ...)`; `design = "cross-sections"` | `powerape dgp name, did baseline(0.20) gap(0.20) trend(0.10) design(panel) rho(0.5) ...`; `design(cross-sections)` |
+| Difference-in-differences: shares, periods, subgroup | `p_treated`, `p_post`, `n_pre`, `n_post`, `subgroup = pa_var("female", "binary", p = 0.4)` | `ptreated()`, `ppost()`, `npre()`, `npost()`, `subgroup(female, p(0.4))` |
+| Scale on which untreated trends are parallel | `trends = "index"` (default) or `"linear"` | `trends(index)` (default) or `trends(linear)` |
+| Analysis of each simulated difference-in-differences study | `analysis = "index"` (default; probit or logit) or `"linear"` (linear probability model) | `analysis(index)` (default) or `analysis(linear)` |
+| Difference-in-differences design from pre-treatment data | `ape_dgp_did_pilot(pilot, outcome = "y", group = "treated", id = "firm", period = "year", trend = 0.05)` | `powerape dgp name, didpilot outcome(y) group(treated) id(firm) period(year) trend(0.05)`, on the data in memory |
 | Pin the APE | `d <- set_ape(d, target = 0.10)` | `powerape setape d, target(0.10)` |
 | Pin the AIE | `set_aie(d, target = 0.08, main_focal = 0.10, main_moderator = 0.03)` | `powerape setaie d, target(0.08) mainfocal(0.10) mainmoderator(0.03)` |
-| The true effect of a world | `true_ape(d)`, `true_aie(d)` | `powerape trueape d`, `powerape trueaie d` |
+| Pin the effect on the treated (difference-in-differences) | `set_att(d, target = 0.07)`; with a subgroup, `target = c(0.10, 0.03)` | `powerape setatt d, target(0.07)`; with a subgroup, `target(0.10 0.03)` |
+| The true effect of a world | `true_ape(d)`, `true_aie(d)`, `true_att(d)` | `powerape trueape d`, `powerape trueaie d`, `powerape trueatt d` |
 | Show a world | `print(d)` | `powerape describe d` |
+| Three-way interaction design | `ape_dgp(moderator2 = pa_var(...))`, `set_aie3()`, `true_aie3()` | not available |
+| Linear probability analysis of the other designs | `set_analysis(d, "linear")` | not available; `analysis(linear)` exists for difference-in-differences designs only |
 
 `set_ape()` returns a new design and leaves `d` as it was unless you assign
 the result back; `powerape setape` changes the stored design in place. To
@@ -100,6 +108,7 @@ keep two versions in Stata, describe the world twice under two names.
 | Minimum detectable effect | `ape_mde(d, n = 1500, ...)`, `direction`, `main_focal`, `main_moderator` | `powerape mde d, n(1500) ...`, `direction()`, `mainfocal()`, `mainmoderator()` |
 | Robustness sweep | `ape_robust(d, n = 2200, vary = list(baseline = c(0.2, 0.4)), ...)` | `powerape robust d, n(2200) vary(baseline(0.2 0.4)) ...` |
 | Sweep settings | `pin`, `mode = "mde"`, `grid_points`, `nmax = FALSE`, `nmax_power` | `pin()`, `mode(mde)`, `gridpoints()`, `nonmax`, `nmaxpower()` |
+| Sweep over the parallel-trends scale (difference-in-differences) | `vary = list(trends = c("index", "linear"))` | `vary(trends(index linear))` |
 | Who fits the simulated studies | the package's own routine | `engine(stata)` (default) or `engine(mata)`; `effects(closed)` (default) or `effects(margins)` |
 
 ## Reporting and justified error rates
@@ -123,7 +132,17 @@ what Stata reports: the observed information, and its small-sample factors
 for `vce(robust)` and `vce(cluster)`. On fixed data the probit standard
 errors differ by at most about 0.00006 and the logit ones agree to
 numerical precision, so the two reach the same decision in nearly every
-simulated study.
+simulated study. The linear analysis of a difference-in-differences design
+uses the factors of `regress` (`vce(robust)` in cross-sections,
+`vce(cluster)` in panels) in the R package and under both engines.
+
+**What the Stata command does not have.** Version 0.2.0 of the Stata
+command is a port of version 1.12.0 of the R package without two of its
+parts: the three-way interaction design (`moderator2`, `set_aie3()`,
+`true_aie3()`), and `set_analysis()`, which analyses the simulated studies
+of the other designs with a linear probability model. In Stata the linear
+analysis exists for difference-in-differences designs, as
+`analysis(linear)`.
 
 **Alpha rules.** In R a rule is any function of *n*, for example
 `function(n) alphaN::alphaN(n, BF = 3)` from the alphaN package. In Stata it
@@ -152,7 +171,9 @@ The Stata command is validated against the R package in four tiers: exact
 power by enumeration, the estimators on fixed data sets (and against
 `probit`, `logit`, `margins`, `ginteff` and `cfprobit`), the calibration
 constants, and simulated power, sample sizes and detectable effects in
-matched designs. See [How powerape is validated](validation.html).
+matched designs. The difference-in-differences designs have four tiers of
+their own, which also compare the command with `regress`, `didregress` and
+`xtdidregress`. See [How powerape is validated](validation.html).
 
 ## References
 

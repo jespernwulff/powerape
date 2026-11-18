@@ -1,10 +1,5 @@
 # Difference-in-differences designs
 
-``` r
-
-library(powerape)
-```
-
 ## The question
 
 A treated group and a control group are observed before and after one
@@ -26,6 +21,14 @@ rate before treatment (`baseline`), the gap between the groups before
 treatment (`gap`), the control group’s change from before to after
 (`trend`), and the share of treated units (`p_treated`).
 
+- R
+- Stata
+
+``` r
+
+library(powerape)
+```
+
 ``` r
 
 d <- ape_dgp_did(model = "logit", baseline = 0.20, gap = 0.20, trend = 0.10,
@@ -41,6 +44,26 @@ d
 #>   rates before -> after: control 0.200 -> 0.300; treated 0.400 -> 0.600 (0.533 without treatment)
 #>   true ATT pinned at +0.0670 (treatment coefficient = 0.2733)
 #>   the same four rates read under linear-parallel trends: +0.1003 (their cross difference)
+```
+
+``` stata
+powerape dgp d, did model(logit) baseline(0.20) gap(0.20) trend(0.10)      ///
+    design(panel) rho(0.5)
+
+powerape setatt d, target(0.067)
+```
+
+``` stata-output
+powerape DGP -- logit, difference-in-differences (two periods)
+  data: panel, both periods per unit; rho = 0.50 (latent within-unit correlation); unit-clustered SEs
+  analysis: pooled logit; ATT = average partial effect of the treatment indicator over treated
+    post-period rows
+  treated group: 50% of units
+  covariates: none
+  untreated trends: parallel on the logit index (the scale the logit analysis assumes)
+  rates before -> after: control 0.200 -> 0.300; treated 0.400 -> 0.600 (0.533 without treatment)
+  true ATT pinned at +0.0670 (treatment coefficient = 0.2733)
+  the same four rates read under linear-parallel trends: +0.1003 (their cross difference)
 ```
 
 `design = "panel"` follows the same units in both periods; `n` then
@@ -73,6 +96,9 @@ The package therefore keeps two things separate:
 An analysis is unbiased in the world whose scale it assumes. When the
 two agree, the functions report power:
 
+- R
+- Stata
+
 ``` r
 
 ape_power(d, n = 3000, claim = "detect", nsim = 300, seed = 1)
@@ -87,8 +113,28 @@ ape_power(d, n = 3000, claim = "detect", nsim = 300, seed = 1)
 ape_n(d, power = 0.80, claim = "detect", nsim = 1000, seed = 2)
 ```
 
+``` stata
+powerape power d, n(3000) claim(detect) nsim(300) seed(1)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  logit, n = 3000 units x 2 periods (6000 obs), assumed true ATT + 0.0670, 95% CI (alpha = .05),
+    nsim = 300
+  fit: logit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.820 (MCSE 0.022)
+  outcomes: detect 0.820 | inconclusive 0.180 | failed 0.000
+```
+
+``` stata
+powerape n d, power(0.80) claim(detect) nsim(1000) seed(2) engine(mata)
+```
+
 When they differ, the result is labelled a rejection rate, and the mean
 of the estimates shows what the analysis centres on:
+
+- R
+- Stata
 
 ``` r
 
@@ -101,6 +147,24 @@ ape_power(d_mis, n = 1000, claim = "detect", nsim = 300, seed = 3)
 #>   rejection rate = 0.367 (MCSE 0.028) -- not power: the simulated world has linear-parallel trends,
 #>     the logit analysis assumes index-parallel trends; its estimates average +0.0658, the true ATT is +0.1000
 #>   outcomes: detect 0.367 | inconclusive 0.633 | failed 0.000
+```
+
+``` stata
+powerape dgp d_mis, did model(logit) baseline(0.20) gap(0.20) trend(0.10)  ///
+    rho(0.5) trends(linear) analysis(index)
+powerape setatt d_mis, target(0.10)
+
+powerape power d_mis, n(1000) claim(detect) nsim(300) seed(3)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  logit, n = 1000 units x 2 periods (2000 obs), assumed true ATT + 0.1000, 95% CI (alpha = .05),
+    nsim = 300
+  fit: logit, vce(cluster) via engine(stata), effects(closed)
+  rejection rate = 0.393 (MCSE 0.028) -- not power: the simulated world has linear-parallel trends,
+    the logit analysis assumes index-parallel trends; its estimates average +0.0675, the true ATT is +0.1000
+  outcomes: detect 0.393 | inconclusive 0.607 | failed 0.000
 ```
 
 Here the world has an effect of 10 points, and the logit analysis
@@ -116,6 +180,9 @@ the right reason.
 [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
 re-runs the analysis over a grid of the design’s inputs. For these
 designs the grid can include the scale itself:
+
+- R
+- Stata
 
 ``` r
 
@@ -137,6 +204,27 @@ ape_robust(d, n = 3000, claim = "detect", nsim = 200, seed = 4,
 #>  0.7 linear          0.067 0.370 0.03413942         0 0.03440064 FALSE
 ```
 
+``` stata
+powerape robust d, n(3000) claim(detect) nsim(200) seed(4)                 ///
+    vary(rho(0.3 0.7) trends(index linear)) gridpoints(2) nonmax engine(mata)
+```
+
+``` stata-output
+powerape robustness sweep -- detect claim, ATT, pin = ape
+  n = 3000, nsim = 200 per scenario, 4 scenario(s) over: rho, trends
+  note: in 2 scenario(s) (valid = 0) the analysis assumes another parallel-trends scale than the
+    world has: power is a rejection rate there
+    and est_mean shows where the estimates centre (the true ATT is +0.0670); they are left out of
+      the range, the worst case and n_max.
+  power range [0.775, 0.915]; worst scenario: row 1
+  fit: Mata engine (Fisher scoring)
+ row          rho       trends    implied_eff    power     mcse separated  est_mean  valid
+   1           .3        index         0.0670   0.7750   0.0295    0.0000    0.0696      1
+   2           .7        index         0.0670   0.9150   0.0197    0.0000    0.0676      1
+   3           .3       linear         0.0670   0.2500   0.0306    0.0000    0.0348      0
+   4           .7       linear         0.0670   0.3750   0.0342    0.0000    0.0344      0
+```
+
 In every scenario the effect on the treated is pinned at the planning
 value. Rows with `valid = FALSE` are worlds in which the analysis is
 biased: their `power` is a rejection rate, `est_mean` shows where the
@@ -150,6 +238,9 @@ estimates centre, and they are left out of the worst case and of the
 treatment date. The analysis then has an indicator for every period but
 the first and one treatment indicator, so it estimates one effect.
 
+- R
+- Stata
+
 ``` r
 
 d4 <- set_att(ape_dgp_did(model = "logit", baseline = 0.20, gap = 0.20,
@@ -160,6 +251,23 @@ ape_power(d4, n = 1500, claim = "detect", nsim = 300, seed = 5)
 #>   logit, n = 1500 units x 4 periods (6000 obs), assumed true ATT +0.0670, 95% CI (alpha = 0.05), nsim = 300
 #>   power = 0.807 (MCSE 0.023)
 #>   outcomes: detect 0.807 | inconclusive 0.193 | failed 0.000
+```
+
+``` stata
+powerape dgp d4, did model(logit) baseline(0.20) gap(0.20) trend(0.10)     ///
+    rho(0.5) npre(2) npost(2)
+powerape setatt d4, target(0.067)
+
+powerape power d4, n(1500) claim(detect) nsim(300) seed(5)
+```
+
+``` stata-output
+powerape -- detection claim (CI excludes 0, directional)
+  logit, n = 1500 units x 4 periods (6000 obs), assumed true ATT + 0.0670, 95% CI (alpha = .05),
+    nsim = 300
+  fit: logit, vce(cluster) via engine(stata), effects(closed)
+  power = 0.810 (MCSE 0.023)
+  outcomes: detect 0.810 | inconclusive 0.190 | failed 0.000
 ```
 
 Two limits matter when reading this. Rates are the same in every period
@@ -174,6 +282,9 @@ bound.
 With `subgroup`, both groups are split into two subgroups that are both
 treated, and the target becomes the difference between their effects on
 the treated.
+
+- R
+- Stata
 
 ``` r
 
@@ -194,6 +305,27 @@ ds
 #>   the same eight rates read under linear-parallel trends: difference -0.0612 (their triple cross difference)
 ```
 
+``` stata
+powerape dgp ds, did model(logit) baseline(0.30 0.20) gap(0.10 0.15)       ///
+    trend(0.10 0.05) rho(0.5) subgroup(female, p(0.4))
+
+powerape setatt ds, target(0.10 0.03)
+```
+
+``` stata-output
+powerape DGP -- logit, difference-in-differences with a subgroup (two periods)
+  data: panel, both periods per unit; rho = 0.50 (latent within-unit correlation); unit-clustered SEs
+  analysis: pooled logit, fully interacted with female; estimate = difference of the two subgroups'
+    average partial effects of treatment
+  treated group: 50% of units; subgroup female = 1: 40%
+  covariates: none
+  untreated trends: parallel within each subgroup, on the logit index
+  rates before -> after, female = 0: control 0.300 -> 0.400; treated 0.400 -> 0.609 (0.509 without treatment)
+  rates before -> after, female = 1: control 0.200 -> 0.250; treated 0.350 -> 0.448 (0.418 without treatment)
+  effects on the treated: +0.1000 (female = 0), +0.0300 (female = 1); true difference (DATT) pinned at -0.0700
+  the same eight rates read under linear-parallel trends: difference -0.0612 (their triple cross difference)
+```
+
 A difference between two effects is far more expensive than one effect:
 with equal subgroups and a difference as large as the effect itself, it
 needs about four times the units.
@@ -206,6 +338,9 @@ dependence within units.
 [`ape_dgp_did_pilot()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did_pilot.md)
 estimates these and builds the design. The control group’s change from
 before to after is not in such data, so `trend` has to be supplied.
+
+- R
+- Stata
 
 ``` r
 
@@ -230,6 +365,31 @@ set_att(dp, 0.08)
 #>   the same four rates read under linear-parallel trends: +0.0814 (their cross difference)
 ```
 
+``` stata
+* The pilot rows are the ones the R code draws (Stata cannot draw R's random
+* numbers): precompute/stata/did-pilot.csv in the R package's repository.
+import delimited using "did-pilot.csv", encoding(utf-8) clear
+powerape dgp dp, didpilot outcome(y) group(treated) id(firm) period(year)  ///
+    trend(0.05) model(logit)
+
+powerape setatt dp, target(0.08)
+```
+
+``` stata-output
+powerape DGP -- logit, difference-in-differences (two periods)
+  data: panel, both periods per unit; rho = 0.43 (latent within-unit correlation); unit-clustered SEs
+  analysis: pooled logit; ATT = average partial effect of the treatment indicator over treated
+    post-period rows
+  treated group: 48% of units
+  covariates: none
+  untreated trends: parallel on the logit index (the scale the logit analysis assumes)
+  rates before -> after: control 0.320 -> 0.370; treated 0.341 -> 0.472 (0.392 without treatment)
+  pilot: baseline, gap, treated share, rho estimated from 1200 pre-treatment rows (600 units);
+    control group's change between pilot periods +0.010
+  true ATT pinned at +0.0800 (treatment coefficient = 0.3268)
+  the same four rates read under linear-parallel trends: +0.0814 (their cross difference)
+```
+
 The estimates are used as if they were known. Sweep them with
 [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
 before relying on a sample size.
@@ -240,6 +400,9 @@ before relying on a sample size.
 writes the methods paragraph: the groups and periods, the rates, the
 scale on which trends are parallel, the analysis and its standard
 errors.
+
+- R
+- Stata
 
 ``` r
 
@@ -274,6 +437,42 @@ power_statement(pw)
 #> the claim (0.0% of replications).
 ```
 
+``` stata
+powerape power d, n(3000) claim(minimum) sesoi(0.02) nsim(300) seed(6)
+
+powerape statement
+```
+
+``` stata-output
+We conducted a simulation-based power analysis for the average treatment
+effect on the treated (ATT) in a difference-in-differences design, in
+probability points, using the powerape package for Stata (version 0.2.0 (Stata
+port of powerape 1.12.0)), following the confidence-interval approach of
+Riesthuis (2024). The assumed data-generating process was a
+difference-in-differences design with a treated group (50% of the units) and a
+control group, observed in one period before and one period after one common
+treatment date as a panel of the same units, with a latent within-unit
+correlation of 0.50 shared by all periods (Gaussian copula); outcome rates
+before and after treatment of 0.200 and 0.300 in the control group and 0.400
+and 0.600 in the treated group (0.533 without treatment); untreated trends
+parallel on the logit index; no covariates. The assumed true ATT was 0.067
+(6.7 percentage points). At a sample size of n = 3000 units observed in 2
+periods (6,000 unit-period observations), simulated power for the
+minimum-effect claim (the 90% confidence interval's lower bound exceeding the
+smallest effect size of interest, 0.020; a one-sided test at alpha = 5%) was
+0.673 (Monte Carlo SE 0.027; 300 replications). Across replications, the
+probability of concluding a meaningful effect was 0.673, of detection without
+meaningfulness 0.153, of an inconclusive result 0.173, and of equivalence
+0.000. Each simulated study was analysed by a pooled logit regression of the
+outcome on group, period indicators and the treatment indicator, with the
+effect on the treated computed as the average partial effect of the treatment
+indicator over the treated post-treatment observations (Wooldridge, 2023), and
+delta-method Wald confidence intervals from unit-clustered standard errors;
+replications without a maximum-likelihood estimate, from a failed fit or from
+separation (a group-by-before/after cell with no events or no non-events),
+counted against the claim (0.0% of replications).
+```
+
 ## Limits
 
 One treated group and one treatment date; treatment assigned to units,
@@ -281,7 +480,8 @@ not to clusters of units; balanced panels; covariates that do not change
 over time and are not interacted with treatment. Staggered adoption,
 effects that differ by period and pre-trend tests are not available. The
 Stata command covers these designs from its version 0.2.0
-(`powerape dgp NAME, did`); this vignette shows the R code only.
+(`powerape dgp NAME, did`); on the package’s website this vignette shows
+the Stata code next to the R code.
 
 ## References
 

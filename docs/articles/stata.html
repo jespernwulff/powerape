@@ -296,7 +296,7 @@ stage alone ran 2,000), so this call uses the Mata engine,
 <code>engine(mata)</code>, a self-contained port of the R package’s
 fitting routine that is many times faster than calling
 <code>probit</code>. <a href="#engines-who-fits-the-simulated-studies">Engines</a> below
-explains the choice. The search took 15 seconds.</p>
+explains the choice. The search took 12 seconds.</p>
 <p>A power curve evaluates a list of sample sizes on the same
 footing.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode stata"><code class="sourceCode stata"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>powerape curve <span class="kw">d</span>, n(500(500)3000) claim(minimum) sesoi(0.05)             <span class="co">///</span></span>
@@ -376,8 +376,8 @@ paragraph for a grant application or a preregistration.</p>
   outcomes: minimum 0.816 | detect-only 0.180 | inconclusive 0.004 | equivalence 0.000 | failed 0.000
 
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of treat using the powerape package for Stata (version 0.1.3 (Stata port
-of powerape 1.11.3)), following the confidence-interval approach of Riesthuis
+(APE) of treat using the powerape package for Stata (version 0.2.0 (Stata port
+of powerape 1.12.0)), following the confidence-interval approach of Riesthuis
 (2024). The assumed data-generating process was a probit model with focal
 variable treat (binary, prevalence 0.50); parametric covariates age
 (continuous, mean 45, SD 12), female (binary, prevalence 0.55), with an
@@ -426,7 +426,7 @@ compared directly:</p>
 of 500, because <code>probit</code> computes standard errors from the
 observed information and the Mata engine from the expected information,
 which moves an interval that sits right at a boundary. The Mata engine
-took 1.9 seconds, <code>probit</code> 23.8. Use the Mata engine for
+took 1.7 seconds, <code>probit</code> 25.1. Use the Mata engine for
 searches, curves and sweeps, and confirm the final design with Stata’s
 estimator.</p>
 <p><code>effects(margins)</code> goes one step further and computes
@@ -448,7 +448,7 @@ powerape -- minimum-effect claim (CI lower bound &gt; 0.050)
   fit: probit via engine(stata), effects(margins)
   power = 0.720 (MCSE 0.045)
   outcomes: minimum 0.720 | detect-only 0.260 | inconclusive 0.020 | equivalence 0.000 | failed 0.000</code></pre>
-<p>It is also slower (14.1 against 3.6 seconds for these 100
+<p>It is also slower (9.1 against 3.1 seconds for these 100
 replications), so its use is as a check. <code>engine()</code> and
 <code><a href="https://rdrr.io/r/stats/effects.html" class="external-link">effects()</a></code> given on one command apply to that command only;
 <code>powerape engine</code> shows and sets the defaults for the
@@ -548,15 +548,16 @@ powerape -- minimum-effect claim (CI lower bound &gt; 0.050)
   outcomes: minimum 0.616 | detect-only 0.362 | inconclusive 0.022 | equivalence 0.000 | failed 0.000</code></pre>
 <p>The R functions for the two routes are
 <code><a href="../reference/ape_dgp_empirical.html">ape_dgp_empirical()</a></code> and <code><a href="../reference/ape_dgp_from_fit.html">ape_dgp_from_fit()</a></code>.
-Panel data and endogenous treatments have their own routes,
-<code>panel</code> and <code>iv</code>; see <a href="panel-designs.html">Panel designs</a> and <a href="iv-designs.html">IV designs</a>.</p>
+Panel data, difference-in-differences studies and endogenous treatments
+have their own routes, <code>panel</code>, <code>did</code> and
+<code>iv</code>; see <a href="panel-designs.html">Panel designs</a>, <a href="did-designs.html">Difference-in-differences designs</a> and <a href="iv-designs.html">IV designs</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="where-next">Where next<a class="anchor" aria-label="anchor" href="#where-next"></a>
 </h2>
 <ul>
 <li>The <strong>workflows</strong> take one design question each, with
-the R and the Stata code side by side: <a href="classic-sesoi-detection.html">the classic SESOI analysis</a>, <a href="equivalence.html">equivalence</a>, <a href="interaction-effects.html">interaction effects</a>, <a href="panel-designs.html">panel designs</a>, <a href="iv-designs.html">IV designs</a> and <a href="justified-alpha.html">justified alpha</a>.</li>
+the R and the Stata code side by side: <a href="classic-sesoi-detection.html">the classic SESOI analysis</a>, <a href="equivalence.html">equivalence</a>, <a href="interaction-effects.html">interaction effects</a>, <a href="panel-designs.html">panel designs</a>, <a href="did-designs.html">difference-in-differences designs</a>, <a href="iv-designs.html">IV designs</a> and <a href="justified-alpha.html">justified alpha</a>.</li>
 <li>The <a href="stata-help.html">help file</a> documents every
 subcommand, option and stored result.</li>
 <li>

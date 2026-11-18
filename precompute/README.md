@@ -15,11 +15,12 @@ of the package (`.Rbuildignore`).
 | `vignettes/equivalence.Rmd` | workflow, R and Stata tabs | `equivalence` |
 | `vignettes/interaction-effects.Rmd` | workflow, R and Stata tabs | `interaction` |
 | `vignettes/panel-designs.Rmd` | workflow, R and Stata tabs | `panel` |
+| `vignettes/did-designs.Rmd` | workflow, R and Stata tabs | `did` |
 | `vignettes/iv-designs.Rmd` | workflow, R and Stata tabs | `iv` |
 | `vignettes/justified-alpha.Rmd` | workflow, R and Stata tabs | `justified-alpha` |
 | `vignettes/minimum-effect.Rmd` | Get started in R (R only) | none |
 
-The six workflow vignettes are also the package's vignettes. Their Stata
+The seven workflow vignettes are also the package's vignettes. Their Stata
 tabs exist only on the website: their setup chunk sources `helpers.R` when
 pkgdown builds them (`IN_PKGDOWN` is `"true"`) and defines empty stand-ins
 otherwise, so `R CMD build` and `R CMD check` render the same R-only
@@ -57,7 +58,10 @@ vignettes as before.
    R code draws from `design-c-pilot.csv` (Stata cannot draw R's random
    numbers). The file is under version control; `design-c-pilot.R` writes
    it again (`Rscript precompute/stata/design-c-pilot.R` from the package
-   root), and the article stops if the two ever differ.
+   root), and the article stops if the two ever differ. `did.do` reads the
+   1,200 pilot rows of the difference-in-differences vignette in the same
+   way, from `did-pilot.csv` (written by `did-pilot.R`); on the website the
+   vignette stops if the file and its rows differ.
 
 2. **Home page and worked example.** With the version of the R package to
    document installed, from the package root:

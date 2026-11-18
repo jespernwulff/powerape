@@ -10,9 +10,23 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
                       fig.width = 6, fig.height = 4)
+# On the website (pkgdown) the examples sit in R | Stata tabs, with the Stata
+# output read from precompute/stata/output/. The package vignette shows R only.
+# On the website library(powerape) is shown inside the first R tab instead of
+# at the top, where readers of the Stata tabs would see it too.
+in_pkgdown <- identical(Sys.getenv("IN_PKGDOWN"), "true")
+if (in_pkgdown) {
+  root <- normalizePath(getwd(), winslash = "/")
+  while (!file.exists(file.path(root, "DESCRIPTION")) && dirname(root) != root)
+    root <- dirname(root)
+  source(file.path(root, "precompute", "helpers.R"))
+} else {
+  tabs_r <- tabs_stata <- tabs_end <- function(...) ""
+  stata_show <- stata_figure <- function(...) invisible(NULL)
+}
 ```
 
-```{r setup}
+```{r setup, echo = !in_pkgdown}
 library(powerape)
 ```
 
@@ -35,12 +49,26 @@ rate before treatment (`baseline`), the gap between the groups before
 treatment (`gap`), the control group's change from before to after
 (`trend`), and the share of treated units (`p_treated`).
 
+`r tabs_r("design")`
+
+```{r, eval = FALSE, echo = in_pkgdown}
+library(powerape)
+```
+
 ```{r design}
 d <- ape_dgp_did(model = "logit", baseline = 0.20, gap = 0.20, trend = 0.10,
                  design = "panel", rho = 0.5)
 d <- set_att(d, 0.067)
 d
 ```
+
+`r tabs_stata("design")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("did", c("design", "pin"), output = "pin")
+```
+
+`r tabs_end()`
 
 `design = "panel"` follows the same units in both periods; `n` then counts
 units, standard errors are clustered by unit, and `rho` is the dependence
@@ -72,6 +100,8 @@ The package therefore keeps two things separate:
 An analysis is unbiased in the world whose scale it assumes. When the two
 agree, the functions report power:
 
+`r tabs_r("power")`
+
 ```{r power}
 ape_power(d, n = 3000, claim = "detect", nsim = 300, seed = 1)
 ```
@@ -80,8 +110,19 @@ ape_power(d, n = 3000, claim = "detect", nsim = 300, seed = 1)
 ape_n(d, power = 0.80, claim = "detect", nsim = 1000, seed = 2)
 ```
 
+`r tabs_stata("power")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("did", "power")
+stata_show("did", "n", output = FALSE)
+```
+
+`r tabs_end()`
+
 When they differ, the result is labelled a rejection rate, and the mean
 of the estimates shows what the analysis centres on:
+
+`r tabs_r("mismatch")`
 
 ```{r mismatch}
 d_mis <- set_att(ape_dgp_did(model = "logit", baseline = 0.20, gap = 0.20,
@@ -89,6 +130,14 @@ d_mis <- set_att(ape_dgp_did(model = "logit", baseline = 0.20, gap = 0.20,
                              trends = "linear", analysis = "index"), 0.10)
 ape_power(d_mis, n = 1000, claim = "detect", nsim = 300, seed = 3)
 ```
+
+`r tabs_stata("mismatch")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("did", c("mismatch-world", "mismatch"), output = "mismatch")
+```
+
+`r tabs_end()`
 
 Here the world has an effect of 10 points, and the logit analysis averages
 about 6.7, the logit reading of the same rates. `ape_n()` and `ape_mde()`
@@ -100,11 +149,21 @@ right reason.
 `ape_robust()` re-runs the analysis over a grid of the design's inputs.
 For these designs the grid can include the scale itself:
 
+`r tabs_r("robust")`
+
 ```{r robust}
 ape_robust(d, n = 3000, claim = "detect", nsim = 200, seed = 4,
            vary = list(rho = c(0.3, 0.7), trends = c("index", "linear")),
            grid_points = 2, nmax = FALSE)
 ```
+
+`r tabs_stata("robust")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("did", "robust")
+```
+
+`r tabs_end()`
 
 In every scenario the effect on the treated is pinned at the planning
 value. Rows with `valid = FALSE` are worlds in which the analysis is
@@ -119,12 +178,22 @@ estimates centre, and they are left out of the worst case and of the
 treatment date. The analysis then has an indicator for every period but
 the first and one treatment indicator, so it estimates one effect.
 
+`r tabs_r("periods")`
+
 ```{r periods}
 d4 <- set_att(ape_dgp_did(model = "logit", baseline = 0.20, gap = 0.20,
                           trend = 0.10, rho = 0.5, n_pre = 2, n_post = 2),
               0.067)
 ape_power(d4, n = 1500, claim = "detect", nsim = 300, seed = 5)
 ```
+
+`r tabs_stata("periods")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("did", c("periods-world", "periods"), output = "periods")
+```
+
+`r tabs_end()`
 
 Two limits matter when reading this. Rates are the same in every period
 before and in every period after the treatment date, and so is the
@@ -138,6 +207,8 @@ With `subgroup`, both groups are split into two subgroups that are both
 treated, and the target becomes the difference between their effects on
 the treated.
 
+`r tabs_r("subgroup")`
+
 ```{r subgroup}
 ds <- ape_dgp_did(model = "logit", baseline = c(0.30, 0.20), gap = c(0.10, 0.15),
                   trend = c(0.10, 0.05), rho = 0.5,
@@ -145,6 +216,14 @@ ds <- ape_dgp_did(model = "logit", baseline = c(0.30, 0.20), gap = c(0.10, 0.15)
 ds <- set_att(ds, c(0.10, 0.03))
 ds
 ```
+
+`r tabs_stata("subgroup")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("did", c("subgroup", "subgroup-pin"), output = "subgroup-pin")
+```
+
+`r tabs_end()`
 
 A difference between two effects is far more expensive than one effect:
 with equal subgroups and a difference as large as the effect itself, it
@@ -158,6 +237,8 @@ within units. `ape_dgp_did_pilot()` estimates these and builds the design.
 The control group's change from before to after is not in such data, so
 `trend` has to be supplied.
 
+`r tabs_r("pilot")`
+
 ```{r pilot}
 set.seed(1)
 u <- rnorm(600)
@@ -170,6 +251,22 @@ dp <- ape_dgp_did_pilot(pilot, outcome = "y", group = "treated", id = "firm",
 set_att(dp, 0.08)
 ```
 
+`r tabs_stata("pilot")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("did", c("pilot", "pilot-pin"), output = "pilot-pin")
+```
+
+```{r, include = FALSE, eval = in_pkgdown}
+# The Stata run reads these rows from precompute/stata/did-pilot.csv (written
+# by precompute/stata/did-pilot.R): stop if the two differ.
+rows <- utils::read.csv(file.path(.pc_dir(), "stata", "did-pilot.csv"))
+stopifnot(identical(dim(rows), dim(pilot)),
+          isTRUE(all.equal(rows, pilot, check.attributes = FALSE)))
+```
+
+`r tabs_end()`
+
 The estimates are used as if they were known. Sweep them with
 `ape_robust()` before relying on a sample size.
 
@@ -179,10 +276,20 @@ The estimates are used as if they were known. Sweep them with
 the rates, the scale on which trends are parallel, the analysis and its
 standard errors.
 
+`r tabs_r("statement")`
+
 ```{r statement}
 pw <- ape_power(d, n = 3000, claim = "minimum", sesoi = 0.02, nsim = 300, seed = 6)
 power_statement(pw)
 ```
+
+`r tabs_stata("statement")`
+
+```{r, echo = FALSE, results = "asis"}
+stata_show("did", c("statement-power", "statement"), output = "statement")
+```
+
+`r tabs_end()`
 
 ## Limits
 
@@ -191,7 +298,8 @@ not to clusters of units; balanced panels; covariates that do not change
 over time and are not interacted with treatment. Staggered adoption,
 effects that differ by period and pre-trend tests are not available. The
 Stata command covers these designs from its version 0.2.0
-(`powerape dgp NAME, did`); this vignette shows the R code only.
+(`powerape dgp NAME, did`); on the package's website this vignette shows
+the Stata code next to the R code.
 
 ## References
 

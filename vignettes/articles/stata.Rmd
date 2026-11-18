@@ -282,8 +282,10 @@ stata_show("getting-started", "pilot-fromfit")
 ```
 
 The R functions for the two routes are `ape_dgp_empirical()` and
-`ape_dgp_from_fit()`. Panel data and endogenous treatments have their own
-routes, `panel` and `iv`; see [Panel designs](panel-designs.html) and
+`ape_dgp_from_fit()`. Panel data, difference-in-differences studies and
+endogenous treatments have their own routes, `panel`, `did` and `iv`; see
+[Panel designs](panel-designs.html),
+[Difference-in-differences designs](did-designs.html) and
 [IV designs](iv-designs.html).
 
 ## Where next
@@ -291,8 +293,9 @@ routes, `panel` and `iv`; see [Panel designs](panel-designs.html) and
 - The **workflows** take one design question each, with the R and the Stata
   code side by side: [the classic SESOI analysis](classic-sesoi-detection.html),
   [equivalence](equivalence.html), [interaction effects](interaction-effects.html),
-  [panel designs](panel-designs.html), [IV designs](iv-designs.html) and
-  [justified alpha](justified-alpha.html).
+  [panel designs](panel-designs.html),
+  [difference-in-differences designs](did-designs.html),
+  [IV designs](iv-designs.html) and [justified alpha](justified-alpha.html).
 - The [help file](stata-help.html) documents every subcommand, option and
   stored result.
 - [R and Stata side by side](r-and-stata.html) matches the R functions to

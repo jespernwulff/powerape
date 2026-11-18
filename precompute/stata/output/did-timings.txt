@@ -1,0 +1,7 @@
+label	seconds
+power	     60.2
+n	    142.3
+mismatch	     20.7
+robust	     26.0
+periods	     36.5
+statement	     41.1

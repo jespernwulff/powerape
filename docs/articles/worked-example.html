@@ -1461,8 +1461,8 @@ Stata
 <span id="cb57-3"><a href="#cb57-3" tabindex="-1"></a></span>
 <span id="cb57-4"><a href="#cb57-4" tabindex="-1"></a>powerape statement</span></code></pre></div>
 <pre class="stata-output"><code>We conducted a simulation-based power analysis for the average partial effect
-(APE) of program using the powerape package for Stata (version 0.1.3 (Stata
-port of powerape 1.11.3)), following the confidence-interval approach of
+(APE) of program using the powerape package for Stata (version 0.2.0 (Stata
+port of powerape 1.12.0)), following the confidence-interval approach of
 Riesthuis (2024). The assumed data-generating process was a probit model with
 focal variable program (binary, prevalence 0.50); parametric covariates z
 (continuous, mean 0, SD 1), with the focal variable and the covariates
@@ -1488,7 +1488,7 @@ replications).</code></pre>
 </h2>
 <ul>
 <li>The R output on this page comes from <code>powerape</code> 1.12.0,
-the Stata output from the Stata command 0.1.3 (StataNow 19.5). Every
+the Stata output from the Stata command 0.2.0 (StataNow 19.5). Every
 call shows its seed and its number of replications, so with the same
 versions the R numbers reproduce exactly.</li>
 <li>R and Stata draw different random numbers, so their numbers agree up
@@ -1504,7 +1504,7 @@ found a power of .82.</li>
 Stata’s own commands: <code>probit</code> (with
 <code>vce(cluster)</code> on the panel route) and <code>cfprobit</code>
 on the IV route. That is slower: the 4,000 simulated panels of Design
-D’s first power call took 5 minutes this way, on a machine that was busy
+D’s first power call took 4 minutes this way, on a machine that was busy
 with other jobs. The searches and sweeps use the Mata engine, which
 follows the R package’s conventions and is 10 to 30 times faster; the
 two engines agree up to simulation error (see <a href="validation.html">How powerape is validated</a>).</li>

@@ -277,29 +277,106 @@ on the data in memory</td>
 <td><code>powerape dgp name, iv instruments(...) endogeneity(0.4) ivstrength(0.2) ...</code></td>
 </tr>
 <tr class="odd">
+<td>Difference-in-differences: rates, data structure</td>
+<td>
+<code>ape_dgp_did(baseline = 0.20, gap = 0.20, trend = 0.10, design = "panel", rho = 0.5, ...)</code>;
+<code>design = "cross-sections"</code>
+</td>
+<td>
+<code>powerape dgp name, did baseline(0.20) gap(0.20) trend(0.10) design(panel) rho(0.5) ...</code>;
+<code>design(cross-sections)</code>
+</td>
+</tr>
+<tr class="even">
+<td>Difference-in-differences: shares, periods, subgroup</td>
+<td>
+<code>p_treated</code>, <code>p_post</code>, <code>n_pre</code>,
+<code>n_post</code>,
+<code>subgroup = pa_var("female", "binary", p = 0.4)</code>
+</td>
+<td>
+<code>ptreated()</code>, <code>ppost()</code>, <code>npre()</code>,
+<code>npost()</code>, <code>subgroup(female, p(0.4))</code>
+</td>
+</tr>
+<tr class="odd">
+<td>Scale on which untreated trends are parallel</td>
+<td>
+<code>trends = "index"</code> (default) or
+<code>"linear"</code>
+</td>
+<td>
+<code>trends(index)</code> (default) or
+<code>trends(linear)</code>
+</td>
+</tr>
+<tr class="even">
+<td>Analysis of each simulated difference-in-differences study</td>
+<td>
+<code>analysis = "index"</code> (default; probit or logit) or
+<code>"linear"</code> (linear probability model)</td>
+<td>
+<code>analysis(index)</code> (default) or
+<code>analysis(linear)</code>
+</td>
+</tr>
+<tr class="odd">
+<td>Difference-in-differences design from pre-treatment data</td>
+<td><code>ape_dgp_did_pilot(pilot, outcome = "y", group = "treated", id = "firm", period = "year", trend = 0.05)</code></td>
+<td>
+<code>powerape dgp name, didpilot outcome(y) group(treated) id(firm) period(year) trend(0.05)</code>,
+on the data in memory</td>
+</tr>
+<tr class="even">
 <td>Pin the APE</td>
 <td><code>d &lt;- set_ape(d, target = 0.10)</code></td>
 <td><code>powerape setape d, target(0.10)</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Pin the AIE</td>
 <td><code>set_aie(d, target = 0.08, main_focal = 0.10, main_moderator = 0.03)</code></td>
 <td><code>powerape setaie d, target(0.08) mainfocal(0.10) mainmoderator(0.03)</code></td>
 </tr>
+<tr class="even">
+<td>Pin the effect on the treated (difference-in-differences)</td>
+<td>
+<code>set_att(d, target = 0.07)</code>; with a subgroup,
+<code>target = c(0.10, 0.03)</code>
+</td>
+<td>
+<code>powerape setatt d, target(0.07)</code>; with a subgroup,
+<code>target(0.10 0.03)</code>
+</td>
+</tr>
 <tr class="odd">
 <td>The true effect of a world</td>
 <td>
-<code>true_ape(d)</code>, <code>true_aie(d)</code>
+<code>true_ape(d)</code>, <code>true_aie(d)</code>,
+<code>true_att(d)</code>
 </td>
 <td>
-<code>powerape trueape d</code>,
-<code>powerape trueaie d</code>
+<code>powerape trueape d</code>, <code>powerape trueaie d</code>,
+<code>powerape trueatt d</code>
 </td>
 </tr>
 <tr class="even">
 <td>Show a world</td>
 <td><code>print(d)</code></td>
 <td><code>powerape describe d</code></td>
+</tr>
+<tr class="odd">
+<td>Three-way interaction design</td>
+<td>
+<code>ape_dgp(moderator2 = pa_var(...))</code>,
+<code><a href="../reference/set_aie3.html">set_aie3()</a></code>, <code><a href="../reference/true_aie3.html">true_aie3()</a></code>
+</td>
+<td>not available</td>
+</tr>
+<tr class="even">
+<td>Linear probability analysis of the other designs</td>
+<td><code>set_analysis(d, "linear")</code></td>
+<td>not available; <code>analysis(linear)</code> exists for
+difference-in-differences designs only</td>
 </tr>
 </tbody>
 </table>
@@ -446,6 +523,12 @@ two versions in Stata, describe the world twice under two names.</p>
 </td>
 </tr>
 <tr class="odd">
+<td>Sweep over the parallel-trends scale
+(difference-in-differences)</td>
+<td><code>vary = list(trends = c("index", "linear"))</code></td>
+<td><code>vary(trends(index linear))</code></td>
+</tr>
+<tr class="even">
 <td>Who fits the simulated studies</td>
 <td>the package’s own routine</td>
 <td>
@@ -533,7 +616,19 @@ Stata reports: the observed information, and its small-sample factors
 for <code>vce(robust)</code> and <code>vce(cluster)</code>. On fixed
 data the probit standard errors differ by at most about 0.00006 and the
 logit ones agree to numerical precision, so the two reach the same
-decision in nearly every simulated study.</p>
+decision in nearly every simulated study. The linear analysis of a
+difference-in-differences design uses the factors of
+<code>regress</code> (<code>vce(robust)</code> in cross-sections,
+<code>vce(cluster)</code> in panels) in the R package and under both
+engines.</p>
+<p><strong>What the Stata command does not have.</strong> Version 0.2.0
+of the Stata command is a port of version 1.12.0 of the R package
+without two of its parts: the three-way interaction design
+(<code>moderator2</code>, <code><a href="../reference/set_aie3.html">set_aie3()</a></code>,
+<code><a href="../reference/true_aie3.html">true_aie3()</a></code>), and <code><a href="../reference/set_analysis.html">set_analysis()</a></code>, which
+analyses the simulated studies of the other designs with a linear
+probability model. In Stata the linear analysis exists for
+difference-in-differences designs, as <code>analysis(linear)</code>.</p>
 <p><strong>Alpha rules.</strong> In R a rule is any function of
 <em>n</em>, for example
 <code>function(n) alphaN::alphaN(n, BF = 3)</code> from the alphaN
@@ -567,8 +662,9 @@ exact power by enumeration, the estimators on fixed data sets (and
 against <code>probit</code>, <code>logit</code>, <code>margins</code>,
 <code>ginteff</code> and <code>cfprobit</code>), the calibration
 constants, and simulated power, sample sizes and detectable effects in
-matched designs. See <a href="validation.html">How powerape is
-validated</a>.</p>
+matched designs. The difference-in-differences designs have four tiers
+of their own, which also compare the command with <code>regress</code>,
+<code>didregress</code> and <code>xtdidregress</code>. See <a href="validation.html">How powerape is validated</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

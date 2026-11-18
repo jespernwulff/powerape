@@ -1,9 +1,9 @@
 label	seconds
-power	    273.4
-cs_power	    203.6
-n	     80.4
-rho	    174.2
-power_85	    133.1
-power_70	    109.3
-n_85	     58.7
-n_70	     50.7
+power	    213.5
+cs_power	    180.8
+n	     76.1
+rho	    172.2
+power_85	    159.2
+power_70	    152.7
+n_85	     74.2
+n_70	     56.2

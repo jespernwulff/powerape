@@ -37,6 +37,12 @@ results:
   robust and clustered standard errors, and the `margins` effects, to about
   1e-6, including the endogenous-interaction design run with Stata's own
   syntax.
+* **Difference-in-differences, the linear analysis and three-way
+  interactions.** On fixed data sets the effect on the treated, the linear
+  probability analysis and the three-way effect match Stata's `regress`,
+  `logit` with `margins`, `didregress` and `xtdidregress`, and
+  difference-in-differences power in a small study matches its exact value
+  from enumerating every possible study.
 
 The package's test suite runs these anchors, among many other checks, on
 Linux, Windows and macOS with every change.
@@ -79,3 +85,30 @@ HC0 sandwich; on fixed data the probit standard errors differ by at most
 about 0.00006. And Stata's `asis` fit of a perfectly separated sample stops
 its likelihood search a little before R's `glm` does, which moves the
 estimate in the fifth decimal.
+
+### Difference-in-differences designs
+
+The Stata command has the difference-in-differences designs from its
+version 0.2.0. They went through the same four tiers, with scripts and data
+of their own, against version 1.12.0 of the R package. Both analyses of
+these designs are checked throughout: the pooled probit or logit, whose
+effect on the treated is an average partial effect, and the linear
+probability model.
+
+| Tier | What is compared | Criterion | Result |
+|-----|---------|------|---|
+| A. Exact power | Exact power by enumeration in repeated cross-sections without covariates against the R package's enumeration, then simulated power and the share of studies without a usable estimate against the exact values, for the logit, probit and linear analyses | the two enumerations to 1e-9; simulation within 4 combined SEs (Monte Carlo error and the error of the exact value) | 31 of 31 |
+| B. Fixed data | The estimators on five data sets, with one or several periods before and after treatment and with a subgroup: the R package's internals, and Stata's `logit` and `probit` with `margins`, `regress`, `didregress` and `xtdidregress` | R internals to 1e-6 or better; Stata's estimators to their documented conventions | 225 of 225 |
+| C. Calibration | The index coefficients, the rates, both readings of the rates and the true effect of designs on both scales, with and without covariates, with several periods and with a subgroup, and the estimates of the pilot-data builder | closed forms to 1e-8; integration-based worlds to their integration error | 235 of 235 |
+| D. Simulation | Power, rejection rates when the analysis assumes another scale than the world has, required numbers of units, detectable effects, sweeps (also over the scale of the parallel trends) and justified alpha in matched designs, at 4,000 replications per row | within 3 combined Monte Carlo SEs; searches within 6% of the R package's answer | 53 of 53 |
+
+The scripts are `v_did_tierA.do` to `v_did_tierD.do` in the same folder and
+are started the same way. Tiers B and C take a minute or two each, Tier A
+about ten minutes and Tier D about 25.
+
+One difference between the engines is specific to these designs. With
+`separation(keep)`, the default engine still counts most separated studies
+as failed: Stata's `asis` fit does not converge when a group-by-period cell
+other than the treated group's cell after treatment is separated.
+`engine(mata)` keeps such studies, as the R package does. Under the default,
+`separation(fail)`, the two engines agree.
