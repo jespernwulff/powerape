@@ -138,7 +138,7 @@ pw_rule
 #>   outcomes: minimum 0.790 | detect-only 0.210 | inconclusive 0.000 | equivalence 0.000 | failed 0.000
 power_statement(pw_rule)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of program using the powerape package (version 1.12.0), following the
+#> (APE) of program using the powerape package (version 1.12.1), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable program (binary, prevalence
 #> 0.50); parametric covariates z (continuous, mean 0, SD 1), with the focal
@@ -172,8 +172,8 @@ powerape -- minimum-effect claim (CI lower bound > 0.050)
   outcomes: minimum 0.802 | detect-only 0.198 | inconclusive 0.000 | equivalence 0.000 | failed 0.000
 
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of program using the powerape package for Stata (version 0.2.0 (Stata
-port of powerape 1.12.0)), following the confidence-interval approach of
+(APE) of program using the powerape package for Stata (version 0.2.1 (Stata
+port of powerape 1.12.1)), following the confidence-interval approach of
 Riesthuis (2024). The assumed data-generating process was a probit model with
 focal variable program (binary, prevalence 0.50); parametric covariates z
 (continuous, mean 0, SD 1), with the focal variable and the covariates
@@ -424,7 +424,7 @@ power_statement(ja4)
 #> and Type II error rate (Maier & Lakens, 2022; Mudge et al., 2012), weighting
 #> a Type I error 4 times a Type II error and taking prior odds of 1 for the
 #> planning value (APE = 0.100) against the claim boundary, using the powerape
-#> package (version 1.12.0). The assumed data-generating process was a probit
+#> package (version 1.12.1). The assumed data-generating process was a probit
 #> model with focal variable program (binary, prevalence 0.50); parametric
 #> covariates z (continuous, mean 0, SD 1), with the focal variable and the
 #> covariates mutually independent; baseline outcome rate 0.300 with the focal
@@ -459,7 +459,7 @@ a one-sided test at alpha = 4.2%) by minimizing the weighted combined Type I
 and Type II error rate (Maier & Lakens, 2022; Mudge et al., 2012), weighting a
 Type I error 4 times a Type II error and taking prior odds of 1 for the
 planning value (APE = 0.100) against the claim boundary, using the powerape
-package for Stata (version 0.2.0 (Stata port of powerape 1.12.0)). The assumed
+package for Stata (version 0.2.1 (Stata port of powerape 1.12.1)). The assumed
 data-generating process was a probit model with focal variable program
 (binary, prevalence 0.50); parametric covariates z (continuous, mean 0, SD 1),
 with the focal variable and the covariates mutually independent; baseline

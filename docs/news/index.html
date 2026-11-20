@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,6 +64,16 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.12.1" id="powerape-1121">powerape 1.12.1<a class="anchor" aria-label="anchor" href="#powerape-1121"></a></h2>
+<p>Difference-in-differences designs: what <code>rho</code> means when a design has covariates. No simulated result of an existing design changes; one function does.</p>
+<ul><li>
+<strong><code><a href="../reference/ape_dgp_did_pilot.html">ape_dgp_did_pilot()</a></code> with covariates returned too high a <code>rho</code>.</strong> In <code><a href="../reference/ape_dgp_did.html">ape_dgp_did()</a></code>, <code>rho</code> is the dependence between a unit’s outcomes that is left given the covariates; covariates are constant over time and add dependence of their own. The pairs of outcomes in a pilot show the whole dependence, and the function used that raw value together with any covariates passed to it, which counted part of the dependence twice and overstated power (in one probit example with <code>signal = 0.3</code>: 82% reported for a design with 74%, and 16% too few units for 80%). With covariates the function now solves for the <code>rho</code> at which the design has the pilot’s share of pairs with the outcome in both periods; the raw value is kept in <code>$pilot$rho_raw</code> and printed. If the covariates as specified imply more dependence than the pilot shows, <code>rho</code> is set to 0 with a warning. Designs built without covariates are unchanged.</li>
+<li>
+<strong>A warning for few units in one group.</strong> Robust and cluster-robust standard errors are too small when one group of a difference-in-differences design has few independent units, and more periods per unit do not help: with ten treated units among one hundred, a true zero effect was declared significant in 9% to 10% of simulated studies at the 5% level, under both analyses. The existing warnings (fewer than 30 units in all; a cell with fewer than ten events) did not see a small group observed in several periods. <code><a href="../reference/ape_power.html">ape_power()</a></code>, <code><a href="../reference/ape_curve.html">ape_curve()</a></code>, <code><a href="../reference/ape_n.html">ape_n()</a></code>, <code><a href="../reference/ape_mde.html">ape_mde()</a></code> and <code><a href="../reference/ape_robust.html">ape_robust()</a></code> now warn when fewer than 30 units are expected in the smaller group (in repeated cross-sections: fewer than 30 observations in the smallest group-by-before/after cell; with a subgroup: in the smallest group-by-subgroup cell). <code><a href="../reference/ape_dgp_did.html">?ape_dgp_did</a></code>, section ‘Interval coverage in small samples’, gives the simulated rates. No result changes.</li>
+<li>
+<strong>Documentation.</strong> <code><a href="../reference/ape_dgp_did.html">?ape_dgp_did</a></code> says that <code>rho</code> is the correlation given the covariates, gives the raw correlation it implies under probit (<code>(rho + s2) / (1 + s2)</code>, <code>s2 = signal / (1 - signal)</code>) and the conversion from a raw correlation. The sentence that <code>signal</code> “buys the linear panel analysis no precision” is corrected: adjusting for a time-constant covariate buys that analysis nothing, but a panel design with a larger <code>signal</code> at the same <code>rho</code> has more power, because its units are more alike over time. The design print and <code><a href="../reference/power_statement.html">power_statement()</a></code> name <code>rho</code> as “given the covariates” when a design has covariates that move the outcome.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.12.0" id="powerape-1120">powerape 1.12.0<a class="anchor" aria-label="anchor" href="#powerape-1120"></a></h2>
 <p>Existing designs are untouched under their default analysis: seeded results of every existing route are identical to 1.11.4.</p>

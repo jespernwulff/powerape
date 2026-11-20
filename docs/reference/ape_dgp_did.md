@@ -74,7 +74,8 @@ ape_dgp_did(
 - rho:
 
   Panel designs: latent correlation between any two outcomes of a unit,
-  in `[0, 1)`.
+  in `[0, 1)`; with covariates, the correlation given the covariates
+  (section 'Data structure').
 
 - p_post:
 
@@ -185,10 +186,20 @@ panel); `n` in the power functions counts units, and standard errors are
 clustered by unit. Outcomes of one unit are dependent through a Gaussian
 copula with latent correlation `rho` that leaves the marginal rates
 exact under either link; under probit this is the random-effects probit
-with `rho = Var(c) / (Var(c) + 1)`. `design = "cross-sections"` draws
-independent observations, each after the treatment date with probability
-`p_post` and then in one of that block's periods with equal probability;
-`n` counts all observations, and `se` in
+with `rho = Var(c) / (Var(c) + 1)`. With covariates, `rho` is the
+dependence that is left **given the covariates**, as in a random-effects
+probit with regressors: covariates are constant over time, so they make
+a unit's outcomes more alike on top of `rho`. Under probit with normal
+covariates the raw latent correlation between two outcomes of a unit is
+`(rho + s2) / (1 + s2)` with `s2 = signal / (1 - signal)`; to plan from
+a raw within-unit correlation `r`, use
+`rho = (r - signal) / (1 - signal)`. Under logit the covariates add less
+and there is no closed form;
+[`ape_dgp_did_pilot()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did_pilot.md)
+solves for the value under either link. `design = "cross-sections"`
+draws independent observations, each after the treatment date with
+probability `p_post` and then in one of that block's periods with equal
+probability; `n` counts all observations, and `se` in
 [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md)
 chooses model-based or robust standard errors for the probit/logit
 analysis.
@@ -244,8 +255,12 @@ squares has no separation, so no simulated study is discarded for an
 all-zero or all-one cell; the sparse-cell warning still applies. In a
 balanced panel a time-constant covariate changes neither the estimate
 nor its clustered standard error beyond the degrees of freedom (its
-contribution cancels in each unit's change), so `signal` buys the linear
-panel analysis no precision; in cross-sections it does.
+contribution cancels in each unit's change), so adjusting for covariates
+buys the linear panel analysis no precision; in cross-sections it does.
+A panel design with a larger `signal` at the same `rho` still has more
+power under either analysis, because `rho` is the dependence given the
+covariates and the design's units are then more alike over time (section
+'Data structure'), not because of the adjustment.
 
 ## Interval coverage in small samples
 
@@ -266,6 +281,23 @@ power of the analysis a study will run and needs no correction; with
 small cells, part of it is this excess. The interval of the linear
 analysis is close to nominal at the same sizes (94.9% to 95.0% for the
 same rates).
+
+A second effect concerns both analyses. Robust and cluster-robust
+standard errors are too small when one group has few independent units,
+and more periods per unit do not help, because the units are what is
+independent. With 10% of the units treated and a true effect of zero,
+the 5% test of the linear analysis rejected in 12%, 10%, 7% and 6% of
+simulated two-period panels with 4, 10, 20 and 40 treated units, and in
+17%, 10% and 6% of panels with four periods on each side and 4, 10 and
+40 treated units; the probit/logit analysis behaved alike (9%, 8% and 6%
+with 10, 20 and 40 treated units). With groups of equal size the excess
+of the linear analysis is small (5.7% with 20 units a group in a
+two-period panel, 6.9% with four periods on each side, 5% to 6% from 50
+a group). The power functions warn when fewer than 30 units are expected
+in the smaller group; in repeated cross-sections, when fewer than 30
+observations are expected in the smallest group-by-before/after cell;
+with a subgroup, in the smallest group-by-subgroup cell. Power reported
+for such a design contains the excess.
 
 ## Limits of this version
 

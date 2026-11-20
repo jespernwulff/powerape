@@ -134,8 +134,8 @@ difference-in-differences design uses the factors of `regress`
 (`vce(robust)` in cross-sections, `vce(cluster)` in panels) in the R
 package and under both engines.
 
-**What the Stata command does not have.** Version 0.2.0 of the Stata
-command is a port of version 1.12.0 of the R package without two of its
+**What the Stata command does not have.** Version 0.2.1 of the Stata
+command is a port of version 1.12.1 of the R package without two of its
 parts: the three-way interaction design (`moderator2`,
 [`set_aie3()`](https://jespernwulff.github.io/powerape/reference/set_aie3.md),
 [`true_aie3()`](https://jespernwulff.github.io/powerape/reference/true_aie3.md)),

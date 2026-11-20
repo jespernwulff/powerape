@@ -5,6 +5,34 @@ the version it ports is named in `powerape version` and in every power
 statement. The changes of the R package are listed in its
 [news](https://jespernwulff.github.io/powerape/news/index.md).
 
+## powerape for Stata 0.2.1 (2026-11-20)
+
+- `powerape dgp NAME, didpilot` with `covariates()` returned too high a
+  `rho()`. In a difference-in-differences design `rho()` is the
+  dependence between a unit’s outcomes that is left given the
+  covariates; covariates are constant over time and add dependence of
+  their own. The pairs of outcomes in a pilot show the whole dependence,
+  and 0.2.0 used that raw value together with the covariates, which
+  counted part of the dependence twice and overstated power. With
+  covariates the command now solves for the `rho()` at which the design
+  has the pilot’s share of pairs with the outcome in both periods; the
+  raw correlation is kept in `r(pilot)` and printed. Designs built
+  without covariates are unchanged.
+- A warning for few units in one group. Robust and cluster-robust
+  standard errors are too small when one group of a
+  difference-in-differences design has few independent units, and more
+  periods per unit do not help. `power`, `curve`, `n`, `mde` and
+  `robust` now warn when fewer than 30 units are expected in the smaller
+  group (in repeated cross-sections: fewer than 30 observations in the
+  smallest group-by-before/after cell; with a subgroup: in the smallest
+  group-by-subgroup cell).
+- The help file says that `rho()` is the correlation given the
+  covariates and corrects the sentence about `signal()` and the linear
+  panel analysis: a panel design with a larger `signal()` at the same
+  `rho()` has more power, because its units are more alike over time.
+- The command now follows version 1.12.1 of the R package. Results of
+  the designs that existed before are bit-identical to 0.2.0.
+
 ## powerape for Stata 0.2.0 (2026-11-13)
 
 - Difference-in-differences designs. `powerape dgp NAME, did` builds a

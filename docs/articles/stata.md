@@ -315,8 +315,8 @@ powerape -- minimum-effect claim (CI lower bound > 0.050)
   outcomes: minimum 0.816 | detect-only 0.180 | inconclusive 0.004 | equivalence 0.000 | failed 0.000
 
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of treat using the powerape package for Stata (version 0.2.0 (Stata port
-of powerape 1.12.0)), following the confidence-interval approach of Riesthuis
+(APE) of treat using the powerape package for Stata (version 0.2.1 (Stata port
+of powerape 1.12.1)), following the confidence-interval approach of Riesthuis
 (2024). The assumed data-generating process was a probit model with focal
 variable treat (binary, prevalence 0.50); parametric covariates age
 (continuous, mean 45, SD 12), female (binary, prevalence 0.55), with an
@@ -368,7 +368,7 @@ The power is the same, 0.652. The outcome split differs by one study of
 500, because `probit` computes standard errors from the observed
 information and the Mata engine from the expected information, which
 moves an interval that sits right at a boundary. The Mata engine took
-1.7 seconds, `probit` 25.1. Use the Mata engine for searches, curves and
+1.5 seconds, `probit` 21.1. Use the Mata engine for searches, curves and
 sweeps, and confirm the final design with Stata’s estimator.
 
 `effects(margins)` goes one step further and computes every APE with
@@ -396,7 +396,7 @@ powerape -- minimum-effect claim (CI lower bound > 0.050)
   outcomes: minimum 0.720 | detect-only 0.260 | inconclusive 0.020 | equivalence 0.000 | failed 0.000
 ```
 
-It is also slower (9.1 against 3.1 seconds for these 100 replications),
+It is also slower (9.4 against 3.1 seconds for these 100 replications),
 so its use is as a check. `engine()` and
 [`effects()`](https://rdrr.io/r/stats/effects.html) given on one command
 apply to that command only; `powerape engine` shows and sets the

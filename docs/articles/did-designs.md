@@ -68,8 +68,9 @@ powerape DGP -- logit, difference-in-differences (two periods)
 
 `design = "panel"` follows the same units in both periods; `n` then
 counts units, standard errors are clustered by unit, and `rho` is the
-dependence between a unit’s outcomes. `design = "cross-sections"` draws
-new observations in each period.
+dependence between a unit’s outcomes (in a design with covariates: the
+dependence that is left given the covariates).
+`design = "cross-sections"` draws new observations in each period.
 
 ## Which effect do four rates show?
 
@@ -392,7 +393,10 @@ powerape DGP -- logit, difference-in-differences (two periods)
 
 The estimates are used as if they were known. Sweep them with
 [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
-before relying on a sample size.
+before relying on a sample size. When covariates are added to the call,
+the function returns the `rho` that is left given those covariates,
+which is lower than the raw correlation in the pilot: the covariates are
+constant over time and account for part of it.
 
 ## Reporting
 
@@ -410,7 +414,7 @@ pw <- ape_power(d, n = 3000, claim = "minimum", sesoi = 0.02, nsim = 300, seed =
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average treatment
 #> effect on the treated (ATT) in a difference-in-differences design, in
-#> probability points, using the powerape package (version 1.12.0), following
+#> probability points, using the powerape package (version 1.12.1), following
 #> the confidence-interval approach of Riesthuis (2024). The assumed
 #> data-generating process was a difference-in-differences design with a treated
 #> group (50% of the units) and a control group, observed in one period before
@@ -446,8 +450,8 @@ powerape statement
 ``` stata-output
 We conducted a simulation-based power analysis for the average treatment
 effect on the treated (ATT) in a difference-in-differences design, in
-probability points, using the powerape package for Stata (version 0.2.0 (Stata
-port of powerape 1.12.0)), following the confidence-interval approach of
+probability points, using the powerape package for Stata (version 0.2.1 (Stata
+port of powerape 1.12.1)), following the confidence-interval approach of
 Riesthuis (2024). The assumed data-generating process was a
 difference-in-differences design with a treated group (50% of the units) and a
 control group, observed in one period before and one period after one common

@@ -212,7 +212,7 @@ If you use `powerape`, please cite the software, and the methods it
 builds on where you use them.
 
 Wulff, J. N. (2026). *powerape: Power analysis for average partial
-effects* (R package version 1.12.0; Stata command version 0.2.0).
+effects* (R package version 1.12.1; Stata command version 0.2.1).
 <https://jespernwulff.github.io/powerape/>
 
 Hancock, G. R., & Feng, Y. (2026). nmax and the quest to restore

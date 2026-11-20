@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -225,7 +225,7 @@ Syntax
 
 Description
 
-    powerape is a Stata port of the R package powerape (version 1.12.0):  simulation-based
+    powerape is a Stata port of the R package powerape (version 1.12.1):  simulation-based
     power analysis in which the effect size of interest is the average partial effect
     (APE) or the average interaction effect (AIE) of a probit or logit model. Targets are
     stated in probability points; the package calibrates the data-generating process
@@ -358,8 +358,14 @@ Difference-in-differences designs
     balanced panel); n() counts units and standard errors are clustered by unit. Outcomes
     of one unit are dependent through a Gaussian copula with latent correlation rho() that
     leaves the marginal rates exact under either link (under probit this is the
-    random-effects probit with rho = Var(c)/(Var(c) + 1)). design(cross-sections) draws
-    independent observations, each after the treatment date with probability ppost()
+    random-effects probit with rho = Var(c)/(Var(c) + 1)). With covariates, rho() is the
+    dependence that is left given the covariates: covariates are constant over time, so
+    they make a unit's outcomes more alike on top of rho(). Under probit with normal
+    covariates the raw latent correlation between two outcomes of a unit is (rho + s2)/(1
+    + s2) with s2 = signal/(1 - signal); to plan from a raw within-unit correlation r, use
+    rho = (r - signal)/(1 - signal). Under logit the covariates add less and there is no
+    closed form; didpilot solves for the value under either link. design(cross-sections)
+    draws independent observations, each after the treatment date with probability ppost()
     (default npost/(npre + npost)) and then in one of that block's periods with equal
     probability; n() counts all observations and se() chooses model-based or robust
     standard errors for the probit/logit analysis.
@@ -397,8 +403,11 @@ Difference-in-differences designs
     its small-sample factor).  Ordinary least squares has no separation, so no simulated
     study is discarded for an all-zero or all-one cell; the sparse-cell warning still
     applies. In a balanced panel a time-constant covariate changes neither the estimate
-    nor its clustered standard error beyond the degrees of freedom, so signal() buys the
-    linear panel analysis no precision; in cross-sections it does.
+    nor its clustered standard error beyond the degrees of freedom, so adjusting for
+    covariates buys the linear panel analysis no precision; in cross-sections it does. A
+    panel design with a larger signal() at the same rho() still has more power under
+    either analysis, because rho() is the dependence given the covariates and the design's
+    units are then more alike over time, not because of the adjustment.
 
     Interval coverage in small samples. Under the index analysis the effect on the treated
     is a nonlinear function of the estimated rates, and its delta-method interval (the one
@@ -407,6 +416,20 @@ Difference-in-differences designs
     observations per cell, 94.5% with 250, 94.7% with 500 and 94.9% with 1,000 under logit
     (exact values in the design without covariates). The simulated studies use this
     interval, so the power reported is the power of the analysis a study will run.
+
+    A second effect concerns both analyses. Robust and cluster-robust standard errors are
+    too small when one group has few independent units, and more periods per unit do not
+    help, because the units are what is independent. With 10% of the units treated and a
+    true effect of zero, the 5% test of the linear analysis rejected in 12%, 10%, 7% and
+    6% of simulated two-period panels with 4, 10, 20 and 40 treated units, and in 17%, 10%
+    and 6% of panels with four periods on each side and 4, 10 and 40 treated units; the
+    probit/logit analysis behaved alike (9%, 8% and 6% with 10, 20 and 40 treated units).
+    With groups of equal size the excess of the linear analysis is small (5.7% with 20
+    units a group in a two-period panel, 6.9% with four periods on each side, 5% to 6%
+    from 50 a group). The simulation commands warn when fewer than 30 units are expected
+    in the smaller group; in repeated cross-sections, when fewer than 30 observations are
+    expected in the smallest group-by-before/after cell; with a subgroup, in the smallest
+    group-by-subgroup cell. Power reported for such a design contains the excess.
 
     A design from pre-treatment pilot data. powerape dgp name, didpilot estimates, from
     data in memory observed before the treatment date, the inputs such data can inform and
@@ -419,9 +442,17 @@ Difference-in-differences designs
     with period() the control group's average change between pilot periods is reported as
     a guide.  Without id() the design is repeated cross-sections. Naming baseline(),
     gap(), ptreated(), rho() or design() overrides the estimate; covariates are not taken
-    from the pilot, and subgroup designs are not supported. The estimates are used as if
-    they were known: vary them with powerape robust, in particular for a small pilot (a
-    note is printed below 500 rows).
+    from the pilot, and subgroup designs are not supported. The pairs of outcomes in a
+    pilot show the whole within-unit dependence. When covariates() with a nonzero signal()
+    (or gamma()) are given, rho() is therefore solved as the value at which the design,
+    with those covariates, has the pilot's share of pairs with the outcome in both
+    periods; it is lower than the pilot's raw correlation, which is printed next to it and
+    stored as the last element of r(pilot).  If the covariates as specified imply more
+    dependence than the pilot shows, rho() is set to 0 with a warning. (Version 0.2.0 used
+    the raw correlation together with the covariates, which counted part of the dependence
+    twice and overstated power.) The estimates are used as if they were known: vary them
+    with powerape robust, in particular for a small pilot (a note is printed below 500
+    rows).
 
     Limits of this version. One treated group, one treatment date, treatment assigned at
     the unit level, balanced panels, effects that are the same in every period after
@@ -515,14 +546,14 @@ Stored results
     r(att_sub), and matrices r(rates) (one row per subgroup: control before, control
     after, treated before, treated after without treatment, treated after) and r(didcoef)
     (the index coefficients a, b, l, th, de); didpilot adds r(pilot) (rows, units,
-    periods, pairs, and the estimates). trueatt stores r(att) (for a subgroup design the
-    difference, with r(att_ref) and r(att_sub)). power, n and mde add r(analysis),
-    r(trends) and r(valid) (1 when the analysis assumes the scale the world has), and
-    power adds r(est_mean) and r(est_mcse), the mean of the usable estimates and its Monte
-    Carlo standard error; r(results) of curve gains a column est_mean. When robust varies
-    trends, r(scenarios) codes it 1 = index, 2 = linear and gains the columns est_mean
-    (power mode) and valid; scenarios with valid = 0 are shown but left out of the range,
-    the worst case and n_max.
+    periods, pairs, the estimates, and the raw within-unit correlation). trueatt stores
+    r(att) (for a subgroup design the difference, with r(att_ref) and r(att_sub)). power,
+    n and mde add r(analysis), r(trends) and r(valid) (1 when the analysis assumes the
+    scale the world has), and power adds r(est_mean) and r(est_mcse), the mean of the
+    usable estimates and its Monte Carlo standard error; r(results) of curve gains a
+    column est_mean. When robust varies trends, r(scenarios) codes it 1 = index, 2 =
+    linear and gains the columns est_mean (power mode) and valid; scenarios with valid = 0
+    are shown but left out of the range, the worst case and n_max.
 
 Examples
 
@@ -621,6 +652,12 @@ Validation
     three-way interaction design, and the linear probability analysis of the designs other
     than difference-in-differences.
 
+    Version 0.2.1 (2026-11-20) follows version 1.12.1 of the R package:  didpilot with
+    covariates() returns the rho() given the covariates, and the simulation commands warn
+    when one group of a difference-in-differences design has few units. All eight tiers
+    were rerun:  every results file is identical to 0.2.0. On one pilot file the converted
+    rho() agrees with the R package's to 0.0003.
+
 References
 
     Caron, L. 2025. Triple difference designs with heterogeneous treatment effects.
@@ -639,7 +676,7 @@ References
     Wooldridge, J. M. 2019. Correlated random effects models with unbalanced panels.
         Journal of Econometrics 211: 137-150.
     Wulff, J. N. powerape: Power analysis for average partial effects. R package version
-        1.12.0. https://github.com/jespernwulff/powerape
+        1.12.1. https://github.com/jespernwulff/powerape
 
 Author
 

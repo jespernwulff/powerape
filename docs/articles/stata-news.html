@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,6 +118,41 @@
 releases; the version it ports is named in <code>powerape version</code>
 and in every power statement. The changes of the R package are listed in
 its <a href="../news/index.html">news</a>.</p>
+<div class="section level2">
+<h2 id="powerape-for-stata-0-2-1-2026-11-20">powerape for Stata 0.2.1 (2026-11-20)<a class="anchor" aria-label="anchor" href="#powerape-for-stata-0-2-1-2026-11-20"></a>
+</h2>
+<ul>
+<li>
+<code>powerape dgp NAME, didpilot</code> with
+<code>covariates()</code> returned too high a <code>rho()</code>. In a
+difference-in-differences design <code>rho()</code> is the dependence
+between a unit’s outcomes that is left given the covariates; covariates
+are constant over time and add dependence of their own. The pairs of
+outcomes in a pilot show the whole dependence, and 0.2.0 used that raw
+value together with the covariates, which counted part of the dependence
+twice and overstated power. With covariates the command now solves for
+the <code>rho()</code> at which the design has the pilot’s share of
+pairs with the outcome in both periods; the raw correlation is kept in
+<code>r(pilot)</code> and printed. Designs built without covariates are
+unchanged.</li>
+<li>A warning for few units in one group. Robust and cluster-robust
+standard errors are too small when one group of a
+difference-in-differences design has few independent units, and more
+periods per unit do not help. <code>power</code>, <code>curve</code>,
+<code>n</code>, <code>mde</code> and <code>robust</code> now warn when
+fewer than 30 units are expected in the smaller group (in repeated
+cross-sections: fewer than 30 observations in the smallest
+group-by-before/after cell; with a subgroup: in the smallest
+group-by-subgroup cell).</li>
+<li>The help file says that <code>rho()</code> is the correlation given
+the covariates and corrects the sentence about <code>signal()</code> and
+the linear panel analysis: a panel design with a larger
+<code>signal()</code> at the same <code>rho()</code> has more power,
+because its units are more alike over time.</li>
+<li>The command now follows version 1.12.1 of the R package. Results of
+the designs that existed before are bit-identical to 0.2.0.</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="powerape-for-stata-0-2-0-2026-11-13">powerape for Stata 0.2.0 (2026-11-13)<a class="anchor" aria-label="anchor" href="#powerape-for-stata-0-2-0-2026-11-13"></a>
 </h2>

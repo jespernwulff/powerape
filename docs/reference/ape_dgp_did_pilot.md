@@ -65,7 +65,8 @@ with the estimates and the pilot's size in `$pilot`. Pin the effect with
 - `rho`, for a panel: the latent within-unit correlation of the route's
   Gaussian copula, by the method of moments (the value at which the
   model's probability of the outcome in two periods of one unit equals
-  the observed share of such pairs).
+  the observed share of such pairs); with covariates, the correlation
+  given the covariates (section 'Covariates and `rho`').
 
 All pre-treatment periods are pooled, because the route holds rates flat
 before the treatment date. Pre-treatment data cannot tell how the
@@ -75,6 +76,24 @@ group's average change from one to the next is reported as a guide.
 Covariates are not taken from the pilot: pass them as
 [`pa_var()`](https://jespernwulff.github.io/powerape/reference/pa_var.md)
 objects.
+
+## Covariates and `rho`
+
+In
+[`ape_dgp_did()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md),
+`rho` is the dependence between a unit's outcomes that is left given the
+covariates; covariates are constant over time and add dependence of
+their own. The pairs of outcomes in a pilot show the whole dependence.
+When covariates with a nonzero `signal` (or `gamma`) are passed, the
+function therefore solves for the `rho` at which the design, with those
+covariates, has the pilot's share of pairs with the outcome in both
+periods. That value is lower than the raw correlation of the pilot,
+which is reported next to it (`$pilot$rho_raw`). If the covariates as
+specified imply more dependence than the pilot shows, `rho` is set to 0
+with a warning: the stated `signal` is then too high for these data.
+(Versions up to 1.12.0 used the raw correlation together with the
+covariates, which counted part of the dependence twice and overstated
+power.)
 
 The estimates are used as if they were known. They are not: vary them
 with

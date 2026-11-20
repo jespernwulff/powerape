@@ -1,5 +1,61 @@
 # Changelog
 
+## powerape 1.12.1
+
+Difference-in-differences designs: what `rho` means when a design has
+covariates. No simulated result of an existing design changes; one
+function does.
+
+- **[`ape_dgp_did_pilot()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did_pilot.md)
+  with covariates returned too high a `rho`.** In
+  [`ape_dgp_did()`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md),
+  `rho` is the dependence between a unit’s outcomes that is left given
+  the covariates; covariates are constant over time and add dependence
+  of their own. The pairs of outcomes in a pilot show the whole
+  dependence, and the function used that raw value together with any
+  covariates passed to it, which counted part of the dependence twice
+  and overstated power (in one probit example with `signal = 0.3`: 82%
+  reported for a design with 74%, and 16% too few units for 80%). With
+  covariates the function now solves for the `rho` at which the design
+  has the pilot’s share of pairs with the outcome in both periods; the
+  raw value is kept in `$pilot$rho_raw` and printed. If the covariates
+  as specified imply more dependence than the pilot shows, `rho` is set
+  to 0 with a warning. Designs built without covariates are unchanged.
+- **A warning for few units in one group.** Robust and cluster-robust
+  standard errors are too small when one group of a
+  difference-in-differences design has few independent units, and more
+  periods per unit do not help: with ten treated units among one
+  hundred, a true zero effect was declared significant in 9% to 10% of
+  simulated studies at the 5% level, under both analyses. The existing
+  warnings (fewer than 30 units in all; a cell with fewer than ten
+  events) did not see a small group observed in several periods.
+  [`ape_power()`](https://jespernwulff.github.io/powerape/reference/ape_power.md),
+  [`ape_curve()`](https://jespernwulff.github.io/powerape/reference/ape_curve.md),
+  [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md),
+  [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
+  and
+  [`ape_robust()`](https://jespernwulff.github.io/powerape/reference/ape_robust.md)
+  now warn when fewer than 30 units are expected in the smaller group
+  (in repeated cross-sections: fewer than 30 observations in the
+  smallest group-by-before/after cell; with a subgroup: in the smallest
+  group-by-subgroup cell).
+  [`?ape_dgp_did`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md),
+  section ‘Interval coverage in small samples’, gives the simulated
+  rates. No result changes.
+- **Documentation.**
+  [`?ape_dgp_did`](https://jespernwulff.github.io/powerape/reference/ape_dgp_did.md)
+  says that `rho` is the correlation given the covariates, gives the raw
+  correlation it implies under probit (`(rho + s2) / (1 + s2)`,
+  `s2 = signal / (1 - signal)`) and the conversion from a raw
+  correlation. The sentence that `signal` “buys the linear panel
+  analysis no precision” is corrected: adjusting for a time-constant
+  covariate buys that analysis nothing, but a panel design with a larger
+  `signal` at the same `rho` has more power, because its units are more
+  alike over time. The design print and
+  [`power_statement()`](https://jespernwulff.github.io/powerape/reference/power_statement.md)
+  name `rho` as “given the covariates” when a design has covariates that
+  move the outcome.
+
 ## powerape 1.12.0
 
 Existing designs are untouched under their default analysis: seeded

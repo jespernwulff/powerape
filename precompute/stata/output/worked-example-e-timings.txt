@@ -1,7 +1,7 @@
 label	seconds
-exog_power	     82.1
-power	    284.2
-n	   1411.4
-exog_n	     16.3
-robust	     13.4
-aie_power	    197.9
+exog_power	     74.6
+power	    212.6
+n	   1307.5
+exog_n	     16.8
+robust	     17.8
+aie_power	    192.8
