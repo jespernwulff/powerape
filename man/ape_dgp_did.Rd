@@ -122,7 +122,10 @@ When \code{trends} and \code{analysis} name the same scale, \code{\link[=ape_pow
 power. When they differ, the analysis centres on another number than
 the ATT: \code{\link[=ape_power]{ape_power()}} and \code{\link[=ape_curve]{ape_curve()}} then report a \strong{rejection rate}
 together with the mean of the estimates, and \code{\link[=ape_n]{ape_n()}} and \code{\link[=ape_mde]{ape_mde()}}
-refuse the design. With two periods and no covariates the data cannot
+refuse the design. One case is exempt: with \code{gap = 0} or \code{trend = 0}
+and no covariates that move the outcome, parallel trends mean the same
+on both scales, the two worlds are the same world, and either analysis
+is treated as valid. With two periods and no covariates the data cannot
 tell the two scales apart (Wooldridge, 2023), and the same four cell
 rates imply different effects under each: the printed design shows both
 readings. The linear analysis always centres on the cross difference of

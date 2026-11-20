@@ -64,6 +64,7 @@ treated as covariates.
 }
 }
 \examples{
+set.seed(1)
 pilot <- data.frame(treat = rbinom(600, 1, 0.5),
                     age = rnorm(600, 45, 12))
 d <- ape_dgp_empirical(data = pilot, focal = "treat",

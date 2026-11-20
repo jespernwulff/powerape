@@ -24,7 +24,42 @@ did_panel <- function(dgp) is_did(dgp) && identical(dgp$design, "panel")
 # when it assumes the scale on which the world's untreated trends are
 # parallel.
 did_linear <- function(dgp) is_did(dgp) && identical(dgp$analysis, "linear")
-did_valid <- function(dgp) identical(dgp$trends, dgp$analysis %||% "index")
+did_valid <- function(dgp)
+  identical(dgp$trends, dgp$analysis %||% "index") || did_scales_coincide(dgp)
+
+# Without a gap between the groups before treatment, or without a change in
+# the control group, "parallel" means the same on the index and on the
+# probability scale: the untreated rate of the treated group is the same
+# number either way, so both analyses are valid in both worlds. This holds
+# for the marginal rates, so it is used only for designs whose covariates do
+# not move the outcome (with a subgroup: in each subgroup).
+did_scales_coincide <- function(dgp) {
+  is_did(dgp) && isTRUE(dgp$s2 == 0) &&
+    all(dgp$gap == 0 | dgp$trend == 0)
+}
+
+# The note under the design print when world and analysis name different
+# scales. `what` is "the ATT" or "the true difference".
+did_scale_note <- function(x, what) {
+  if (identical(x$trends, x$analysis %||% "index")) return(invisible(NULL))
+  if (did_scales_coincide(x)) {
+    cat(sprintf(paste0(
+      "  note: with %s, parallel trends mean the same on both scales, ",
+      "so the analysis is valid for this design\n"),
+      if (all(x$gap == 0)) "no gap between the groups before treatment"
+      else if (all(x$trend == 0)) "no change in the control group"
+      else "no gap between the groups or no change in the control group in each subgroup"))
+  } else if (!identical(x$analysis, "linear") && isTRUE(x$s2 > 0)) {
+    cat(sprintf(paste0(
+      "  note: the analysis assumes index-parallel trends, so it centres ",
+      "near that covariate-free reading (not exactly on it, because the ",
+      "design has covariates), not on %s\n"), what))
+  } else {
+    cat(sprintf("  note: the analysis assumes %s-parallel trends, so it centres on that reading, not on %s\n",
+                x$analysis, what))
+  }
+  invisible(NULL)
+}
 
 # Routes whose standard errors are fixed by the design (`se` is ignored) and
 # routes whose `n` counts units observed over several periods.
@@ -188,7 +223,10 @@ did_solve <- function(lf, q, rate, offset = 0) {
 #' power. When they differ, the analysis centres on another number than
 #' the ATT: [ape_power()] and [ape_curve()] then report a **rejection rate**
 #' together with the mean of the estimates, and [ape_n()] and [ape_mde()]
-#' refuse the design. With two periods and no covariates the data cannot
+#' refuse the design. One case is exempt: with `gap = 0` or `trend = 0`
+#' and no covariates that move the outcome, parallel trends mean the same
+#' on both scales, the two worlds are the same world, and either analysis
+#' is treated as valid. With two periods and no covariates the data cannot
 #' tell the two scales apart (Wooldridge, 2023), and the same four cell
 #' rates imply different effects under each: the printed design shows both
 #' readings. The linear analysis always centres on the cross difference of
@@ -392,6 +430,25 @@ ape_dgp_did <- function(model = c("probit", "logit"), baseline, gap = 0,
   design <- match.arg(design)
   trends <- match.arg(trends)
   analysis <- match.arg(analysis)
+  ## inputs that this design does not use: say so once, and do not store them
+  ## (a rebuilt copy of the design then stays silent)
+  if (design == "panel" && !is.null(p_post)) {
+    warning(paste("`p_post` is ignored for design = \"panel\": every unit is",
+                  "observed in every period."), call. = FALSE)
+    p_post <- NULL
+  }
+  if (!is.null(correlation) && !inherits(covariates, "pa_var") &&
+      length(covariates) == 0L) {
+    warning("`correlation` is ignored: the design has no covariates.",
+            call. = FALSE)
+    correlation <- NULL
+  }
+  if (is.null(subgroup) &&
+      (length(baseline) > 1L || length(gap) > 1L || length(trend) > 1L))
+    stop(paste("`baseline`, `gap` and `trend` take two numbers only in a",
+               "design with a `subgroup` (reference subgroup first, then the",
+               "second subgroup). This design has no subgroup: give one",
+               "number each."), call. = FALSE)
   ## designs with a subgroup are built in did-subgroup.R (section 17.3)
   if (!is.null(subgroup))
     return(did_subgroup_dgp(model, baseline, gap, trend, p_treated, design,
@@ -542,6 +599,10 @@ ape_dgp_did <- function(model = c("probit", "logit"), baseline, gap = 0,
 set_att <- function(dgp, target) {
   stopifnot(inherits(dgp, "powerape_dgp"))
   if (did_has_subgroup(dgp)) return(did_subgroup_set_att(dgp, target))
+  if (is_did(dgp) && is.numeric(target) && length(target) != 1L)
+    stop(paste("`target` is one number for this design: the effect on the",
+               "treated. Two numbers (one effect per subgroup) belong to a",
+               "design built with a `subgroup`."), call. = FALSE)
   stopifnot(inherits(dgp, "powerape_dgp"),
             is.numeric(target), length(target) == 1L, is.finite(target))
   if (!is_did(dgp))
@@ -756,9 +817,7 @@ print_did_dgp <- function(x) {
       cat(sprintf("  the same four rates read on the %s index: %+.4f (covariate-free reading)\n",
                   x$model, rd$index))
     }
-    if (!did_valid(x))
-      cat(sprintf("  note: the analysis assumes %s-parallel trends, so it centres on that reading, not on the ATT\n",
-                  x$analysis))
+    did_scale_note(x, "the ATT")
   } else {
     cat("  target effect not set yet - call set_att().\n")
   }

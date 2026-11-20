@@ -14,10 +14,13 @@ the group that will be treated (0/1 or logical).}
 
 \item{id}{Optional name of the unit identifier. With it the design is a
 panel and \code{rho} is estimated (units need two or more periods);
-without it the design is repeated cross-sections.}
+without it, or with \code{design = "cross-sections"}, the design is
+repeated cross-sections.}
 
 \item{period}{Optional name of the period variable; used to report the
-control group's change between pre-treatment periods.}
+control group's change between pre-treatment periods. Periods are
+ordered by value when they are numbers or dates, by level when the
+variable is a factor, and alphabetically when it is other text.}
 
 \item{trend}{The control group's change in the outcome rate from before
 to after treatment, in probability points. Required.}
@@ -54,6 +57,14 @@ group will change from before to after treatment, so \code{trend} must be
 supplied; when the pilot has several periods, the control group's
 average change from one to the next is reported as a guide. Covariates
 are not taken from the pilot: pass them as \code{\link[=pa_var]{pa_var()}} objects.
+
+Pooling assumes that the rates are flat over the pilot's periods. When
+they drift, the estimated \code{rho} is too low, because the pooled rate
+overstates the product of two periods' rates: with rates that change by
+ten points from one period to the next, a true \code{rho} of 0.40 came out as
+0.34. The error lowers planned power, so it is on the cautious side; if
+the reported change between pilot periods is large, consider supplying
+\code{rho} yourself.
 }
 \section{Covariates and \code{rho}}{
 

@@ -1,3 +1,33 @@
+# powerape 1.12.2
+
+Small corrections to the difference-in-differences route. No simulated
+result of a design that was valid before changes.
+
+* **A design whose two parallel-trends scales coincide is no longer
+  called biased.** With `gap = 0` or `trend = 0` and no covariates that
+  move the outcome, parallel trends mean the same on the index and on the
+  probability scale, so the linear world and the index world are the same
+  world. Such a design was still labelled a mismatch when `trends` and
+  `analysis` named different scales: `ape_power()` reported a rejection
+  rate and `ape_n()` and `ape_mde()` refused it. It is now treated as
+  valid, and the design print says why.
+* The note under the design print says "centres near that covariate-free
+  reading" when the logit or probit analysis meets a linear world in a
+  design with covariates: with covariates the estimates do not centre
+  exactly on the covariate-free reading.
+* `ape_dgp_did()` warns when `p_post` is given for a panel and when
+  `correlation` is given without covariates (both were ignored silently).
+  A `baseline`, `gap` or `trend` of two numbers without a `subgroup`, and
+  a `set_att()` target of two numbers for a design without one, give a
+  worded error.
+* `ape_dgp_did_pilot()`: a `period` stored as a date, a factor or text no
+  longer gives a coercion warning, and periods are ordered by value, by
+  factor level, or (other text) alphabetically; a unit identifier together
+  with `design = "cross-sections"` no longer warns about a `rho` that was
+  not given. The help page says that rates drifting over the pilot's
+  periods bias the estimated `rho` downward.
+* The example of `?ape_dgp_empirical` sets a seed.
+
 # powerape 1.12.1
 
 Difference-in-differences designs: what `rho` means when a design has

@@ -99,6 +99,14 @@ did_pilot_rho_cov <- function(lf, p, m, w, qs) {
 #' average change from one to the next is reported as a guide. Covariates
 #' are not taken from the pilot: pass them as [pa_var()] objects.
 #'
+#' Pooling assumes that the rates are flat over the pilot's periods. When
+#' they drift, the estimated `rho` is too low, because the pooled rate
+#' overstates the product of two periods' rates: with rates that change by
+#' ten points from one period to the next, a true `rho` of 0.40 came out as
+#' 0.34. The error lowers planned power, so it is on the cautious side; if
+#' the reported change between pilot periods is large, consider supplying
+#' `rho` yourself.
+#'
 #' @section Covariates and `rho`:
 #' In [ape_dgp_did()], `rho` is the dependence between a unit's outcomes
 #' that is left given the covariates; covariates are constant over time and
@@ -121,11 +129,14 @@ did_pilot_rho_cov <- function(lf, p, m, w, qs) {
 #' @param data A data frame of pre-treatment observations.
 #' @param outcome,group Names of the binary outcome and of the indicator of
 #'   the group that will be treated (0/1 or logical).
+#' @param period Optional name of the period variable; used to report the
+#'   control group's change between pre-treatment periods. Periods are
+#'   ordered by value when they are numbers or dates, by level when the
+#'   variable is a factor, and alphabetically when it is other text.
 #' @param id Optional name of the unit identifier. With it the design is a
 #'   panel and `rho` is estimated (units need two or more periods);
-#'   without it the design is repeated cross-sections.
-#' @param period Optional name of the period variable; used to report the
-#'   control group's change between pre-treatment periods.
+#'   without it, or with `design = "cross-sections"`, the design is
+#'   repeated cross-sections.
 #' @param trend The control group's change in the outcome rate from before
 #'   to after treatment, in probability points. Required.
 #' @param ... Further arguments of [ape_dgp_did()], such as `model`,
@@ -210,8 +221,16 @@ ape_dgp_did_pilot <- function(data, outcome, group, id = NULL, period = NULL,
   ctrl_change <- NA_real_
   n_per <- NA_integer_
   if (!is.null(period)) {
-    r0 <- tapply(y[g == 0], data[[period]][g == 0], mean)
-    r0 <- r0[order(as.numeric(names(r0)), names(r0))]
+    ## periods in their own order: numbers and dates by value, a factor by
+    ## its levels, text that reads as numbers by those numbers, other text
+    ## alphabetically
+    per <- data[[period]]
+    if (is.character(per)) {
+      num <- suppressWarnings(as.numeric(per))
+      per <- if (!anyNA(num)) num else factor(per)
+    }
+    r0 <- tapply(y[g == 0], per[g == 0], mean)
+    r0 <- r0[!is.na(r0)]
     n_per <- length(unique(data[[period]]))
     if (length(r0) >= 2L) ctrl_change <- mean(diff(as.numeric(r0)))
   }
@@ -225,6 +244,9 @@ ape_dgp_did_pilot <- function(data, outcome, group, id = NULL, period = NULL,
                    ctrl_change)), call. = FALSE)
   overridden <- intersect(names(est), names(args))
   est[overridden] <- NULL
+  ## asked for repeated cross-sections although the pilot has units: the
+  ## estimated dependence has no use there and is not passed on
+  if (identical(args$design, "cross-sections")) est$rho <- NULL
   if (nrow(data) < 500L)
     warning(paste("The pilot has fewer than 500 rows: the estimated rates and",
                   "the within-unit correlation are imprecise. Vary them with",

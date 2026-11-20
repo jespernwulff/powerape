@@ -394,9 +394,7 @@ print_did_subgroup <- function(x) {
       cat(sprintf("  the same eight rates read on the %s index: difference %+.4f (covariate-free reading)\n",
                   x$model, rd$index))
     }
-    if (!did_valid(x))
-      cat(sprintf("  note: the analysis assumes %s-parallel trends, so it centres on that reading, not on the true difference\n",
-                  x$analysis))
+    did_scale_note(x, "the true difference")
   } else {
     cat(sprintf("  effects not set yet - call set_att(d, c(effect for %s = 0, effect for %s = 1)).\n",
                 nm, nm))

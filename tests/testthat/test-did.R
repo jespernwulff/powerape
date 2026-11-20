@@ -884,7 +884,7 @@ test_that("subgroup: arguments, calibration and prints", {
   expect_error(ape_dgp_did(baseline = 0.3, subgroup = pa_var("age", "normal")), "binary pa_var")
   expect_error(ape_dgp_did(baseline = c(0.3, 0.2, 0.1), subgroup = pa_var("f", "binary", p = .5)),
                "one number")
-  expect_error(ape_dgp_did(baseline = c(0.3, 0.2)), "length\\(baseline\\) == 1L|num1\\(baseline\\)")
+  expect_error(ape_dgp_did(baseline = c(0.3, 0.2)), "take two numbers only in a design with a `subgroup`")
   expect_error(ape_dgp_did(baseline = c(0.3, 0.9), gap = 0.2,
                            subgroup = pa_var("f", "binary", p = .5)), "Subgroup f = 1")
   d0 <- ape_dgp_did(model = "logit", baseline = c(0.30, 0.05), gap = c(0.10, 0.05),
