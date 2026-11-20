@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,6 +64,18 @@
       <small>Source: <a href="https://github.com/jespernwulff/powerape/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.12.2" id="powerape-1122">powerape 1.12.2<a class="anchor" aria-label="anchor" href="#powerape-1122"></a></h2>
+<p>Small corrections to the difference-in-differences route. No simulated result of a design that was valid before changes.</p>
+<ul><li>
+<strong>A design whose two parallel-trends scales coincide is no longer called biased.</strong> With <code>gap = 0</code> or <code>trend = 0</code> and no covariates that move the outcome, parallel trends mean the same on the index and on the probability scale, so the linear world and the index world are the same world. Such a design was still labelled a mismatch when <code>trends</code> and <code>analysis</code> named different scales: <code><a href="../reference/ape_power.html">ape_power()</a></code> reported a rejection rate and <code><a href="../reference/ape_n.html">ape_n()</a></code> and <code><a href="../reference/ape_mde.html">ape_mde()</a></code> refused it. It is now treated as valid, and the design print says why.</li>
+<li>The note under the design print says “centres near that covariate-free reading” when the logit or probit analysis meets a linear world in a design with covariates: with covariates the estimates do not centre exactly on the covariate-free reading.</li>
+<li>
+<code><a href="../reference/ape_dgp_did.html">ape_dgp_did()</a></code> warns when <code>p_post</code> is given for a panel and when <code>correlation</code> is given without covariates (both were ignored silently). A <code>baseline</code>, <code>gap</code> or <code>trend</code> of two numbers without a <code>subgroup</code>, and a <code><a href="../reference/set_att.html">set_att()</a></code> target of two numbers for a design without one, give a worded error.</li>
+<li>
+<code><a href="../reference/ape_dgp_did_pilot.html">ape_dgp_did_pilot()</a></code>: a <code>period</code> stored as a date, a factor or text no longer gives a coercion warning, and periods are ordered by value, by factor level, or (other text) alphabetically; a unit identifier together with <code>design = "cross-sections"</code> no longer warns about a <code>rho</code> that was not given. The help page says that rates drifting over the pilot’s periods bias the estimated <code>rho</code> downward.</li>
+<li>The example of <code><a href="../reference/ape_dgp_empirical.html">?ape_dgp_empirical</a></code> sets a seed.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.12.1" id="powerape-1121">powerape 1.12.1<a class="anchor" aria-label="anchor" href="#powerape-1121"></a></h2>
 <p>Difference-in-differences designs: what <code>rho</code> means when a design has covariates. No simulated result of an existing design changes; one function does.</p>

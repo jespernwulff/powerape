@@ -186,7 +186,7 @@ pw <- ape_power(d, n = 2600, claim = "equivalence", sesoi = 0.05,
                 nsim = 500, seed = 5)
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average partial effect
-#> (APE) of treat using the powerape package (version 1.12.1), following the
+#> (APE) of treat using the powerape package (version 1.12.2), following the
 #> confidence-interval approach of Riesthuis (2024). The assumed data-generating
 #> process was a probit model with focal variable treat (binary, prevalence
 #> 0.50); parametric covariates age (continuous, mean 45, SD 12), with the focal
@@ -217,8 +217,8 @@ powerape -- equivalence claim (CI within +/-0.050)
   outcomes: minimum 0.000 | detect-only 0.024 | inconclusive 0.218 | equivalence 0.758 | failed 0.000
 
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of treat using the powerape package for Stata (version 0.2.1 (Stata port
-of powerape 1.12.1)), following the confidence-interval approach of Riesthuis
+(APE) of treat using the powerape package for Stata (version 0.2.2 (Stata port
+of powerape 1.12.2)), following the confidence-interval approach of Riesthuis
 (2024). The assumed data-generating process was a probit model with focal
 variable treat (binary, prevalence 0.50); parametric covariates age
 (continuous, mean 45, SD 12), with the focal variable and the covariates

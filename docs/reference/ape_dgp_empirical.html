@@ -17,7 +17,7 @@ exist."><meta property="og:image" content="https://jespernwulff.github.io/powera
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -157,13 +157,14 @@ treated as covariates.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pilot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>treat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">600</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pilot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>treat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">600</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                    age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">600</span>, <span class="fl">45</span>, <span class="fl">12</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">ape_dgp_empirical</span><span class="op">(</span>data <span class="op">=</span> <span class="va">pilot</span>, focal <span class="op">=</span> <span class="st">"treat"</span>,</span></span>
 <span class="r-in"><span>                       baseline <span class="op">=</span> <span class="fl">0.30</span>, signal <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> powerape DGP -- probit (empirical covariates)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   focal: treat (binary, p = 0.50) [resampled jointly with covariates]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   focal: treat (binary, p = 0.48) [resampled jointly with covariates]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   covariates: age </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   pilot rows: 600 (resampled with replacement)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   baseline P(Y=1 | reference) = 0.300, nuisance signal (latent pseudo-R2) = 0.150</span>

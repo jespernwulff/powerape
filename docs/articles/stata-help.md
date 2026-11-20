@@ -114,7 +114,7 @@ Syntax
 
 Description
 
-    powerape is a Stata port of the R package powerape (version 1.12.1):  simulation-based
+    powerape is a Stata port of the R package powerape (version 1.12.2):  simulation-based
     power analysis in which the effect size of interest is the average partial effect
     (APE) or the average interaction effect (AIE) of a probit or logit model. Targets are
     stated in probability points; the package calibrates the data-generating process
@@ -237,11 +237,14 @@ Difference-in-differences designs
     scale, powerape power reports power. When they differ, the analysis centres on another
     number than the ATT: power and curve then report a rejection rate together with the
     mean of the estimates, and n, mde, powerat, alpha and statement refuse the design or
-    the result. With two periods and no covariates the data cannot tell the two scales
-    apart, and the same four rates imply different effects under each (control .20 to .30
-    and treated .40 to .60 is an effect of .100 under linear trends, .074 on the probit
-    index and .067 on the logit index): the printed design shows both readings. The linear
-    analysis always centres on the cross difference of the four rates.
+    the result. One case is exempt: with gap(0) or trend(0) and no covariates that move
+    the outcome, parallel trends mean the same on both scales, the two worlds are the same
+    world, and either analysis is treated as valid. With two periods and no covariates the
+    data cannot tell the two scales apart, and the same four rates imply different effects
+    under each (control .20 to .30 and treated .40 to .60 is an effect of .100 under
+    linear trends, .074 on the probit index and .067 on the logit index): the printed
+    design shows both readings. The linear analysis always centres on the cross difference
+    of the four rates.
 
     Data structure. design(panel) (default) follows the same units over all periods (a
     balanced panel); n() counts units and standard errors are clustered by unit. Outcomes
@@ -326,22 +329,25 @@ Difference-in-differences designs
     of the group that will be treated), gap(), ptreated() and, with id() and two or more
     periods per unit, rho() by the method of moments (the value at which the model's
     probability of the outcome in two periods of one unit equals the observed share of
-    such pairs). All pre-treatment periods are pooled.  Pre-treatment data cannot show how
-    the control group will change from before to after treatment, so trend() is required;
-    with period() the control group's average change between pilot periods is reported as
-    a guide.  Without id() the design is repeated cross-sections. Naming baseline(),
-    gap(), ptreated(), rho() or design() overrides the estimate; covariates are not taken
-    from the pilot, and subgroup designs are not supported. The pairs of outcomes in a
-    pilot show the whole within-unit dependence. When covariates() with a nonzero signal()
-    (or gamma()) are given, rho() is therefore solved as the value at which the design,
-    with those covariates, has the pilot's share of pairs with the outcome in both
-    periods; it is lower than the pilot's raw correlation, which is printed next to it and
-    stored as the last element of r(pilot).  If the covariates as specified imply more
-    dependence than the pilot shows, rho() is set to 0 with a warning. (Version 0.2.0 used
-    the raw correlation together with the covariates, which counted part of the dependence
-    twice and overstated power.) The estimates are used as if they were known: vary them
-    with powerape robust, in particular for a small pilot (a note is printed below 500
-    rows).
+    such pairs). All pre-treatment periods are pooled, which assumes flat rates over the
+    pilot's periods: when the rates drift, rho() comes out too low (0.34 for a true 0.40
+    with rates that change by ten points a period), which lowers planned power. With
+    design(cross-sections) the estimated rho() is not used.  Pre-treatment data cannot
+    show how the control group will change from before to after treatment, so trend() is
+    required; with period() the control group's average change between pilot periods is
+    reported as a guide.  Without id() the design is repeated cross-sections. Naming
+    baseline(), gap(), ptreated(), rho() or design() overrides the estimate; covariates
+    are not taken from the pilot, and subgroup designs are not supported. The pairs of
+    outcomes in a pilot show the whole within-unit dependence. When covariates() with a
+    nonzero signal() (or gamma()) are given, rho() is therefore solved as the value at
+    which the design, with those covariates, has the pilot's share of pairs with the
+    outcome in both periods; it is lower than the pilot's raw correlation, which is
+    printed next to it and stored as the last element of r(pilot).  If the covariates as
+    specified imply more dependence than the pilot shows, rho() is set to 0 with a
+    warning. (Version 0.2.0 used the raw correlation together with the covariates, which
+    counted part of the dependence twice and overstated power.) The estimates are used as
+    if they were known: vary them with powerape robust, in particular for a small pilot (a
+    note is printed below 500 rows).
 
     Limits of this version. One treated group, one treatment date, treatment assigned at
     the unit level, balanced panels, effects that are the same in every period after
@@ -547,6 +553,11 @@ Validation
     were rerun:  every results file is identical to 0.2.0. On one pilot file the converted
     rho() agrees with the R package's to 0.0003.
 
+    Version 0.2.2 (2026-11-20) follows version 1.12.2 of the R package: a
+    difference-in-differences design whose two parallel-trends scales coincide is valid
+    under either analysis, and several notes, warnings and help passages are corrected.
+    All eight tiers were rerun: every results file is identical to 0.2.1.
+
 References
 
     Caron, L. 2025. Triple difference designs with heterogeneous treatment effects.
@@ -565,7 +576,7 @@ References
     Wooldridge, J. M. 2019. Correlated random effects models with unbalanced panels.
         Journal of Econometrics 211: 137-150.
     Wulff, J. N. powerape: Power analysis for average partial effects. R package version
-        1.12.1. https://github.com/jespernwulff/powerape
+        1.12.2. https://github.com/jespernwulff/powerape
 
 Author
 

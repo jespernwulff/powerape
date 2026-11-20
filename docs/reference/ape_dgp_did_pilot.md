@@ -25,13 +25,16 @@ ape_dgp_did_pilot(data, outcome, group, id = NULL, period = NULL, trend, ...)
 - id:
 
   Optional name of the unit identifier. With it the design is a panel
-  and `rho` is estimated (units need two or more periods); without it
-  the design is repeated cross-sections.
+  and `rho` is estimated (units need two or more periods); without it,
+  or with `design = "cross-sections"`, the design is repeated
+  cross-sections.
 
 - period:
 
   Optional name of the period variable; used to report the control
-  group's change between pre-treatment periods.
+  group's change between pre-treatment periods. Periods are ordered by
+  value when they are numbers or dates, by level when the variable is a
+  factor, and alphabetically when it is other text.
 
 - trend:
 
@@ -76,6 +79,14 @@ group's average change from one to the next is reported as a guide.
 Covariates are not taken from the pilot: pass them as
 [`pa_var()`](https://jespernwulff.github.io/powerape/reference/pa_var.md)
 objects.
+
+Pooling assumes that the rates are flat over the pilot's periods. When
+they drift, the estimated `rho` is too low, because the pooled rate
+overstates the product of two periods' rates: with rates that change by
+ten points from one period to the next, a true `rho` of 0.40 came out as
+0.34. The error lowers planned power, so it is on the cautious side; if
+the reported change between pilot periods is large, consider supplying
+`rho` yourself.
 
 ## Covariates and `rho`
 

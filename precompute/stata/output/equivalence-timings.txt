@@ -1,6 +1,6 @@
 label	seconds
-power	     28.1
-n	     20.6
-curve	      5.6
-robust	      8.8
-statement	     26.1
+power	    167.9
+n	     31.5
+curve	     13.3
+robust	     12.1
+statement	     38.9

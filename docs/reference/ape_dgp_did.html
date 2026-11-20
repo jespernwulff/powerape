@@ -35,7 +35,7 @@ difference-in-differences estimate.'><meta property="og:image" content="https://
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -248,7 +248,10 @@ When <code>trends</code> and <code>analysis</code> name the same scale, <code><a
 power. When they differ, the analysis centres on another number than
 the ATT: <code><a href="ape_power.html">ape_power()</a></code> and <code><a href="ape_curve.html">ape_curve()</a></code> then report a <strong>rejection rate</strong>
 together with the mean of the estimates, and <code><a href="ape_n.html">ape_n()</a></code> and <code><a href="ape_mde.html">ape_mde()</a></code>
-refuse the design. With two periods and no covariates the data cannot
+refuse the design. One case is exempt: with <code>gap = 0</code> or <code>trend = 0</code>
+and no covariates that move the outcome, parallel trends mean the same
+on both scales, the two worlds are the same world, and either analysis
+is treated as valid. With two periods and no covariates the data cannot
 tell the two scales apart (Wooldridge, 2023), and the same four cell
 rates imply different effects under each: the printed design shows both
 readings. The linear analysis always centres on the cross difference of

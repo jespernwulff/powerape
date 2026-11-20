@@ -173,7 +173,10 @@ estimates, and
 [`ape_n()`](https://jespernwulff.github.io/powerape/reference/ape_n.md)
 and
 [`ape_mde()`](https://jespernwulff.github.io/powerape/reference/ape_mde.md)
-refuse the design. With two periods and no covariates the data cannot
+refuse the design. One case is exempt: with `gap = 0` or `trend = 0` and
+no covariates that move the outcome, parallel trends mean the same on
+both scales, the two worlds are the same world, and either analysis is
+treated as valid. With two periods and no covariates the data cannot
 tell the two scales apart (Wooldridge, 2023), and the same four cell
 rates imply different effects under each: the printed design shows both
 readings. The linear analysis always centres on the cross difference of

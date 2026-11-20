@@ -414,7 +414,7 @@ pw <- ape_power(d, n = 3000, claim = "minimum", sesoi = 0.02, nsim = 300, seed =
 power_statement(pw)
 #> We conducted a simulation-based power analysis for the average treatment
 #> effect on the treated (ATT) in a difference-in-differences design, in
-#> probability points, using the powerape package (version 1.12.1), following
+#> probability points, using the powerape package (version 1.12.2), following
 #> the confidence-interval approach of Riesthuis (2024). The assumed
 #> data-generating process was a difference-in-differences design with a treated
 #> group (50% of the units) and a control group, observed in one period before
@@ -450,8 +450,8 @@ powerape statement
 ``` stata-output
 We conducted a simulation-based power analysis for the average treatment
 effect on the treated (ATT) in a difference-in-differences design, in
-probability points, using the powerape package for Stata (version 0.2.1 (Stata
-port of powerape 1.12.1)), following the confidence-interval approach of
+probability points, using the powerape package for Stata (version 0.2.2 (Stata
+port of powerape 1.12.2)), following the confidence-interval approach of
 Riesthuis (2024). The assumed data-generating process was a
 difference-in-differences design with a treated group (50% of the units) and a
 control group, observed in one period before and one period after one common

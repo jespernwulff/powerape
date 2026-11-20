@@ -9,7 +9,7 @@ of ape_dgp_did() that such data can inform, and builds the design:"><meta proper
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,12 +93,15 @@ the group that will be treated (0/1 or logical).</p></dd>
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>Optional name of the unit identifier. With it the design is a
 panel and <code>rho</code> is estimated (units need two or more periods);
-without it the design is repeated cross-sections.</p></dd>
+without it, or with <code>design = "cross-sections"</code>, the design is
+repeated cross-sections.</p></dd>
 
 
 <dt id="arg-period">period<a class="anchor" aria-label="anchor" href="#arg-period"></a></dt>
 <dd><p>Optional name of the period variable; used to report the
-control group's change between pre-treatment periods.</p></dd>
+control group's change between pre-treatment periods. Periods are
+ordered by value when they are numbers or dates, by level when the
+variable is a factor, and alphabetically when it is other text.</p></dd>
 
 
 <dt id="arg-trend">trend<a class="anchor" aria-label="anchor" href="#arg-trend"></a></dt>
@@ -136,6 +139,13 @@ group will change from before to after treatment, so <code>trend</code> must be
 supplied; when the pilot has several periods, the control group's
 average change from one to the next is reported as a guide. Covariates
 are not taken from the pilot: pass them as <code><a href="pa_var.html">pa_var()</a></code> objects.</p>
+<p>Pooling assumes that the rates are flat over the pilot's periods. When
+they drift, the estimated <code>rho</code> is too low, because the pooled rate
+overstates the product of two periods' rates: with rates that change by
+ten points from one period to the next, a true <code>rho</code> of 0.40 came out as
+0.34. The error lowers planned power, so it is on the cautious side; if
+the reported change between pilot periods is large, consider supplying
+<code>rho</code> yourself.</p>
     </div>
     <div class="section level2">
     <h2 id="covariates-and-rho">Covariates and <code>rho</code><a class="anchor" aria-label="anchor" href="#covariates-and-rho"></a></h2>

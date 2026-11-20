@@ -10,6 +10,24 @@ version it ports is named in `powerape version` and in every power
 statement. The changes of the R package are listed in its
 [news](../news/index.html).
 
+## powerape for Stata 0.2.2 (2026-11-20)
+
+* A difference-in-differences design whose two parallel-trends scales
+  coincide is no longer called a mismatch. With `gap(0)` or `trend(0)` and
+  no covariates that move the outcome, parallel trends mean the same on the
+  index and on the probability scale, so either analysis is valid: `power`
+  reports power, and `n`, `mde`, `powerat`, `alpha` and `statement` take the
+  design. The design print says why.
+* The note under the print of a mismatched design with covariates says
+  that the probit or logit analysis centres near, not on, the covariate-free
+  reading.
+* `ppost()` on a panel gives a warning. `didpilot` with `id()` and
+  `design(cross-sections)` no longer warns about a `rho()` that was not
+  given. The help file says that rates drifting over a pilot's periods bias
+  the estimated `rho()` downward.
+* The command now follows version 1.12.2 of the R package. Results of the
+  designs that were valid before are bit-identical to 0.2.1.
+
 ## powerape for Stata 0.2.1 (2026-11-20)
 
 * `powerape dgp NAME, didpilot` with `covariates()` returned too high a

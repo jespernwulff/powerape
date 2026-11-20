@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -376,8 +376,8 @@ paragraph for a grant application or a preregistration.</p>
   outcomes: minimum 0.816 | detect-only 0.180 | inconclusive 0.004 | equivalence 0.000 | failed 0.000
 
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of treat using the powerape package for Stata (version 0.2.1 (Stata port
-of powerape 1.12.1)), following the confidence-interval approach of Riesthuis
+(APE) of treat using the powerape package for Stata (version 0.2.2 (Stata port
+of powerape 1.12.2)), following the confidence-interval approach of Riesthuis
 (2024). The assumed data-generating process was a probit model with focal
 variable treat (binary, prevalence 0.50); parametric covariates age
 (continuous, mean 45, SD 12), female (binary, prevalence 0.55), with an
@@ -426,7 +426,7 @@ compared directly:</p>
 of 500, because <code>probit</code> computes standard errors from the
 observed information and the Mata engine from the expected information,
 which moves an interval that sits right at a boundary. The Mata engine
-took 1.5 seconds, <code>probit</code> 21.1. Use the Mata engine for
+took 1.5 seconds, <code>probit</code> 20.1. Use the Mata engine for
 searches, curves and sweeps, and confirm the final design with Stata’s
 estimator.</p>
 <p><code>effects(margins)</code> goes one step further and computes
@@ -448,7 +448,7 @@ powerape -- minimum-effect claim (CI lower bound &gt; 0.050)
   fit: probit via engine(stata), effects(margins)
   power = 0.720 (MCSE 0.045)
   outcomes: minimum 0.720 | detect-only 0.260 | inconclusive 0.020 | equivalence 0.000 | failed 0.000</code></pre>
-<p>It is also slower (9.4 against 3.1 seconds for these 100
+<p>It is also slower (8.9 against 2.9 seconds for these 100
 replications), so its use is as a check. <code>engine()</code> and
 <code><a href="https://rdrr.io/r/stats/effects.html" class="external-link">effects()</a></code> given on one command apply to that command only;
 <code>powerape engine</code> shows and sets the defaults for the

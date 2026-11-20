@@ -1,6 +1,6 @@
 label	seconds
-power	     24.8
-main_power	     16.1
-n	     29.4
-closed25	      1.1
-ginteff	      9.5
+power	    189.4
+main_power	     59.6
+n	     33.3
+closed25	      0.9
+ginteff	      8.2

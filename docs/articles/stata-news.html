@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">powerape</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.12.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,6 +118,32 @@
 releases; the version it ports is named in <code>powerape version</code>
 and in every power statement. The changes of the R package are listed in
 its <a href="../news/index.html">news</a>.</p>
+<div class="section level2">
+<h2 id="powerape-for-stata-0-2-2-2026-11-20">powerape for Stata 0.2.2 (2026-11-20)<a class="anchor" aria-label="anchor" href="#powerape-for-stata-0-2-2-2026-11-20"></a>
+</h2>
+<ul>
+<li>A difference-in-differences design whose two parallel-trends scales
+coincide is no longer called a mismatch. With <code>gap(0)</code> or
+<code>trend(0)</code> and no covariates that move the outcome, parallel
+trends mean the same on the index and on the probability scale, so
+either analysis is valid: <code>power</code> reports power, and
+<code>n</code>, <code>mde</code>, <code>powerat</code>,
+<code>alpha</code> and <code>statement</code> take the design. The
+design print says why.</li>
+<li>The note under the print of a mismatched design with covariates says
+that the probit or logit analysis centres near, not on, the
+covariate-free reading.</li>
+<li>
+<code>ppost()</code> on a panel gives a warning.
+<code>didpilot</code> with <code>id()</code> and
+<code>design(cross-sections)</code> no longer warns about a
+<code>rho()</code> that was not given. The help file says that rates
+drifting over a pilot’s periods bias the estimated <code>rho()</code>
+downward.</li>
+<li>The command now follows version 1.12.2 of the R package. Results of
+the designs that were valid before are bit-identical to 0.2.1.</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="powerape-for-stata-0-2-1-2026-11-20">powerape for Stata 0.2.1 (2026-11-20)<a class="anchor" aria-label="anchor" href="#powerape-for-stata-0-2-1-2026-11-20"></a>
 </h2>

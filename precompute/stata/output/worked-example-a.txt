@@ -119,8 +119,8 @@ powerape -- minimum-effect claim (CI lower bound > 0.050)
 . * >>> statement
 . powerape statement
 We conducted a simulation-based power analysis for the average partial effect
-(APE) of program using the powerape package for Stata (version 0.2.1 (Stata
-port of powerape 1.12.1)), following the confidence-interval approach of
+(APE) of program using the powerape package for Stata (version 0.2.2 (Stata
+port of powerape 1.12.2)), following the confidence-interval approach of
 Riesthuis (2024). The assumed data-generating process was a probit model with
 focal variable program (binary, prevalence 0.50); parametric covariates z
 (continuous, mean 0, SD 1), with the focal variable and the covariates
