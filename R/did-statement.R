@@ -34,8 +34,8 @@ describe_did <- function(d) {
                       did_n_periods(d$n_post))
   s_data <- if (panel) {
     sprintf(paste0("as a panel of the same units, with a latent within-unit ",
-                   "correlation of %.2f shared by all periods (Gaussian copula)"),
-            d$rho)
+                   "correlation of %.2f%s shared by all periods (Gaussian copula)"),
+            d$rho, if (did_cov_dep(d)) " given the covariates," else "")
   } else {
     sprintf(paste0("as repeated cross-sections, with %.0f%% of the observations ",
                    "after the treatment date"), 100 * d$p_post)

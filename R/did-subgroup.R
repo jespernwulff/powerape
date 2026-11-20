@@ -348,9 +348,9 @@ print_did_subgroup <- function(x) {
                            x$n_pre, x$n_post)))
   cat(sprintf("  data: %s\n",
               if (panel) {
-                sprintf("panel, %s per unit; rho = %.2f (latent within-unit correlation); unit-clustered SEs",
+                sprintf("panel, %s per unit; rho = %.2f (%s); unit-clustered SEs",
                         if (two) "both periods" else sprintf("all %d periods", x$n_periods),
-                        x$rho)
+                        x$rho, did_rho_label(x))
               } else {
                 sprintf("repeated cross-sections, %.0f%% of observations in the post %s",
                         100 * x$p_post, if (two) "period" else "periods")

@@ -133,6 +133,11 @@ test_that("power_statement describes the design, the world and the analysis", {
   has("a treated group (50% of the units) and a control group")
   has("observed in one period before and one period after one common treatment date")
   has("as a panel of the same units, with a latent within-unit correlation of 0.40")
+  ## covariates add dependence of their own: rho is named as what is left
+  has("correlation of 0.40 given the covariates, shared by all periods (Gaussian copula)")
+  s0 <- power_statement(suppressWarnings(ape_power(di_base(), 800, "detect", nsim = 30, seed = 8)))
+  has("correlation of 0.40 shared by all periods (Gaussian copula)", s0)
+  expect_false(grepl("given the covariates", s0, fixed = TRUE))
   has("0.250 and 0.330 in the control group and 0.350 and")
   has("untreated trends parallel on the logit index")
   has("time-constant covariates z (continuous, mean 0, SD 1), independent of group membership")
@@ -177,4 +182,59 @@ test_that("power_statement describes the design, the world and the analysis", {
   s1 <- power_statement(suppressWarnings(ape_power(d1, 800, "detect", nsim = 60, seed = 13)))
   has("average partial effect (APE) of treat", s1)
   expect_false(grepl("difference-in-differences", s1, fixed = TRUE))
+})
+
+test_that("few independent units behind one group: counted and warned about", {
+  few <- powerape:::did_few_units
+  d <- di_base(p_treated = 0.1)
+  ## panel: units of the smaller group
+  f <- few(d, 100)
+  expect_equal(f$count, 10)
+  expect_identical(f$cell, "the treated group")
+  expect_match(f$text, "about 10 units are expected in the treated group", fixed = TRUE)
+  expect_null(few(d, 300))                       # 30 treated units: at the threshold
+  expect_equal(few(d, 299)$count, 29.9)
+  expect_null(few(d, 25))                        # under 30 units in all: the unit warning covers it
+  expect_identical(few(di_base(p_treated = 0.9), 100)$cell, "the control group")
+  expect_identical(few(di_base(), 40)$cell, "each group")            # groups of one size
+  ## repeated cross-sections: observations of the smallest group-by-block cell
+  dx <- set_att(ape_dgp_did(model = "logit", baseline = 0.25, gap = 0.10, trend = 0.08,
+                            design = "cross-sections", p_treated = 0.2, p_post = 0.25), 0.07)
+  fx <- few(dx, 400)
+  expect_equal(fx$count, 400 * 0.2 * 0.25)
+  expect_identical(fx$cell, "the treated group after the treatment date")
+  expect_match(fx$text, "about 20 observations", fixed = TRUE)
+  ## a subgroup: the smallest group-by-subgroup cell, with the copula's joint share
+  ds <- di_sub()
+  fs <- few(ds, 100)
+  expect_equal(fs$count, 100 * 0.5 * 0.4)
+  expect_match(fs$cell, "= 1", fixed = TRUE)
+  set.seed(3)
+  u <- matrix(rnorm(4e5), ncol = 2)
+  u[, 2] <- 0.5 * u[, 1] + sqrt(0.75) * u[, 2]
+  expect_equal(powerape:::binorm_upper(qnorm(0.7), qnorm(0.6), 0.5),
+               mean(u[, 1] > qnorm(0.7) & u[, 2] > qnorm(0.6)), tolerance = 0.02)
+  expect_equal(powerape:::binorm_upper(0.3, -0.2, 0), pnorm(-0.3) * pnorm(0.2))
+  ## other designs: never
+  expect_null(few(set_ape(ape_dgp(focal = pa_var("t", "binary", p = 0.05), baseline = 0.3), 0.1), 100))
+  ## the power functions say it, once, and not for a design with enough units
+  expect_warning(ape_power(d, 100, "detect", nsim = 30, seed = 1),
+                 "about 10 units are expected in the treated group")
+  w <- NULL
+  withCallingHandlers(ape_power(di_base(), 400, "detect", nsim = 30, seed = 1),
+                      warning = function(c) { w <<- c(w, conditionMessage(c)); invokeRestart("muffleWarning") })
+  expect_false(any(grepl("independent units", w, fixed = TRUE)))
+  ## the curve states it at the sizes it applies to, next to its sparse-cell warning
+  w <- NULL
+  withCallingHandlers(ape_curve(d, n = c(100, 400), claim = "detect", nsim = 30, seed = 1),
+                      warning = function(c) { w <<- c(w, conditionMessage(c)); invokeRestart("muffleWarning") })
+  expect_true(any(grepl("At n = 100: about 10 units", w, fixed = TRUE)))
+  expect_false(any(grepl("At n = 100, 400", w, fixed = TRUE)))
+  d8 <- di_base(p_treated = 0.1, n_pre = 4, n_post = 4)
+  expect_warning(ape_power(d8, 100, "detect", nsim = 30, seed = 1),
+                 "See ?ape_dgp_did, section 'Interval coverage in small samples'",
+                 fixed = TRUE)
+  expect_warning(ape_robust(di_base(), n = 200, claim = "detect", nsim = 30, seed = 2,
+                            vary = list(p_treated = c(0.1, 0.5)), grid_points = 2, nmax = FALSE),
+                 "in the scenario with the smallest group: about 20 units")
 })

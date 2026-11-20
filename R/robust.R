@@ -189,6 +189,8 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   ## another parallel-trends scale than the world has: their rate is a
   ## rejection rate, so they are shown but never ranked (worst case, n_max)
   world <- "trends" %in% names(vary)
+  ## the smallest group over the base design and the scenarios (did.R)
+  few_min <- did_few_units(dgp, n)
   valid <- rep(TRUE, nrow(grid))
   est_mean <- rep(NA_real_, nrow(grid))
 
@@ -205,6 +207,8 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
     if (!inherits(d_i, "error") && is_linear(dgp)) d_i$analysis <- "linear"
     if (did && !inherits(d_i, "error")) {
       valid[i] <- did_valid(d_i)
+      f_i <- did_few_units(d_i, n)
+      if (!is.null(f_i) && (is.null(few_min) || f_i$count < few_min$count)) few_min <- f_i
       ## a subgroup design must be pinned before its effect can be searched
       if (mode == "mde" && did_has_subgroup(dgp))
         d_i <- tryCatch(set_att(d_i, dgp$att_sub), error = function(e) e)
@@ -380,6 +384,15 @@ ape_robust <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
       }
     }
   }
+
+  ## difference-in-differences designs: few independent units behind one
+  ## group, in the base design or in a scenario (the treated share may be
+  ## varied); one warning, for the smallest such group
+  if (!is.null(few_min))
+    sparse_warning(list(separated = 0, min_cell = NA_real_, separation = separation),
+                   where = sprintf("At n = %d, in the scenario with the smallest group",
+                                   as.integer(n)),
+                   est = dgp$estimand, few = few_min)
 
   out <- structure(list(scenarios = scenarios,
                  worst = scenarios[worst_i, , drop = FALSE],

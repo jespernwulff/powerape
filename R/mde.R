@@ -343,7 +343,8 @@ finish_mde <- function(dgp, n, best, hist, power, claim, sesoi, conf, nsim,
   sparse_warning(list(separated = best$separated, min_cell = best$min_cell,
                       separation = separation),
                  where = sprintf("At the returned %s", if (is_margin) "margin" else "MDE"),
-                 aie = identical(est_kind, "aie"), est = est_kind)
+                 aie = identical(est_kind, "aie"), est = est_kind,
+                 few = did_few_units(dgp, n))
   dgp_at <- if (is_margin) dgp else repin(dgp, best$value, mf, mm)
   structure(list(
     mde = best$value, power = best$power, mcse = best$mcse,

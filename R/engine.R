@@ -303,7 +303,7 @@ cell_label <- function(est) {
 # sparse identifying cells. `p` carries the
 # `separated` share, the mean smallest-cell count `min_cell`, and the
 # `separation` convention; `where` names the design (e.g. "At n = 523").
-sparse_warning <- function(p, where = NULL, aie = FALSE, est = NULL) {
+sparse_warning <- function(p, where = NULL, aie = FALSE, est = NULL, few = NULL) {
   cell <- cell_label(est %||% p$estimand %||% (if (aie) "aie" else "ape"))
   msg <- character()
   if (isTRUE(p$separated > 0.01))
@@ -321,10 +321,17 @@ sparse_warning <- function(p, where = NULL, aie = FALSE, est = NULL) {
       "(one-sided error rates can run up to about twice nominal, in the ",
       "direction in which the sparse cell has the lower rate)"),
       cell, p$min_cell))
+  see <- if (length(msg)) "?ape_power, section 'Separation and sparse cells'"
+  ## a difference-in-differences design with few independent units behind
+  ## one group (did_few_units(), did.R)
+  if (!is.null(few)) {
+    msg <- c(msg, few$text)
+    see <- c(see, "?ape_dgp_did, section 'Interval coverage in small samples'")
+  }
   if (length(msg))
     warning(paste0(if (!is.null(where)) paste0(where, ": ") else "",
                    paste(msg, collapse = "; "),
-                   ". See ?ape_power, section 'Separation and sparse cells'."),
+                   ". See ", paste(see, collapse = " and "), "."),
             call. = FALSE)
   invisible(length(msg) > 0L)
 }
@@ -490,6 +497,7 @@ ape_power <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
   res <- power_once(dgp, n, claim, sesoi, conf, nsim, seed, enforce = TRUE,
                     se = se, alpha = alpha, keep_draws = keep_draws,
                     separation = separation)
-  sparse_warning(res, aie = identical(res$estimand, "aie"))
+  sparse_warning(res, aie = identical(res$estimand, "aie"),
+                 few = did_few_units(dgp, n))
   res
 }

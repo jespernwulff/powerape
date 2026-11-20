@@ -44,7 +44,8 @@ group;
 \item \code{rho}, for a panel: the latent within-unit correlation of the route's
 Gaussian copula, by the method of moments (the value at which the
 model's probability of the outcome in two periods of one unit equals
-the observed share of such pairs).
+the observed share of such pairs); with covariates, the correlation
+given the covariates (section 'Covariates and \code{rho}').
 }
 
 All pre-treatment periods are pooled, because the route holds rates flat
@@ -53,11 +54,28 @@ group will change from before to after treatment, so \code{trend} must be
 supplied; when the pilot has several periods, the control group's
 average change from one to the next is reported as a guide. Covariates
 are not taken from the pilot: pass them as \code{\link[=pa_var]{pa_var()}} objects.
+}
+\section{Covariates and \code{rho}}{
+
+In \code{\link[=ape_dgp_did]{ape_dgp_did()}}, \code{rho} is the dependence between a unit's outcomes
+that is left given the covariates; covariates are constant over time and
+add dependence of their own. The pairs of outcomes in a pilot show the
+whole dependence. When covariates with a nonzero \code{signal} (or \code{gamma})
+are passed, the function therefore solves for the \code{rho} at which the
+design, with those covariates, has the pilot's share of pairs with the
+outcome in both periods. That value is lower than the raw correlation
+of the pilot, which is reported next to it (\verb{$pilot$rho_raw}). If the
+covariates as specified imply more dependence than the pilot shows,
+\code{rho} is set to 0 with a warning: the stated \code{signal} is then too high
+for these data. (Versions up to 1.12.0 used the raw correlation together
+with the covariates, which counted part of the dependence twice and
+overstated power.)
 
 The estimates are used as if they were known. They are not: vary them
 with \code{\link[=ape_robust]{ape_robust()}} (\code{baseline}, \code{gap}, \code{rho}, \code{p_treated}), in
 particular for a small pilot.
 }
+
 \examples{
 ## a pilot panel: 300 units observed in two pre-treatment periods
 set.seed(1)

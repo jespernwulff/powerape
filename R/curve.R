@@ -56,6 +56,13 @@ ape_curve <- function(dgp, n, claim = c("minimum", "detect", "equivalence"),
     sparse_warning(diag[[sparse_at[1L]]],
                    where = sprintf("At n = %s", paste(n[sparse_at], collapse = ", ")),
                    aie = identical(dgp$estimand, "aie"), est = dgp$estimand)
+  ## difference-in-differences designs: few independent units behind one
+  ## group, stated at the smallest n it applies to
+  few_at <- which(!vapply(n, function(ni) is.null(did_few_units(dgp, ni)), logical(1)))
+  if (length(few_at))
+    sparse_warning(list(separated = 0, min_cell = NA_real_, separation = separation),
+                   where = sprintf("At n = %s", paste(n[few_at], collapse = ", ")),
+                   est = dgp$estimand, few = did_few_units(dgp, n[few_at[1L]]))
   rule <- is.function(alpha)
   structure(list(results = do.call(rbind, rows), claim = claim, sesoi = sesoi,
                  conf = if (rule) NA_real_ else lv1$conf_claim,
@@ -276,7 +283,8 @@ ape_n <- function(dgp, power = 0.90, claim = c("minimum", "detect", "equivalence
   sparse_warning(list(separated = best$separated, min_cell = best$min_cell,
                       separation = separation),
                  where = sprintf("At the returned n = %d", best$n),
-                 aie = identical(dgp$estimand, "aie"), est = dgp$estimand)
+                 aie = identical(dgp$estimand, "aie"), est = dgp$estimand,
+                 few = did_few_units(dgp, best$n))
   lv_b <- claim_levels(claim, alpha, conf, best$n)
   structure(list(n = best$n, power = best$power, mcse = best$mcse,
                  goal = power, claim = claim, sesoi = sesoi,

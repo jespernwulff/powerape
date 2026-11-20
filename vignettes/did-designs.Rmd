@@ -72,7 +72,8 @@ stata_show("did", c("design", "pin"), output = "pin")
 
 `design = "panel"` follows the same units in both periods; `n` then counts
 units, standard errors are clustered by unit, and `rho` is the dependence
-between a unit's outcomes. `design = "cross-sections"` draws new
+between a unit's outcomes (in a design with covariates: the dependence that
+is left given the covariates). `design = "cross-sections"` draws new
 observations in each period.
 
 ## Which effect do four rates show?
@@ -268,7 +269,10 @@ stopifnot(identical(dim(rows), dim(pilot)),
 `r tabs_end()`
 
 The estimates are used as if they were known. Sweep them with
-`ape_robust()` before relying on a sample size.
+`ape_robust()` before relying on a sample size. When covariates are added
+to the call, the function returns the `rho` that is left given those
+covariates, which is lower than the raw correlation in the pilot: the
+covariates are constant over time and account for part of it.
 
 ## Reporting
 

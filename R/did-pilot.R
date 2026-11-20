@@ -29,6 +29,54 @@ did_pilot_rho <- function(p, m, w) {
   uniroot(f, c(0, 0.995), tol = 1e-9)$root
 }
 
+# The same moment condition for a design with covariates. Covariates are
+# constant over time, so they are a second source of dependence between a
+# unit's outcomes, and the design's `rho` is the latent correlation that is
+# left GIVEN the covariates. The raw pairs of the pilot show the whole
+# dependence, so the rho to use is the one at which the design's joint rate,
+# averaged over the covariate index q of each group, equals the pilot's.
+
+# An equally weighted grid standing in for the draws of q (quantile
+# midpoints): the averages below are smooth in q, and 2,000 points
+# reproduce them to about 1e-6.
+did_q_grid <- function(q, K = 2000L) {
+  if (length(q) <= K) return(q)
+  stats::quantile(q, (seq_len(K) - 0.5) / K, names = FALSE, type = 7)
+}
+
+# P(Y_s = 1, Y_t = 1) for two periods of one unit whose rate is
+# G(cc + q), averaged over the values `q`, at latent correlation `rho`
+# given q.
+did_joint_rate_cov <- function(lf, cc, q, rho) {
+  p <- lf$G(cc + q)
+  if (rho <= 0) return(mean(p^2))
+  thr <- qnorm(p)
+  f <- function(a) {
+    dnorm(a) * vapply(a, function(ai)
+      mean(pnorm((thr - sqrt(rho) * ai) / sqrt(1 - rho))^2), numeric(1))
+  }
+  integrate(f, -Inf, Inf, rel.tol = 1e-9, abs.tol = 1e-12)$value
+}
+
+# rho given the covariates. `p`, `m`, `w` as in did_pilot_rho(); `qs`: the
+# covariate index of the control and of the treated group. The group
+# intercepts are solved at the pilot's own rates. Returns the rho and
+# whether the covariates alone already imply at least the dependence the
+# pilot shows (then rho = 0 and the design has more dependence than the
+# pilot).
+did_pilot_rho_cov <- function(lf, p, m, w, qs) {
+  qs <- lapply(qs, did_q_grid)
+  use <- which(w > 0)
+  cs <- vapply(1:2, function(g) did_solve(lf, qs[[g]], p[g]), numeric(1))
+  f <- function(rho) {
+    sum(vapply(use, function(g)
+      w[g] * (did_joint_rate_cov(lf, cs[g], qs[[g]], rho) - m[g]), numeric(1)))
+  }
+  if (f(0) >= 0) return(list(rho = 0, exceeds = TRUE))
+  if (f(0.995) <= 0) return(list(rho = 0.995, exceeds = FALSE))
+  list(rho = uniroot(f, c(0, 0.995), tol = 1e-9)$root, exceeds = FALSE)
+}
+
 #' A difference-in-differences design from pre-treatment pilot data
 #'
 #' Estimates, from data observed **before** the treatment date, the inputs
@@ -41,7 +89,8 @@ did_pilot_rho <- function(p, m, w) {
 #' * `rho`, for a panel: the latent within-unit correlation of the route's
 #'   Gaussian copula, by the method of moments (the value at which the
 #'   model's probability of the outcome in two periods of one unit equals
-#'   the observed share of such pairs).
+#'   the observed share of such pairs); with covariates, the correlation
+#'   given the covariates (section 'Covariates and `rho`').
 #'
 #' All pre-treatment periods are pooled, because the route holds rates flat
 #' before the treatment date. Pre-treatment data cannot tell how the control
@@ -49,6 +98,21 @@ did_pilot_rho <- function(p, m, w) {
 #' supplied; when the pilot has several periods, the control group's
 #' average change from one to the next is reported as a guide. Covariates
 #' are not taken from the pilot: pass them as [pa_var()] objects.
+#'
+#' @section Covariates and `rho`:
+#' In [ape_dgp_did()], `rho` is the dependence between a unit's outcomes
+#' that is left given the covariates; covariates are constant over time and
+#' add dependence of their own. The pairs of outcomes in a pilot show the
+#' whole dependence. When covariates with a nonzero `signal` (or `gamma`)
+#' are passed, the function therefore solves for the `rho` at which the
+#' design, with those covariates, has the pilot's share of pairs with the
+#' outcome in both periods. That value is lower than the raw correlation
+#' of the pilot, which is reported next to it (`$pilot$rho_raw`). If the
+#' covariates as specified imply more dependence than the pilot shows,
+#' `rho` is set to 0 with a warning: the stated `signal` is then too high
+#' for these data. (Versions up to 1.12.0 used the raw correlation together
+#' with the covariates, which counted part of the dependence twice and
+#' overstated power.)
 #'
 #' The estimates are used as if they were known. They are not: vary them
 #' with [ape_robust()] (`baseline`, `gap`, `rho`, `p_treated`), in
@@ -166,9 +230,30 @@ ape_dgp_did_pilot <- function(data, outcome, group, id = NULL, period = NULL,
                   "the within-unit correlation are imprecise. Vary them with",
                   "ape_robust() before relying on a sample size."), call. = FALSE)
   d <- do.call(ape_dgp_did, c(est, list(trend = trend), args))
+  ## covariates add within-unit dependence of their own: the design's rho
+  ## is the part left given them (see 'Covariates and rho' above). The
+  ## calibration does not depend on rho, so the design is updated in place.
+  rho_raw <- rho_hat
+  if (!is.na(rho_hat) && !("rho" %in% overridden) && did_panel(d) &&
+      d$k > 0L && isTRUE(d$s2 > 0)) {
+    qd <- did_integration(d)
+    rc <- did_pilot_rho_cov(link_funs(d$model), c(p0, p1), m, w,
+                            list(qd$q0, qd$q1))
+    if (rc$exceeds)
+      warning(sprintf(paste(
+        "The covariates as specified imply more within-unit dependence than",
+        "the pilot shows (its raw latent correlation is %.3f): `rho` given",
+        "the covariates is set to 0, and the design still has more dependence",
+        "than the pilot. The stated `signal` looks too high for these data."),
+        rho_raw), call. = FALSE)
+    rho_hat <- rc$rho
+    d$rho <- rho_hat
+    d$spec$rho <- rho_hat
+  }
   d$pilot <- list(n_rows = nrow(data), n_units = n_units, n_periods = n_per,
                   n_pairs = n_pairs, baseline = p0, gap = p1 - p0,
                   p_treated = if (panel) mean(gi) else mean(g), rho = rho_hat,
+                  rho_raw = rho_raw,
                   control_change = ctrl_change, overridden = overridden)
   d
 }
@@ -178,11 +263,20 @@ did_pilot_line <- function(x) {
   pl <- x$pilot
   est <- setdiff(c("baseline", "gap", "treated share", if (!is.na(pl$rho)) "rho"),
                  sub("p_treated", "treated share", pl$overridden))
-  sprintf("  pilot: %s estimated from %d pre-treatment rows%s%s",
+  sprintf("  pilot: %s estimated from %d pre-treatment rows%s%s%s",
           paste(est, collapse = ", "), pl$n_rows,
           if (is.na(pl$n_units)) "" else sprintf(" (%d units)", pl$n_units),
           if (is.na(pl$control_change)) ""
-          else sprintf("; control group's change between pilot periods %+.3f", pl$control_change))
+          else sprintf("; control group's change between pilot periods %+.3f", pl$control_change),
+          if (did_pilot_converted(pl))
+            sprintf("; rho given the covariates %.3f (raw within-unit correlation %.3f)",
+                    pl$rho, pl$rho_raw)
+          else "")
+}
+# TRUE when the pilot's rho was solved given the design's covariates.
+did_pilot_converted <- function(pl) {
+  !is.null(pl$rho_raw) && !is.na(pl$rho_raw) && !("rho" %in% pl$overridden) &&
+    !isTRUE(all.equal(pl$rho, pl$rho_raw))
 }
 did_pilot_clause <- function(d) {
   pl <- d$pilot
@@ -190,7 +284,8 @@ did_pilot_clause <- function(d) {
   est <- setdiff(c("baseline", "gap", "p_treated", if (!is.na(pl$rho)) "rho"), pl$overridden)
   lab <- c(baseline = "the control group's rate before treatment",
            gap = "the gap between the groups", p_treated = "the treated share",
-           rho = "the within-unit correlation")[est]
+           rho = if (did_pilot_converted(pl)) "the within-unit correlation given the covariates"
+                 else "the within-unit correlation")[est]
   if (!length(lab)) return(NULL)
   sprintf("%s estimated from %d pre-treatment pilot observations",
           if (length(lab) > 1L) paste(paste(lab[-length(lab)], collapse = ", "), "and", lab[length(lab)])

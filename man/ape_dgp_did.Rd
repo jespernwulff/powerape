@@ -43,7 +43,8 @@ treatment date (probability points; default 0).}
 \item{design}{\code{"panel"} (default) or \code{"cross-sections"}.}
 
 \item{rho}{Panel designs: latent correlation between any two outcomes
-of a unit, in \verb{[0, 1)}.}
+of a unit, in \verb{[0, 1)}; with covariates, the correlation given the
+covariates (section 'Data structure').}
 
 \item{p_post}{Cross-section designs: share of observations drawn after
 the treatment date (default \code{n_post / (n_pre + n_post)}).}
@@ -134,7 +135,17 @@ panel); \code{n} in the power functions counts units, and standard errors
 are clustered by unit. Outcomes of one unit are dependent through a
 Gaussian copula with latent correlation \code{rho} that leaves the marginal
 rates exact under either link; under probit this is the random-effects
-probit with \code{rho = Var(c) / (Var(c) + 1)}. \code{design = "cross-sections"}
+probit with \code{rho = Var(c) / (Var(c) + 1)}. With covariates, \code{rho} is
+the dependence that is left \strong{given the covariates}, as in a
+random-effects probit with regressors: covariates are constant over
+time, so they make a unit's outcomes more alike on top of \code{rho}. Under
+probit with normal covariates the raw latent correlation between two
+outcomes of a unit is \code{(rho + s2) / (1 + s2)} with
+\code{s2 = signal / (1 - signal)}; to plan from a raw within-unit
+correlation \code{r}, use \code{rho = (r - signal) / (1 - signal)}. Under logit
+the covariates add less and there is no closed form;
+\code{\link[=ape_dgp_did_pilot]{ape_dgp_did_pilot()}} solves for the value under either link.
+\code{design = "cross-sections"}
 draws independent observations, each after the treatment date with
 probability \code{p_post} and then in one of that block's periods with equal
 probability; \code{n} counts all observations, and \code{se} in \code{\link[=ape_power]{ape_power()}}
@@ -193,8 +204,13 @@ squares has no separation, so no simulated study is discarded for an
 all-zero or all-one cell; the sparse-cell warning still applies. In a
 balanced panel a time-constant covariate changes neither the estimate
 nor its clustered standard error beyond the degrees of freedom (its
-contribution cancels in each unit's change), so \code{signal} buys the linear
-panel analysis no precision; in cross-sections it does.
+contribution cancels in each unit's change), so adjusting for
+covariates buys the linear panel analysis no precision; in
+cross-sections it does. A panel design with a larger \code{signal} at the
+same \code{rho} still has more power under either analysis, because \code{rho}
+is the dependence given the covariates and the design's units are then
+more alike over time (section 'Data structure'), not because of the
+adjustment.
 }
 
 \section{Interval coverage in small samples}{
@@ -216,6 +232,23 @@ power of the analysis a study will run and needs no correction; with
 small cells, part of it is this excess. The interval of the linear
 analysis is close to nominal at the same sizes (94.9\% to 95.0\% for the
 same rates).
+
+A second effect concerns both analyses. Robust and cluster-robust
+standard errors are too small when one group has few independent units,
+and more periods per unit do not help, because the units are what is
+independent. With 10\% of the units treated and a true effect of zero,
+the 5\% test of the linear analysis rejected in 12\%, 10\%, 7\% and 6\% of
+simulated two-period panels with 4, 10, 20 and 40 treated units, and in
+17\%, 10\% and 6\% of panels with four periods on each side and 4, 10 and
+40 treated units; the probit/logit analysis behaved alike (9\%, 8\% and 6\%
+with 10, 20 and 40 treated units). With groups of equal size the excess
+of the linear analysis is small (5.7\% with 20 units a group in a
+two-period panel, 6.9\% with four periods on each side, 5\% to 6\% from 50
+a group). The power functions warn when fewer than 30 units are expected
+in the smaller group; in repeated cross-sections, when fewer than 30
+observations are expected in the smallest group-by-before/after cell;
+with a subgroup, in the smallest group-by-subgroup cell. Power reported
+for such a design contains the excess.
 }
 
 \section{Limits of this version}{

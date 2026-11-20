@@ -39,6 +39,78 @@ model_label <- function(dgp) {
   if (is_linear(dgp)) "linear probability (OLS)" else dgp$model
 }
 
+# What `rho` is, as named in the design print and the methods paragraph.
+# Covariates are constant over time and add within-unit dependence of
+# their own, so with covariates that move the outcome `rho` is the latent
+# correlation given the covariates.
+did_cov_dep <- function(dgp) dgp$k > 0L && isTRUE(dgp$s2 > 0)
+did_rho_label <- function(dgp) {
+  if (did_cov_dep(dgp)) "latent within-unit correlation given the covariates"
+  else "latent within-unit correlation"
+}
+
+# Few independent units behind one group -----------------------------------
+# Robust and cluster-robust standard errors tend to be too small when one
+# group of a difference-in-differences design has few independent units,
+# whatever the number of rows per unit, and a true zero effect is then
+# declared significant more often than alpha. The guards on cell events
+# (sparse_warning) and on the total number of units (power_once) do not see
+# a small group that is observed in several periods.
+
+# P(U1 > a, U2 > b) for standard normals with correlation r.
+binorm_upper <- function(a, b, r) {
+  if (abs(r) < 1e-12) return(pnorm(-a) * pnorm(-b))
+  integrate(function(u) dnorm(u) * pnorm((r * u - b) / sqrt(1 - r^2)),
+            a, Inf, rel.tol = 1e-10)$value
+}
+
+# The smallest expected number of independent units behind a group at
+# design size n: units of the smaller group in a panel, observations of the
+# smallest group-by-before/after cell in repeated cross-sections; with a
+# subgroup, of the smallest group-by-subgroup cell (by before/after in
+# cross-sections). Returns NULL for other designs, at `threshold` or more,
+# and for a panel with fewer than 30 units in all (power_once warns there);
+# otherwise the count and the clause for the warning.
+did_few_units <- function(dgp, n, threshold = 30) {
+  if (!is_did(dgp)) return(NULL)
+  panel <- did_panel(dgp)
+  if (panel && n < 30) return(NULL)
+  pt <- dgp$p_treated
+  if (did_has_subgroup(dgp)) {
+    ps <- dgp$subgroup$p
+    nm <- dgp$subgroup$name
+    p11 <- binorm_upper(qnorm(1 - pt), qnorm(1 - ps), dgp$R[1L, 2L])
+    sh <- c(1 - pt - ps + p11, ps - p11, pt - p11, p11)
+    lab <- c(sprintf("the control group with %s = 0", nm),
+             sprintf("the control group with %s = 1", nm),
+             sprintf("the treated group with %s = 0", nm),
+             sprintf("the treated group with %s = 1", nm))
+  } else {
+    sh <- c(1 - pt, pt)
+    lab <- c("the control group", "the treated group")
+  }
+  if (!panel) {
+    sh <- c(sh * (1 - dgp$p_post), sh * dgp$p_post)
+    lab <- c(paste(lab, "before the treatment date"),
+             paste(lab, "after the treatment date"))
+  }
+  i <- which.min(sh)
+  cnt <- n * sh[i]
+  if (cnt >= threshold) return(NULL)
+  what <- if (panel) "units" else "observations"
+  ## groups (cells) of one size: name them all
+  if (!did_has_subgroup(dgp) && max(sh) - min(sh) < 1e-12)
+    lab[i] <- if (panel) "each group" else "each group-by-before/after cell"
+  list(count = cnt, cell = lab[i],
+       text = sprintf(paste0(
+         "about %s %s are expected in %s; robust and cluster-robust standard ",
+         "errors tend to be too small with so few independent units behind one ",
+         "group (most when the other group is much larger), a true zero effect ",
+         "is then declared significant more often than alpha, and the reported ",
+         "power contains that excess"),
+         if (cnt < 1) "fewer than 1" else format(round(cnt)), what, lab[i]))
+}
+
 # One clause naming a world/analysis mismatch (curve print, error messages).
 did_mismatch_text <- function(dgp) {
   sprintf("the simulated world has %s-parallel trends and the %s analysis assumes %s-parallel trends",
@@ -128,7 +200,17 @@ did_solve <- function(lf, q, rate, offset = 0) {
 #' are clustered by unit. Outcomes of one unit are dependent through a
 #' Gaussian copula with latent correlation `rho` that leaves the marginal
 #' rates exact under either link; under probit this is the random-effects
-#' probit with `rho = Var(c) / (Var(c) + 1)`. `design = "cross-sections"`
+#' probit with `rho = Var(c) / (Var(c) + 1)`. With covariates, `rho` is
+#' the dependence that is left **given the covariates**, as in a
+#' random-effects probit with regressors: covariates are constant over
+#' time, so they make a unit's outcomes more alike on top of `rho`. Under
+#' probit with normal covariates the raw latent correlation between two
+#' outcomes of a unit is `(rho + s2) / (1 + s2)` with
+#' `s2 = signal / (1 - signal)`; to plan from a raw within-unit
+#' correlation `r`, use `rho = (r - signal) / (1 - signal)`. Under logit
+#' the covariates add less and there is no closed form;
+#' [ape_dgp_did_pilot()] solves for the value under either link.
+#' `design = "cross-sections"`
 #' draws independent observations, each after the treatment date with
 #' probability `p_post` and then in one of that block's periods with equal
 #' probability; `n` counts all observations, and `se` in [ape_power()]
@@ -181,8 +263,13 @@ did_solve <- function(lf, q, rate, offset = 0) {
 #' all-zero or all-one cell; the sparse-cell warning still applies. In a
 #' balanced panel a time-constant covariate changes neither the estimate
 #' nor its clustered standard error beyond the degrees of freedom (its
-#' contribution cancels in each unit's change), so `signal` buys the linear
-#' panel analysis no precision; in cross-sections it does.
+#' contribution cancels in each unit's change), so adjusting for
+#' covariates buys the linear panel analysis no precision; in
+#' cross-sections it does. A panel design with a larger `signal` at the
+#' same `rho` still has more power under either analysis, because `rho`
+#' is the dependence given the covariates and the design's units are then
+#' more alike over time (section 'Data structure'), not because of the
+#' adjustment.
 #'
 #' @section Interval coverage in small samples:
 #' Under the index analysis the effect on the treated is a nonlinear
@@ -202,6 +289,23 @@ did_solve <- function(lf, q, rate, offset = 0) {
 #' small cells, part of it is this excess. The interval of the linear
 #' analysis is close to nominal at the same sizes (94.9% to 95.0% for the
 #' same rates).
+#'
+#' A second effect concerns both analyses. Robust and cluster-robust
+#' standard errors are too small when one group has few independent units,
+#' and more periods per unit do not help, because the units are what is
+#' independent. With 10% of the units treated and a true effect of zero,
+#' the 5% test of the linear analysis rejected in 12%, 10%, 7% and 6% of
+#' simulated two-period panels with 4, 10, 20 and 40 treated units, and in
+#' 17%, 10% and 6% of panels with four periods on each side and 4, 10 and
+#' 40 treated units; the probit/logit analysis behaved alike (9%, 8% and 6%
+#' with 10, 20 and 40 treated units). With groups of equal size the excess
+#' of the linear analysis is small (5.7% with 20 units a group in a
+#' two-period panel, 6.9% with four periods on each side, 5% to 6% from 50
+#' a group). The power functions warn when fewer than 30 units are expected
+#' in the smaller group; in repeated cross-sections, when fewer than 30
+#' observations are expected in the smallest group-by-before/after cell;
+#' with a subgroup, in the smallest group-by-subgroup cell. Power reported
+#' for such a design contains the excess.
 #'
 #' @section Limits of this version:
 #' One treated group, one treatment date, treatment assigned at the unit
@@ -230,7 +334,8 @@ did_solve <- function(lf, q, rate, offset = 0) {
 #' @param p_treated Share of units (or observations) in the treated group.
 #' @param design `"panel"` (default) or `"cross-sections"`.
 #' @param rho Panel designs: latent correlation between any two outcomes
-#'   of a unit, in `[0, 1)`.
+#'   of a unit, in `[0, 1)`; with covariates, the correlation given the
+#'   covariates (section 'Data structure').
 #' @param p_post Cross-section designs: share of observations drawn after
 #'   the treatment date (default `n_post / (n_pre + n_post)`).
 #' @param trends Scale on which the untreated trends are parallel in the
@@ -592,9 +697,9 @@ print_did_dgp <- function(x) {
                            x$n_pre, x$n_post)))
   cat(sprintf("  data: %s\n",
               if (panel) {
-                sprintf("panel, %s per unit; rho = %.2f (latent within-unit correlation); unit-clustered SEs",
+                sprintf("panel, %s per unit; rho = %.2f (%s); unit-clustered SEs",
                         if (two) "both periods" else sprintf("all %d periods", x$n_periods),
-                        x$rho)
+                        x$rho, did_rho_label(x))
               } else {
                 sprintf("repeated cross-sections, %.0f%% of observations in the post %s",
                         100 * x$p_post, if (two) "period" else "periods")
